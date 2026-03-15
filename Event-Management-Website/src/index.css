@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  /* Premium System Tokens */
+  --primary: #6366f1; /* Indigo 500 */
+  --primary-hover: #4f46e5;
+  --primary-light: #e0e7ff;
+  
+  --secondary: #ec4899; /* Pink 500 */
+  --secondary-hover: #db2777;
+  
+  --bg-default: #f8fafc; /* Slate 50 */
+  --bg-paper: #ffffff;
+  
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #64748b; /* Slate 500 */
+  --border-color: #e2e8f0;
+  
+  --surface-glass: rgba(255, 255, 255, 0.7);
+  
+  /* Layout */
+  --sidebar-width: 280px;
+  --topbar-height: 72px;
+
+  --sans: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  
+  font-family: var(--sans);
+  color: var(--text-primary);
+  background-color: var(--bg-default);
+}
+
+.dark-mode {
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-light: rgba(99, 102, 241, 0.2);
+  
+  --secondary: #f472b6;
+  --secondary-hover: #ec4899;
+  
+  --bg-default: #0f172a;
+  --bg-paper: #1e293b;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  
+  --surface-glass: rgba(30, 41, 59, 0.7);
+}
+
+.accessibility-mode {
+  /* High contrast mode / larger fonts */
+  --primary: #0000ff;
+  --bg-default: #ffffff;
+  --bg-paper: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #111111;
+  --border-color: #000000;
+  font-size: 110%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
