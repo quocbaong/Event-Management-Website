@@ -1,4 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
 
 :root {
   /* Premium System Tokens */
@@ -22,12 +24,18 @@
   --sidebar-width: 280px;
   --topbar-height: 72px;
 
-  --sans: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   
   font-family: var(--sans);
   color: var(--text-primary);
   background-color: var(--bg-default);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
 }
+
 
 .dark-mode {
   --primary: #818cf8;
@@ -58,23 +66,29 @@
   font-size: 110%;
 }
 
-body {
+html, body, #root, .App {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow: hidden !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  position: fixed;
+  top: 0;
+  left: 0;
   transition: background-color 0.3s ease, color 0.3s ease;
+  touch-action: none; /* Prevents touch scrolling on mobile */
 }
 
-#root {
-  min-height: 100vh;
-  display: flex;
+
+
+/* Hide scrollbars for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  margin-top: 0;
+/* Hide scrollbars for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
