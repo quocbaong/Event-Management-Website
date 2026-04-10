@@ -1,16 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { ThemeProviderWrapper } from './context/ThemeContext';
-import AppRoutes from './routes/AppRoutes';
+import AppRouter from './router/AppRouter';
 
 function App() {
   return (
-    <ThemeProviderWrapper>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </ThemeProviderWrapper>
+    <div className="App">
+      <AppRouter />
+    </div>
   );
 }
 
-export default App;
+export default App;
