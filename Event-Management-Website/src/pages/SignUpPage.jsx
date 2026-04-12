@@ -19,7 +19,7 @@ const SignUpPage = () => {
   ];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans">
+    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans layout-fixed">
 
       {/* Left Panel */}
       <div className="hidden lg:flex lg:flex-[1.1] relative overflow-hidden bg-[#2D31A6] p-16 xl:p-20 flex flex-col justify-between text-white">

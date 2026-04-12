@@ -12,7 +12,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white">
+    <div className="flex h-screen w-full overflow-hidden bg-white layout-fixed">
       {/* Left Panel - Dynamic Gradient & Branding */}
       <div className="hidden lg:flex lg:flex-[1.2] relative overflow-hidden bg-[#5F56FF] p-16 xl:p-24 flex flex-col justify-between text-white font-sans">
         {/* Animated Gradient Overlay */}
