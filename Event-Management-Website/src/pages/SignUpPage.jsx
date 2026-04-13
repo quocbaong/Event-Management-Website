@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Building2, Eye, EyeOff, Sparkles, LineChart, Check } from 'lucide-react';
 import heroIllustration from '../assets/hero-illustration.png';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +21,7 @@ const SignUpPage = () => {
     <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans layout-fixed">
 
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:flex-[1.1] relative overflow-hidden bg-[#2D31A6] p-16 xl:p-20 flex flex-col justify-between text-white">
+      <div className="hidden lg:flex lg:flex-[1.1] relative overflow-hidden bg-[#2D31A6] pt-12 pb-16 px-16 xl:pt-16 xl:pb-20 xl:px-20 flex flex-col justify-between text-white">
         {/* Background Decorative Text */}
         <div className="absolute inset-0 flex flex-col justify-center items-center opacity-10 select-none pointer-events-none">
           <span className="text-[12rem] font-black leading-none italic uppercase">PREMIUM</span>
@@ -29,12 +30,8 @@ const SignUpPage = () => {
         </div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12 cursor-pointer" onClick={() => navigate('/')}>
-
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
-              <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
-            </div>
-            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
+          <div className="flex items-center gap-3 mb-10 cursor-pointer" onClick={() => navigate('/')}>
+            <img src={logo} alt="Prestige Planner" className="h-20 w-auto brightness-0 invert" />
           </div>
 
           <div className="max-w-xl">

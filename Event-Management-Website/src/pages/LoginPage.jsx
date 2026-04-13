@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,7 +11,7 @@ const LoginPage = () => {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white layout-fixed">
       {/* Left Panel - Dynamic Gradient & Branding */}
-      <div className="hidden lg:flex lg:flex-[1.2] relative overflow-hidden bg-[#5F56FF] p-16 xl:p-24 flex flex-col justify-between text-white font-sans">
+      <div className="hidden lg:flex lg:flex-[1.2] relative overflow-hidden bg-[#5F56FF] pt-12 pb-16 px-16 xl:pt-16 xl:pb-24 xl:px-24 flex flex-col justify-between text-white font-sans">
         {/* Animated Gradient Overlay */}
         <div className="absolute inset-0 z-0 bg-gradient-to-tr from-[#4F46E5] via-[#5F56FF] to-[#9333EA] opacity-90"></div>
         
@@ -19,12 +20,8 @@ const LoginPage = () => {
         <div className="absolute bottom-[-5%] left-[-5%] w-[400px] h-[400px] bg-purple-400/20 rounded-full blur-[100px]"></div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12 cursor-pointer" onClick={() => navigate('/')}>
-
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
-              <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
-            </div>
-            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
+          <div className="flex items-center gap-3 mb-10 cursor-pointer" onClick={() => navigate('/')}>
+            <img src={logo} alt="Prestige Planner" className="h-20 w-auto brightness-0 invert" />
           </div>
           
           <div className="max-w-xl">

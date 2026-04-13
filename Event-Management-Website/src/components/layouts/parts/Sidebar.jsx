@@ -11,6 +11,8 @@ import {
   LogOut 
 } from 'lucide-react';
 
+import logo from '../../../assets/logo.png';
+
 const SidebarItem = ({ icon: Icon, label, active = false }) => (
   <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 rounded-xl group ${
     active 
@@ -24,20 +26,10 @@ const SidebarItem = ({ icon: Icon, label, active = false }) => (
 
 const Sidebar = () => {
   return (
-    <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col py-6">
+    <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col pt-4 pb-6">
       {/* Logo */}
-      <div className="px-6 mb-10 flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
-          <Calendar className="w-6 h-6" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-primary leading-tight tracking-tight">
-            EventArchitect
-          </h1>
-          <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-widest">
-            Hệ thống quản trị
-          </p>
-        </div>
+      <div className="px-6 mb-8">
+        <img src={logo} alt="Prestige Planner" className="h-14 w-auto object-contain" />
       </div>
 
       {/* Main Menu */}
