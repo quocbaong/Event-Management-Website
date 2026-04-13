@@ -4,6 +4,7 @@ import MainLayout from '../components/layouts/MainLayout';
 import LoginPage from '../pages/LoginPage';
 import SignUpPage from '../pages/SignUpPage';
 import LandingPage from '../pages/LandingPage';
+import EventsPage from '../pages/EventsPage';
 
 
 const AppRouter = () => {
@@ -11,6 +12,7 @@ const AppRouter = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route element={<MainLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />

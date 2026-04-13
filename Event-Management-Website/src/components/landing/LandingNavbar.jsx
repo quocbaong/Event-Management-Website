@@ -15,10 +15,10 @@ const LandingNavbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Trang chủ', hasDropdown: false, isActive: true },
+    { name: 'Trang chủ', hasDropdown: false, isActive: true, path: '/' },
     { name: 'Tính năng', hasDropdown: true },
     { name: 'Giải pháp', hasDropdown: true },
-    { name: 'Sự kiện', hasDropdown: false },
+    { name: 'Sự kiện', hasDropdown: false, path: '/events' },
     { name: 'Tài nguyên', hasDropdown: false },
     { name: 'Giá', hasDropdown: false },
   ];
@@ -45,7 +45,11 @@ const LandingNavbar = () => {
         {/* Desktop Menu - Reverted to Elegant Style */}
         <div className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
-            <div key={link.name} className="flex items-center gap-1 group cursor-pointer relative py-2">
+            <div 
+              key={link.name} 
+              className="flex items-center gap-1 group cursor-pointer relative py-2"
+              onClick={() => { if(link.path) navigate(link.path); }}
+            >
               <span className={`text-[15px] font-body font-medium transition-all duration-300 ${link.isActive ? 'text-[#e4322a]' : 'text-slate-700 hover:text-[#e4322a]'}`}>
                 {link.name}
               </span>
