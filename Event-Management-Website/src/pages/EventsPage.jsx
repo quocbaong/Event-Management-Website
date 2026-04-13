@@ -313,7 +313,7 @@ const EventsFooter = () => {
         <div className="flex flex-col items-center md:items-start">
           <div className="text-[#5c46e5] font-bold text-xl mb-2">EventArchitect</div>
           <p className="text-slate-500 text-sm font-medium text-center md:text-left">
-            © 2024 EventArchitect. Nền tảng quản lý sự kiện chuyên nghiệp.
+            © 2026 EventArchitect. Nền tảng quản lý sự kiện chuyên nghiệp.
           </p>
         </div>
         <div className="flex items-center gap-8 text-sm font-semibold text-slate-600">
