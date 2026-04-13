@@ -28,7 +28,7 @@ const LoginPage = () => {
             <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
               <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
             </div>
-            <span className="text-2xl font-bold tracking-tight">EventArchitect</span>
+            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
           </div>
           
           <div className="max-w-xl">
@@ -39,7 +39,7 @@ const LoginPage = () => {
             </h1>
             
             <p className="text-indigo-100/70 text-lg leading-relaxed max-w-md mb-8">
-              Không gian làm việc cao cấp cho các kiến trúc sư và những người tầm nhìn. Quản lý, mở rộng và truyền cảm hứng với độ chính xác tuyệt đối.
+              Không gian làm việc cao cấp cho các nhà tổ chức sự kiện và những người tầm nhìn. Quản lý, mở rộng và truyền cảm hứng với độ chính xác tuyệt đối.
             </p>
 
 
@@ -58,7 +58,7 @@ const LoginPage = () => {
             </div>
             <div>
               <p className="text-lg font-semibold text-white">
-                +2,400 kiến trúc sư
+                +2,400 nhà tổ chức sự kiện
               </p>
               <p className="text-sm text-indigo-200/80">
                 đã tham gia sứ mệnh của chúng tôi tuần này
@@ -150,7 +150,7 @@ const LoginPage = () => {
             </div>
 
             <button className="w-full bg-[#5F56FF] text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300 transform">
-              Đăng nhập vào EventArchitect
+              Đăng nhập
             </button>
           </form>
 
@@ -160,7 +160,7 @@ const LoginPage = () => {
               onClick={() => navigate('/signup')} 
               className="font-bold text-indigo-600 hover:text-indigo-800 underline underline-offset-4 decoration-2 decoration-indigo-100 hover:decoration-indigo-600 transition-all"
             >
-              Tạo tài khoản kiến trúc sư của bạn
+              Tạo tài khoản tổ chức sự kiện của bạn
             </button>
           </p>
         </div>

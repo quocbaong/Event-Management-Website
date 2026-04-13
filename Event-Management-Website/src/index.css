@@ -4,16 +4,16 @@
 @import "tailwindcss";
 
 :root {
-  /* Zoho Inspired Palette */
-  --zoho-red: #e4322a;
-  --zoho-red-dark: #cc2d26;
-  --zoho-dark: #0a0b2e;
-  --zoho-peach: #fff9f6;
-  --zoho-text: #1a1a1b;
-  --zoho-muted: #666e75;
+  /* Brand Palette */
+  --brand-red: #e4322a;
+  --brand-red-dark: #cc2d26;
+  --brand-dark: #0a0b2e;
+  --brand-surface-light: #fff9f6;
+  --brand-text: #1a1a1b;
+  --brand-muted: #666e75;
   
-  --primary: var(--zoho-red);
-  --primary-container: var(--zoho-red-dark);
+  --primary: var(--brand-red);
+  --primary-container: var(--brand-red-dark);
   --surface: #ffffff;
   --surface-dim: #f5f6f7;
   
@@ -28,7 +28,7 @@
     width: 100%;
     min-height: 100vh;
     font-family: var(--font-body);
-    color: var(--zoho-text);
+    color: var(--brand-text);
     background-color: var(--surface);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;

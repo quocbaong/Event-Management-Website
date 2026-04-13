@@ -2,36 +2,44 @@ import React from 'react';
 
 const MarqueeLogos = () => {
   const logos = [
-    { name: 'Amazon', src: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
-    { name: 'Levi\'s', src: 'https://upload.wikimedia.org/wikipedia/commons/e/e5/Levi%27s_logo.svg' },
-    { name: 'ITP Media', src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ-1-2-3-4-5-6-7-8-9-0-a-b-c-d-e-f-g-h-i-j-k-l-m-n-o-p-q-r-s-t-u-v-w-x-y-z-brand1' },
-    { name: 'BusinessNZ', src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ-1-2-3-4-5-6-7-8-9-0-a-b-c-d-e-f-g-h-i-j-k-l-m-n-o-p-q-r-s-t-u-v-w-x-y-z-brand2' },
-    { name: 'Razorpay', src: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg' }
+    { name: 'Amazon', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', h: 'h-6 md:h-8' },
+    { name: 'BusinessNZ', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/BusinessNZ_logo.svg', h: 'h-10 md:h-14' },
+    { name: 'Levi\'s', url: 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Levi%27s_logo.svg', h: 'h-9 md:h-12' },
+    { name: 'ITP Media', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/ITP_Media_Group_logo.svg', h: 'h-6 md:h-9' },
+    { name: 'Victoria University', url: 'https://upload.wikimedia.org/wikipedia/commons/d/df/Victoria_University_of_Wellington_logo.svg', h: 'h-12 md:h-16' },
+    { name: 'Razorpay', url: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg', h: 'h-6 md:h-9' }
   ];
 
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
-        <div className="flex items-center gap-8 mb-16">
-          <div className="flex-1 h-[1px] bg-slate-100"></div>
-          <h2 className="text-sm font-headline font-bold text-slate-400 tracking-[0.4em] uppercase">
+        
+        {/* Section Header - Bold Black and Sharp */}
+        <div className="flex items-center gap-12 mb-16">
+          <div className="flex-1 h-[1px] bg-slate-200"></div>
+          <h2 className="text-[14px] md:text-[16px] font-headline font-black text-slate-950 uppercase tracking-[0.8em] whitespace-nowrap">
             Được tin dùng bởi
           </h2>
-          <div className="flex-1 h-[1px] bg-slate-100"></div>
+          <div className="flex-1 h-[1px] bg-slate-200"></div>
         </div>
 
-        <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+        {/* Logos Grid - Vibrant Colors and Solid Presence - Fixed to ONE LINE */}
+        <div className="flex flex-nowrap md:flex-wrap justify-between md:justify-center items-center gap-8 md:gap-16 lg:gap-20 px-4 overflow-x-auto md:overflow-visible no-scrollbar">
           {logos.map((logo, i) => (
-            <div key={i} className="h-8 md:h-10 flex items-center justify-center min-w-[120px]">
-               <img 
-                 src={logo.src} 
-                 alt={logo.name} 
-                 className="h-full object-contain" 
-                 onError={(e) => {
-                   e.target.style.display = 'none';
-                   e.target.parentNode.innerHTML = `<span class="font-black text-xl tracking-tighter text-slate-300 italic">${logo.name}</span>`;
-                 }}
-               />
+            <div key={i} className="flex-shrink-0 flex items-center justify-center transition-all duration-300 hover:scale-110">
+              <img
+                src={logo.url}
+                alt={logo.name}
+                className={`${logo.h} w-auto object-contain filter-none brightness-100 opacity-100`}
+                onError={(e) => {
+                  // Fallback for missing images
+                  e.target.style.display = 'none';
+                  const span = document.createElement('span');
+                  span.textContent = logo.name;
+                  span.className = 'text-slate-900 font-black text-lg uppercase tracking-tight italic';
+                  e.target.parentNode.appendChild(span);
+                }}
+              />
             </div>
           ))}
         </div>

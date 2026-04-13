@@ -9,7 +9,7 @@ const CTASection = () => {
     { q: 'Phần mềm quản lý sự kiện là gì?', a: 'Phần mềm quản lý sự kiện là một nền tảng kỹ thuật số được thiết kế để giúp các tổ chức và cá nhân lập kế hoạch, tổ chức, theo dõi và tham gia vào một sự kiện một cách dễ dàng và hiệu quả.' },
     { q: 'Phần mềm quản lý sự kiện giúp tổ chức sự kiện thành công bằng cách nào?', a: 'Bằng cách tự động hóa các quy trình lập kế hoạch, bán vé, đăng ký và truyền thông, giúp giảm thiểu sai sót và tăng cường trải nghiệm người tham dự.' },
     { q: 'Các tính năng chính của phần mềm quản lý sự kiện là gì?', a: 'Bao gồm bán vé và đăng ký, tạo trang web sự kiện, ứng dụng di động cho người tham dự, hệ thống check-in tại chỗ, và các báo cáo phân tích chi tiết.' },
-    { q: 'Zoho Backstage khác với các nền tảng quản lý sự kiện khác ở điểm nào?', a: 'Zoho Backstage (Prestige Planner) nổi bật với tính bảo mật tuyệt đối, tích hợp AI để kết nối đối tác, và quy trình check-in tự động hóa hoàn toàn.' },
+    { q: 'Prestige Planner khác với các nền tảng quản lý sự kiện khác ở điểm nào?', a: 'Prestige Planner nổi bật với tính bảo mật tuyệt đối, tích hợp AI để kết nối đối tác, và quy trình check-in tự động hóa hoàn toàn.' },
     { q: 'Phần mềm quản lý sự kiện ảo khác với phần mềm hội thảo trực tuyến ở điểm nào?', a: 'Sự kiện ảo cho phép sự tương tác đa chiều, khu vực triển lãm ảo và tính năng networking AI, trong khi hội thảo trực tuyến thường chỉ tập trung vào truyền phát một chiều.' }
   ];
 
