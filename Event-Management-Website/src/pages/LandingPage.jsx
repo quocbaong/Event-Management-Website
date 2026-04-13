@@ -1,56 +1,61 @@
 import React from 'react';
-import LandingNavbar from '../components/landing/LandingNavbar';
+import { useEffect } from 'react';
+import LandingNavbar from '../components/common/LandingNavbar';
 import HeroSection from '../components/landing/HeroSection';
 import DashboardMockupSection from '../components/landing/DashboardMockupSection';
 import StatisticsSection from '../components/landing/StatisticsSection';
 import MarqueeLogos from '../components/landing/MarqueeLogos';
-import FeatureStickyScroll from '../components/landing/FeatureStickyScroll';
-import FeatureBlocksSection from '../components/landing/FeatureBlocksSection';
+import FeatureGrid from '../components/landing/FeatureGrid';
 import ExperienceTypesSection from '../components/landing/ExperienceTypesSection';
-import AppShowcaseSection from '../components/landing/AppShowcaseSection';
-import SecuritySection from '../components/landing/SecuritySection';
-import AwardsSection from '../components/landing/AwardsSection';
-import CTASection from '../components/landing/CTASection';
-import LandingFooter from '../components/landing/LandingFooter';
-import StickyDemoButton from '../components/landing/StickyDemoButton';
+import FeaturedEventsSection from '../components/landing/FeaturedEventsSection';
+import WorkflowSection from '../components/landing/WorkflowSection';
+import TestimonialsSection from '../components/landing/TestimonialsSection';
+import PricingSection from '../components/landing/PricingSection';
+import LandingFooter from '../components/common/LandingFooter';
+import StickyDemoButton from '../components/common/StickyDemoButton';
 
 const LandingPage = () => {
+  useEffect(() => {
+    // Scroll to top on load/reload
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="landing-page bg-white selection:bg-[#e4322a]/30">
       <LandingNavbar />
       <StickyDemoButton />
       <main>
         {/* Dark Hero Area */}
-        <HeroSection />
+        <div id="hero">
+          <HeroSection />
+        </div>
 
         {/* Light Dashboard Showcase */}
         <DashboardMockupSection />
 
-        {/* Statistics Bar - Peach background */}
-        <StatisticsSection />
-
         {/* Partners Row */}
         <MarqueeLogos />
-
-
-        {/* Core Features - Sticky Stacked Cards */}
-        <FeatureStickyScroll />
-
-        {/* Advanced Feature Blocks (Z-Pattern) */}
-        <FeatureBlocksSection />
 
         {/* Experience Cards - Blue/Orange/Purple */}
         <ExperienceTypesSection />
 
-        {/* Mobile App Showcases */}
-        <AppShowcaseSection />
+        {/* Core Features - Clean Grid UI */}
+        <FeatureGrid />
 
-        {/* Security & Awards - Impactful Blue Sections */}
-        <SecuritySection />
-        <AwardsSection />
+        {/* Statistics Bar - Peach background */}
+        <StatisticsSection />
 
-        {/* Final CTA & FAQ */}
-        <CTASection />
+        {/* Featured Events - High Impact */}
+        <FeaturedEventsSection />
+
+        {/* Professional Workflow - Sequential Steps */}
+        <WorkflowSection />
+
+        {/* Global Testimonials - Social Proof */}
+        <TestimonialsSection />
+
+        {/* Flexible Pricing - Subscription Plans */}
+        <PricingSection />
       </main>
       <LandingFooter />
     </div>
