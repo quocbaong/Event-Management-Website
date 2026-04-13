@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Check } from 'lucide-react';
-
-
-
-
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
@@ -108,12 +104,12 @@ const LoginPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type="email" 
-                  id="email"
-                  className="block w-full pl-14 pr-5 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
-                  placeholder="name@company.com"
-                />
+                  <input 
+                    type="email" 
+                    id="email"
+                    className="block w-full pl-14 pr-5 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="name@company.com"
+                  />
               </div>
             </div>
 
@@ -126,12 +122,12 @@ const LoginPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  className="block w-full pl-14 pr-14 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
-                  placeholder="••••••••"
-                />
+                  <input 
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    className="block w-full pl-14 pr-14 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="••••••••"
+                  />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -149,7 +145,11 @@ const LoginPage = () => {
               <span className="ml-3 text-base font-semibold text-gray-600 select-none">Ghi nhớ tôi trong 30 ngày</span>
             </div>
 
-            <button className="w-full bg-[#5F56FF] text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300 transform">
+            <button 
+              type="button" 
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-[#5F56FF] text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300 transform"
+            >
               Đăng nhập vào EventArchitect
             </button>
           </form>

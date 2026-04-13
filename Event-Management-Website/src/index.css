@@ -1,12 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border-color: var(--border-color);
+}
+
 
 :root {
   /* Premium System Tokens */
-  --primary: #6366f1; /* Indigo 500 */
-  --primary-hover: #4f46e5;
-  --primary-light: #e0e7ff;
+  --primary: #1e40af; /* Blue 800 */
+  --primary-hover: #1e3a8a; /* Blue 900 */
+  --primary-light: #dbeafe; /* Blue 100 */
   
   --secondary: #ec4899; /* Pink 500 */
   --secondary-hover: #db2777;
@@ -38,9 +49,9 @@
 
 
 .dark-mode {
-  --primary: #818cf8;
-  --primary-hover: #6366f1;
-  --primary-light: rgba(99, 102, 241, 0.2);
+  --primary: #60a5fa; /* Blue 400 */
+  --primary-hover: #3b82f6; /* Blue 500 */
+  --primary-light: rgba(96, 165, 250, 0.2);
   
   --secondary: #f472b6;
   --secondary-hover: #ec4899;
@@ -69,14 +80,19 @@
 html, body, #root, .App {
   margin: 0;
   padding: 0;
-  overflow: hidden !important;
-  height: 100vh !important;
-  width: 100vw !important;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
   position: fixed;
   top: 0;
   left: 0;
   transition: background-color 0.3s ease, color 0.3s ease;
-  touch-action: none; /* Prevents touch scrolling on mobile */
+}
+
+/* Allow scrolling in containers that explicitly have overflow-auto/scroll */
+.overflow-y-auto {
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
 }
 
 

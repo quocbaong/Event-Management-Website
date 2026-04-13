@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Building2, Eye, EyeOff, Sparkles, LineChart, Check } from 'lucide-react';
-
 import heroIllustration from '../assets/hero-illustration.png';
-
 import { useNavigate } from 'react-router-dom';
 
 const SignUpPage = () => {
@@ -98,11 +96,11 @@ const SignUpPage = () => {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <User className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                   </div>
-                  <input 
-                    type="text" id="name"
-                    placeholder="Nguyễn Văn A"
-                    className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                  />
+                    <input 
+                      type="text" id="name"
+                      placeholder="Nguyễn Văn A"
+                      className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                    />
                 </div>
               </div>
               <div className="group">
@@ -126,11 +124,11 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type="email" id="email"
-                  placeholder="name@company.com"
-                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                />
+                  <input 
+                    type="email" id="email"
+                    placeholder="name@company.com"
+                    className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                  />
               </div>
             </div>
 
@@ -140,12 +138,12 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  placeholder="••••••••"
-                  className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                />
+                  <input 
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    placeholder="••••••••"
+                    className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                  />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -185,7 +183,11 @@ const SignUpPage = () => {
               </span>
             </div>
 
-            <button className="w-full bg-[#5F56FF] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300">
+            <button 
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-[#5F56FF] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300"
+            >
               Tạo Tài khoản của Tôi
             </button>
           </form>
