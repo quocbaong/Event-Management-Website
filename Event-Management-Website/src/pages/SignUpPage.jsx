@@ -17,7 +17,7 @@ const SignUpPage = () => {
   ];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans">
+    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans layout-fixed">
 
       {/* Left Panel */}
       <div className="hidden lg:flex lg:flex-[1.1] relative overflow-hidden bg-[#2D31A6] p-16 xl:p-20 flex flex-col justify-between text-white">
@@ -34,7 +34,7 @@ const SignUpPage = () => {
             <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
               <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
             </div>
-            <span className="text-2xl font-bold tracking-tight">EventArchitect</span>
+            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
           </div>
 
           <div className="max-w-xl">
@@ -186,9 +186,9 @@ const SignUpPage = () => {
             <button 
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="w-full bg-[#5F56FF] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300"
+              className="w-full bg-primary text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300"
             >
-              Tạo Tài khoản của Tôi
+              Tạo tài khoản của tôi
             </button>
           </form>
 

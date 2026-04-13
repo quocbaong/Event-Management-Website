@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @import "tailwindcss";
 
 @theme {
@@ -12,9 +14,16 @@
   --color-border-color: var(--border-color);
 }
 
-
 :root {
-  /* Premium System Tokens */
+  /* Brand Palette from Main */
+  --brand-red: #e4322a;
+  --brand-red-dark: #cc2d26;
+  --brand-dark: #0a0b2e;
+  --brand-surface-light: #fff9f6;
+  --brand-text: #1a1a1b;
+  --brand-muted: #666e75;
+
+  /* Premium System Tokens (User's Blue Theme) */
   --primary: #1e40af; /* Blue 800 */
   --primary-hover: #1e3a8a; /* Blue 900 */
   --primary-light: #dbeafe; /* Blue 100 */
@@ -36,17 +45,9 @@
   --topbar-height: 72px;
 
   --sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  
-  font-family: var(--sans);
-  color: var(--text-primary);
-  background-color: var(--bg-default);
-  
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
+  --font-headline: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
-
 
 .dark-mode {
   --primary: #60a5fa; /* Blue 400 */
@@ -66,45 +67,79 @@
   --surface-glass: rgba(30, 41, 59, 0.7);
 }
 
-.accessibility-mode {
-  /* High contrast mode / larger fonts */
-  --primary: #0000ff;
-  --bg-default: #ffffff;
-  --bg-paper: #ffffff;
-  --text-primary: #000000;
-  --text-secondary: #111111;
-  --border-color: #000000;
-  font-size: 110%;
+@layer base {
+  html, body, #root, .App {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background-color: var(--bg-default);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 }
 
-html, body, #root, .App {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+.layout-fixed {
+  overflow: hidden !important;
+  height: 100vh !important;
+  width: 100vw !important;
   position: fixed;
   top: 0;
   left: 0;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Allow scrolling in containers that explicitly have overflow-auto/scroll */
-.overflow-y-auto {
-  scrollbar-gutter: stable;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 
+/* Landing Specific Styles */
+.font-headline { font-family: var(--font-headline); }
+.font-body { font-family: var(--font-body); }
 
-/* Hide scrollbars for Chrome, Safari and Opera */
+.hero-spotlight {
+  background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0a0b2e 70%, #000000 100%);
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.clip-hexagon {
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-/* Hide scrollbars for IE, Edge and Firefox */
-* {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

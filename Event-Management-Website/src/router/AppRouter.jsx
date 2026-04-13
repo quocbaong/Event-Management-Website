@@ -4,12 +4,14 @@ import MainLayout from '../components/layouts/MainLayout';
 import LoginPage from '../pages/LoginPage';
 import SignUpPage from '../pages/SignUpPage';
 import DashboardPage from '../pages/DashboardPage';
+import LandingPage from '../pages/LandingPage';
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        {/* Auth Routes - Without Sidebar/Header */}
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         
@@ -19,7 +21,6 @@ const AppRouter = () => {
           {/* Add other protected routes here */}
         </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
