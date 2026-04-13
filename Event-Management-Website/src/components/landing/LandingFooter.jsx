@@ -1,74 +1,127 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 const LandingFooter = () => {
+  const navigate = useNavigate();
+
+  const footerLinks = {
+    product: [
+      { name: 'Tính năng', href: '#' },
+      { name: 'Giải pháp', href: '#' },
+      { name: 'Bảng giá', href: '#' },
+      { name: 'Yêu cầu Demo', href: '#' },
+    ],
+    company: [
+      { name: 'Về chúng tôi', href: '#' },
+      { name: 'Tuyển dụng', href: '#' },
+      { name: 'Blog', href: '#' },
+      { name: 'Liên hệ', href: '#' },
+    ],
+    resources: [
+      { name: 'Trung tâm trợ giúp', href: '#' },
+      { name: 'Cộng đồng', href: '#' },
+      { name: 'Tài liệu API', href: '#' },
+      { name: 'Tình trạng hệ thống', href: '#' },
+    ]
+  };
+
+  const socials = [
+    { platform: 'facebook', icon: 'https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/facebook.svg' },
+    { platform: 'twitter', icon: 'https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/x.svg' },
+    { platform: 'linkedin', icon: 'https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/linkedin.svg' },
+    { platform: 'instagram', icon: 'https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/instagram.svg' },
+  ];
+
   return (
-    <footer className="bg-white py-12 px-6 border-t border-slate-100">
-      <div className="max-w-7xl mx-auto space-y-12">
-        
-        {/* Top: Support & Socials */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 text-indigo-600 font-body text-sm font-medium">
-             <span className="material-symbols-outlined text-xl">mail</span>
-             support@prestigeplanner.com
-          </div>
-          <div className="flex items-center gap-6">
-             {['facebook', 'twitter', 'linkedin', 'instagram'].map(platform => (
-               <div key={platform} className="cursor-pointer hover:opacity-70 transition-opacity">
-                  <img src={`https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/${platform === 'twitter' ? 'x' : platform}.svg`} alt={platform} className="w-5 h-5 opacity-60 grayscale hover:grayscale-0" />
-               </div>
-             ))}
-          </div>
-        </div>
-
-        {/* Middle: Compliance Badges */}
-        <div className="flex flex-col items-center gap-6">
-            <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Chọn Quyền riêng tư. Chọn Prestige Planner.</p>
-            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 opacity-40 grayscale">
-               {[
-                 'https://loodibee.com/wp-content/uploads/BSI-Logo.png',
-                 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/ISO_9001_Logo.svg/2560px-ISO_9001_Logo.svg.png',
-                 'https://www.gdpr.org/wp-content/uploads/2018/05/GDPR_logo.png',
-                 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/AICPA_logo.svg/1200px-AICPA_logo.svg.png'
-               ].map((src, i) => (
-                 <div key={i} className="h-10 w-20 flex items-center justify-center">
-                    <img src={src} className="max-h-full max-w-full object-contain" alt="compliance" onError={(e) => e.target.style.display = 'none'} />
-                    {i === 0 && <span className="font-black text-xs">ISO 27001</span>}
-                    {i === 2 && <span className="font-black text-xs">GDPR Compliant</span>}
-                 </div>
-               ))}
+    <footer className="bg-white border-t border-slate-100 pt-20 pb-10 px-6 md:px-10 overflow-hidden relative">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-20">
+          
+          {/* Column 1: Brand */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="cursor-pointer" onClick={() => navigate('/')}>
+              <img src={logo} alt="Prestige Planner" className="h-10 w-auto object-contain" />
             </div>
-        </div>
-
-        {/* Search & Language */}
-        <div className="max-w-xl mx-auto flex flex-col md:flex-row gap-4">
-           <div className="flex-1 relative">
-              <input 
-                className="w-full bg-slate-50 border border-slate-200 rounded p-2.5 pl-4 text-xs font-body outline-none focus:border-indigo-400" 
-                placeholder="Tìm kiếm thông tin về sản phẩm, câu hỏi thường gặp..."
-              />
-              <button className="absolute right-0 top-0 h-full w-12 bg-slate-100 flex items-center justify-center border-l border-slate-200">
-                <span className="material-symbols-outlined text-sm">search</span>
-              </button>
-           </div>
-           <div className="w-full md:w-32 bg-slate-50 border border-slate-200 rounded p-2.5 text-xs flex items-center justify-between cursor-pointer group hover:bg-slate-100 transition-colors">
-              <span className="flex items-center gap-2">🇻🇳 Tiếng Việt</span>
-              <span className="material-symbols-outlined text-xs group-hover:rotate-180 transition-transform">expand_more</span>
-           </div>
-        </div>
-
-        {/* Bottom: Links & Copyright */}
-        <div className="pt-8 border-t border-slate-50 text-center space-y-6">
-           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-[11px] font-medium text-slate-500">
-              {['Liên hệ với chúng tôi', 'Bảo mật', 'Tuân thủ', 'Khiếu nại về quyền sở hữu trí tuệ', 'Chính sách chống thư rác', 'Điều khoản dịch vụ', 'Chính sách quyền riêng tư', 'Chính sách cookie', 'Tuân thủ theo GDPR', 'Chính sách chống lạm dụng'].map(link => (
-                <a key={link} href="#" className="hover:text-indigo-600 transition-colors uppercase tracking-tight">{link}</a>
+            <p className="text-slate-500 text-[14px] leading-relaxed max-w-xs font-body">
+              Nền tảng quản trị sự kiện thông minh hàng đầu, giúp bạn kiến tạo những trải nghiệm đẳng cấp và tự động hóa quy trình chuyên nghiệp.
+            </p>
+            <div className="flex items-center gap-4">
+              {socials.map((social) => (
+                <a 
+                  key={social.platform} 
+                  href="#" 
+                  className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center hover:border-indigo-500 hover:bg-white transition-all duration-300 group shadow-sm"
+                >
+                  <img src={social.icon} alt={social.platform} className="w-4 h-4 opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-opacity" />
+                </a>
               ))}
-           </div>
-           <p className="text-[10px] text-slate-400 font-body">
-             © 2026, Prestige Planner. Bảo lưu mọi quyền.
-           </p>
+            </div>
+          </div>
+
+          {/* Column 2: Product */}
+          <div className="lg:col-span-2 space-y-6">
+            <h4 className="text-slate-900 font-headline font-bold text-[13px] uppercase tracking-widest">Sản phẩm</h4>
+            <ul className="space-y-4">
+              {footerLinks.product.map(link => (
+                <li key={link.name}>
+                  <a href={link.href} className="text-slate-500 hover:text-indigo-600 transition-colors text-[14px] font-medium">{link.name}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Company */}
+          <div className="lg:col-span-2 space-y-6">
+            <h4 className="text-slate-900 font-headline font-bold text-[13px] uppercase tracking-widest">Công ty</h4>
+            <ul className="space-y-4">
+              {footerLinks.company.map(link => (
+                <li key={link.name}>
+                  <a href={link.href} className="text-slate-500 hover:text-indigo-600 transition-colors text-[14px] font-medium">{link.name}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Newsletter */}
+          <div className="lg:col-span-4 space-y-6">
+            <h4 className="text-slate-900 font-headline font-bold text-[13px] uppercase tracking-widest">Đăng ký nhận tin</h4>
+            <p className="text-slate-500 text-[14px] leading-relaxed font-body">
+              Đăng ký để nhận tin tức mới nhất về các xu hướng tổ chức sự kiện và bản cập nhật sản phẩm.
+            </p>
+            <div className="flex gap-2">
+              <input 
+                type="email" 
+                placeholder="Email của bạn"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-[14px] outline-none focus:border-indigo-400 focus:bg-white transition-all"
+              />
+              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-[13px] font-bold transition-all shadow-md active:scale-95">
+                Đăng ký
+              </button>
+            </div>
+          </div>
         </div>
 
+        {/* Bottom Bar */}
+        <div className="pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2">
+            <span className="text-slate-400 text-[12px]">© 2026 Prestige Planner.</span>
+            {['Chính sách bảo mật', 'Điều khoản sử dụng', 'Cookie'].map(legal => (
+              <a key={legal} href="#" className="text-slate-500 hover:text-indigo-600 text-[12px] font-medium transition-colors">{legal}</a>
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[12px] font-medium text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors">
+              <span>Tiếng Việt</span>
+              <span className="material-symbols-outlined text-[16px]">expand_more</span>
+            </div>
+          </div>
+        </div>
       </div>
+      
+      {/* Decorative accent */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
     </footer>
   );
 };

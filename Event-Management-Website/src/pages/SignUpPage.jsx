@@ -36,7 +36,7 @@ const SignUpPage = () => {
             <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
               <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
             </div>
-            <span className="text-2xl font-bold tracking-tight">EventArchitect</span>
+            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
           </div>
 
           <div className="max-w-xl">
@@ -186,7 +186,7 @@ const SignUpPage = () => {
             </div>
 
             <button className="w-full bg-[#5F56FF] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300">
-              Tạo Tài khoản của Tôi
+              Đăng ký
             </button>
           </form>
 

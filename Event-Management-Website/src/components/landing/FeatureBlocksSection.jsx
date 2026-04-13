@@ -56,36 +56,36 @@ const FeatureBlocksSection = () => {
       {blocks.map((block) => (
         <div key={block.id} className={`${block.bg} py-24 px-6 md:px-10 overflow-hidden`}>
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
+
             {/* Content Order Logic */}
             <div className={`space-y-8 ${block.imageAlign === 'left' ? 'lg:order-2' : 'lg:order-1'}`}>
-               <h3 className={`text-3xl md:text-5xl font-headline font-extrabold leading-tight ${block.textColor}`}>
-                 {block.title}
-               </h3>
-               <p className={`text-lg leading-relaxed font-body ${block.mutedColor}`}>
-                 {block.desc}
-               </p>
-               <button className={`flex items-center gap-2 font-headline font-bold text-sm ${block.id % 2 === 0 ? 'text-indigo-400' : 'text-indigo-600'} hover:underline`}>
-                 Tìm hiểu thêm
-                 <span className="material-symbols-outlined">arrow_right_alt</span>
-               </button>
+              <h3 className={`text-3xl md:text-5xl font-headline font-extrabold leading-tight ${block.textColor}`}>
+                {block.title}
+              </h3>
+              <p className={`text-lg leading-relaxed font-body ${block.mutedColor}`}>
+                {block.desc}
+              </p>
+              <button className={`flex items-center gap-2 font-headline font-bold text-sm ${block.id % 2 === 0 ? 'text-indigo-400' : 'text-indigo-600'} hover:underline`}>
+                Tìm hiểu thêm
+                <span className="material-symbols-outlined">arrow_right_alt</span>
+              </button>
             </div>
 
             {/* Mockup Visualization */}
             <div className={`${block.imageAlign === 'left' ? 'lg:order-1' : 'lg:order-2'} relative`}>
-               <div className={`aspect-[4/3] rounded-[2.5rem] ${block.id % 2 === 0 ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100'} border flex items-center justify-center p-8 transition-transform duration-700 hover:scale-[1.02]`}>
-                  <div className="bg-white rounded-2xl shadow-2xl p-6 w-full h-full border border-slate-100 flex flex-col items-center justify-center space-y-4">
-                     <span className="material-symbols-outlined text-[100px] text-indigo-500 opacity-20">{block.mockup}</span>
-                     <div className="w-full space-y-2 px-6">
-                        <div className="h-2 w-full bg-slate-50 rounded-full"></div>
-                        <div className="h-2 w-2/3 bg-slate-50 rounded-full"></div>
-                     </div>
+              <div className={`aspect-[4/3] rounded-[2.5rem] ${block.id % 2 === 0 ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-100'} border flex items-center justify-center p-8 transition-transform duration-700 hover:scale-[1.02]`}>
+                <div className="bg-white rounded-2xl shadow-2xl p-6 w-full h-full border border-slate-100 flex flex-col items-center justify-center space-y-4">
+                  <span className="material-symbols-outlined text-[100px] text-indigo-500 opacity-20">{block.mockup}</span>
+                  <div className="w-full space-y-2 px-6">
+                    <div className="h-2 w-full bg-slate-50 rounded-full"></div>
+                    <div className="h-2 w-2/3 bg-slate-50 rounded-full"></div>
                   </div>
-                  {/* Floating floating element */}
-                  <div className="absolute -bottom-6 -right-6 bg-indigo-600 rounded-3xl p-6 shadow-2xl text-white transform rotate-3">
-                     <span className="material-symbols-outlined text-4xl">verified</span>
-                  </div>
-               </div>
+                </div>
+                {/* Floating floating element */}
+                <div className="absolute -bottom-6 -right-6 bg-indigo-600 rounded-3xl p-6 shadow-2xl text-white transform rotate-3">
+                  <span className="material-symbols-outlined text-4xl">verified</span>
+                </div>
+              </div>
             </div>
 
           </div>

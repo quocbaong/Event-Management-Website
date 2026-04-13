@@ -12,40 +12,43 @@ import SecuritySection from '../components/landing/SecuritySection';
 import AwardsSection from '../components/landing/AwardsSection';
 import CTASection from '../components/landing/CTASection';
 import LandingFooter from '../components/landing/LandingFooter';
+import StickyDemoButton from '../components/landing/StickyDemoButton';
 
 const LandingPage = () => {
   return (
     <div className="landing-page bg-white selection:bg-[#e4322a]/30">
       <LandingNavbar />
+      <StickyDemoButton />
       <main>
         {/* Dark Hero Area */}
         <HeroSection />
-        
+
         {/* Light Dashboard Showcase */}
         <DashboardMockupSection />
-        
+
         {/* Statistics Bar - Peach background */}
         <StatisticsSection />
-        
+
         {/* Partners Row */}
         <MarqueeLogos />
-        
+
+
         {/* Core Features - Sticky Stacked Cards */}
         <FeatureStickyScroll />
-        
+
         {/* Advanced Feature Blocks (Z-Pattern) */}
         <FeatureBlocksSection />
-        
+
         {/* Experience Cards - Blue/Orange/Purple */}
         <ExperienceTypesSection />
-        
+
         {/* Mobile App Showcases */}
         <AppShowcaseSection />
-        
+
         {/* Security & Awards - Impactful Blue Sections */}
         <SecuritySection />
         <AwardsSection />
-        
+
         {/* Final CTA & FAQ */}
         <CTASection />
       </main>
