@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Building2, Eye, EyeOff, Sparkles, LineChart, Check } from 'lucide-react';
-
 import heroIllustration from '../assets/hero-illustration.png';
-
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +21,7 @@ const SignUpPage = () => {
     <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC] font-sans layout-fixed">
 
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:flex-[1.1] relative overflow-hidden bg-[#2D31A6] p-16 xl:p-20 flex flex-col justify-between text-white">
+      <div className="hidden lg:flex lg:flex-[1.1] relative overflow-hidden bg-[#2D31A6] pt-12 pb-16 px-16 xl:pt-16 xl:pb-20 xl:px-20 flex flex-col justify-between text-white">
         {/* Background Decorative Text */}
         <div className="absolute inset-0 flex flex-col justify-center items-center opacity-10 select-none pointer-events-none">
           <span className="text-[12rem] font-black leading-none italic uppercase">PREMIUM</span>
@@ -31,12 +30,8 @@ const SignUpPage = () => {
         </div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12 cursor-pointer" onClick={() => navigate('/')}>
-
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
-              <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
-            </div>
-            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
+          <div className="flex items-center gap-3 mb-10 cursor-pointer" onClick={() => navigate('/')}>
+            <img src={logo} alt="Prestige Planner" className="h-20 w-auto brightness-0 invert" />
           </div>
 
           <div className="max-w-xl">
@@ -98,11 +93,11 @@ const SignUpPage = () => {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <User className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                   </div>
-                  <input 
-                    type="text" id="name"
-                    placeholder="Nguyễn Văn A"
-                    className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                  />
+                    <input 
+                      type="text" id="name"
+                      placeholder="Nguyễn Văn A"
+                      className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                    />
                 </div>
               </div>
               <div className="group">
@@ -126,11 +121,11 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type="email" id="email"
-                  placeholder="name@company.com"
-                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                />
+                  <input 
+                    type="email" id="email"
+                    placeholder="name@company.com"
+                    className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                  />
               </div>
             </div>
 
@@ -140,12 +135,12 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  placeholder="••••••••"
-                  className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                />
+                  <input 
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    placeholder="••••••••"
+                    className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                  />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -185,8 +180,12 @@ const SignUpPage = () => {
               </span>
             </div>
 
-            <button className="w-full bg-[#5F56FF] text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300">
-              Đăng ký
+            <button 
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-primary text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300"
+            >
+              Tạo tài khoản của tôi
             </button>
           </form>
 

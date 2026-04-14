@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Check } from 'lucide-react';
-
-
-
-
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +11,7 @@ const LoginPage = () => {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white layout-fixed">
       {/* Left Panel - Dynamic Gradient & Branding */}
-      <div className="hidden lg:flex lg:flex-[1.2] relative overflow-hidden bg-[#5F56FF] p-16 xl:p-24 flex flex-col justify-between text-white font-sans">
+      <div className="hidden lg:flex lg:flex-[1.2] relative overflow-hidden bg-[#5F56FF] pt-12 pb-16 px-16 xl:pt-16 xl:pb-24 xl:px-24 flex flex-col justify-between text-white font-sans">
         {/* Animated Gradient Overlay */}
         <div className="absolute inset-0 z-0 bg-gradient-to-tr from-[#4F46E5] via-[#5F56FF] to-[#9333EA] opacity-90"></div>
         
@@ -23,12 +20,8 @@ const LoginPage = () => {
         <div className="absolute bottom-[-5%] left-[-5%] w-[400px] h-[400px] bg-purple-400/20 rounded-full blur-[100px]"></div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12 cursor-pointer" onClick={() => navigate('/')}>
-
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
-              <div className="w-5 h-5 bg-white rounded-sm rotate-45"></div>
-            </div>
-            <span className="text-2xl font-bold tracking-tight">Prestige Planner</span>
+          <div className="flex items-center gap-3 mb-10 cursor-pointer" onClick={() => navigate('/')}>
+            <img src={logo} alt="Prestige Planner" className="h-20 w-auto brightness-0 invert" />
           </div>
           
           <div className="max-w-xl">
@@ -108,12 +101,12 @@ const LoginPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type="email" 
-                  id="email"
-                  className="block w-full pl-14 pr-5 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
-                  placeholder="name@company.com"
-                />
+                  <input 
+                    type="email" 
+                    id="email"
+                    className="block w-full pl-14 pr-5 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="name@company.com"
+                  />
               </div>
             </div>
 
@@ -126,12 +119,12 @@ const LoginPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                <input 
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  className="block w-full pl-14 pr-14 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
-                  placeholder="••••••••"
-                />
+                  <input 
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    className="block w-full pl-14 pr-14 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
+                    placeholder="••••••••"
+                  />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -149,8 +142,13 @@ const LoginPage = () => {
               <span className="ml-3 text-base font-semibold text-gray-600 select-none">Ghi nhớ tôi trong 30 ngày</span>
             </div>
 
-            <button className="w-full bg-[#5F56FF] text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-[#4F46E5] hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300 transform">
-              Đăng nhập
+
+            <button 
+              type="button" 
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-primary text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300 transform"
+            >
+              Đăng nhập vào EventArchitect
             </button>
           </form>
 

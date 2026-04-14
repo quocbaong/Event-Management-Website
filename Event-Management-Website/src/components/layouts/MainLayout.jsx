@@ -1,14 +1,18 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Sidebar from './parts/Sidebar';
+import Header from './parts/Header';
 
 const MainLayout = () => {
   return (
-    <div className="main-layout">
-      {/* Add Main Navbar here */}
-      <main>
-        <Outlet />
-      </main>
-      {/* Add Main Footer here */}
+    <div className="flex min-h-screen bg-bg-default overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto w-full">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 };
