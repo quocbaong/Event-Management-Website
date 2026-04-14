@@ -35,12 +35,12 @@ const LandingNavbar = () => {
   };
 
   const navLinks = [
-    { name: 'Trang chủ', id: 'hero', onClick: scrollToTop, isActive: true },
-    { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features') },
-    { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions') },
-    { name: 'Sự kiện', id: 'events', onClick: () => scrollToId('events') },
-    { name: 'Tài nguyên', id: 'resources', onClick: () => scrollToId('footer') },
-    { name: 'Giá', id: 'pricing', onClick: () => scrollToId('pricing') },
+    { name: 'Trang chủ', id: 'hero', onClick: () => { navigate('/'); scrollToTop(); }, isActive: true, hasDropdown: false },
+    { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features'), hasDropdown: true },
+    { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions'), hasDropdown: true },
+    { name: 'Sự kiện', id: 'events', onClick: () => navigate('/events'), hasDropdown: false },
+    { name: 'Tài nguyên', id: 'resources', onClick: () => scrollToId('footer'), hasDropdown: false },
+    { name: 'Giá', id: 'pricing', onClick: () => scrollToId('pricing'), hasDropdown: false },
   ];
 
   return (
