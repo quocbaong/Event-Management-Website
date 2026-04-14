@@ -1,13 +1,16 @@
-import React from 'react';
+import amazonLogo from '../../assets/marqueel_logo/amazon.svg';
+import businessNzLogo from '../../assets/marqueel_logo/business-nz.png';
+import levisLogo from '../../assets/marqueel_logo/levis.svg';
+import itpMediaLogo from '../../assets/marqueel_logo/itp-media.png';
+import razorpayLogo from '../../assets/marqueel_logo/razorpay.svg';
 
 const MarqueeLogos = () => {
   const logos = [
-    { name: 'Amazon', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', h: 'h-6 md:h-8' },
-    { name: 'BusinessNZ', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/BusinessNZ_logo.svg', h: 'h-10 md:h-14' },
-    { name: 'Levi\'s', url: 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Levi%27s_logo.svg', h: 'h-9 md:h-12' },
-    { name: 'ITP Media', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/ITP_Media_Group_logo.svg', h: 'h-6 md:h-9' },
-    { name: 'Victoria University', url: 'https://upload.wikimedia.org/wikipedia/commons/d/df/Victoria_University_of_Wellington_logo.svg', h: 'h-12 md:h-16' },
-    { name: 'Razorpay', url: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg', h: 'h-6 md:h-9' }
+    { name: 'Amazon', src: amazonLogo, h: 'h-6 md:h-8' },
+    { name: 'BusinessNZ', src: businessNzLogo, h: 'h-10 md:h-14' },
+    { name: 'Levi\'s', src: levisLogo, h: 'h-9 md:h-12' },
+    { name: 'ITP Media', src: itpMediaLogo, h: 'h-6 md:h-9' },
+    { name: 'Razorpay', src: razorpayLogo, h: 'h-6 md:h-9' }
   ];
 
   return (
@@ -28,7 +31,7 @@ const MarqueeLogos = () => {
           {logos.map((logo, i) => (
             <div key={i} className="flex-shrink-0 flex items-center justify-center transition-all duration-300 hover:scale-110">
               <img
-                src={logo.url}
+                src={logo.src}
                 alt={logo.name}
                 className={`${logo.h} w-auto object-contain filter-none brightness-100 opacity-100`}
                 onError={(e) => {

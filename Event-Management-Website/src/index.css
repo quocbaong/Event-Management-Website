@@ -3,40 +3,87 @@
 
 @import "tailwindcss";
 
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border-color: var(--border-color);
+}
+
 :root {
-  /* Brand Palette */
+  /* Brand Palette from Main */
   --brand-red: #e4322a;
   --brand-red-dark: #cc2d26;
   --brand-dark: #0a0b2e;
   --brand-surface-light: #fff9f6;
   --brand-text: #1a1a1b;
   --brand-muted: #666e75;
+
+  /* Premium System Tokens (User's Blue Theme) */
+  --primary: #1e40af; /* Blue 800 */
+  --primary-hover: #1e3a8a; /* Blue 900 */
+  --primary-light: #dbeafe; /* Blue 100 */
   
-  --primary: var(--brand-red);
-  --primary-container: var(--brand-red-dark);
-  --surface: #ffffff;
-  --surface-dim: #f5f6f7;
+  --secondary: #ec4899; /* Pink 500 */
+  --secondary-hover: #db2777;
   
+  --bg-default: #f8fafc; /* Slate 50 */
+  --bg-paper: #ffffff;
+  
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #64748b; /* Slate 500 */
+  --border-color: #e2e8f0;
+  
+  --surface-glass: rgba(255, 255, 255, 0.7);
+  
+  /* Layout */
+  --sidebar-width: 280px;
+  --topbar-height: 72px;
+
+  --sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   --font-headline: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
 
+.dark-mode {
+  --primary: #60a5fa; /* Blue 400 */
+  --primary-hover: #3b82f6; /* Blue 500 */
+  --primary-light: rgba(96, 165, 250, 0.2);
+  
+  --secondary: #f472b6;
+  --secondary-hover: #ec4899;
+  
+  --bg-default: #0f172a;
+  --bg-paper: #1e293b;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  
+  --surface-glass: rgba(30, 41, 59, 0.7);
+}
+
 @layer base {
-  html, body {
+  html, body, #root, .App {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100vh;
     font-family: var(--font-body);
-    color: var(--brand-text);
-    background-color: var(--surface);
+    color: var(--text-primary);
+    background-color: var(--bg-default);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
-/* Layout Utilities for Auth/Dashboard pages */
 .layout-fixed {
   overflow: hidden !important;
   height: 100vh !important;
@@ -46,6 +93,7 @@
   left: 0;
   touch-action: none;
 }
+
 
 /* Landing Specific Styles */
 .font-headline { font-family: var(--font-headline); }

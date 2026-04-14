@@ -14,13 +14,33 @@ const LandingNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToId = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 80; // Navbar height offset
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const navLinks = [
-    { name: 'Trang chủ', hasDropdown: false, isActive: true, path: '/' },
-    { name: 'Tính năng', hasDropdown: true },
-    { name: 'Giải pháp', hasDropdown: true },
-    { name: 'Sự kiện', hasDropdown: false, path: '/events' },
-    { name: 'Tài nguyên', hasDropdown: false },
-    { name: 'Giá', hasDropdown: false },
+    { name: 'Trang chủ', id: 'hero', onClick: () => { navigate('/'); scrollToTop(); }, isActive: true, hasDropdown: false },
+    { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features'), hasDropdown: true },
+    { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions'), hasDropdown: true },
+    { name: 'Sự kiện', id: 'events', onClick: () => navigate('/events'), hasDropdown: false },
+    { name: 'Tài nguyên', id: 'resources', onClick: () => scrollToId('footer'), hasDropdown: false },
+    { name: 'Giá', id: 'pricing', onClick: () => scrollToId('pricing'), hasDropdown: false },
   ];
 
   return (
@@ -30,10 +50,10 @@ const LandingNavbar = () => {
       }`}>
       <div className="max-w-7.5xl mx-auto px-6 md:px-15 flex items-center justify-between">
 
-        {/* Brand Logo - Scaled to be clearly visible but balanced */}
+        {/* Brand Logo - Click to Reload */}
         <div
           className="cursor-pointer group flex items-center"
-          onClick={() => navigate('/')}
+          onClick={() => window.location.reload()}
         >
           <img
             src={logo}
@@ -45,10 +65,10 @@ const LandingNavbar = () => {
         {/* Desktop Menu - Reverted to Elegant Style */}
         <div className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
-            <div 
-              key={link.name} 
+            <div
+              key={link.name}
               className="flex items-center gap-1 group cursor-pointer relative py-2"
-              onClick={() => { if(link.path) navigate(link.path); }}
+              onClick={link.onClick}
             >
               <span className={`text-[15px] font-body font-medium transition-all duration-300 ${link.isActive ? 'text-[#e4322a]' : 'text-slate-700 hover:text-[#e4322a]'}`}>
                 {link.name}
