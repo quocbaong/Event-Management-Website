@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 
 const LandingNavbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -35,10 +36,10 @@ const LandingNavbar = () => {
   };
 
   const navLinks = [
-    { name: 'Trang chủ', id: 'hero', onClick: () => { navigate('/'); scrollToTop(); }, isActive: true, hasDropdown: false },
+    { name: 'Trang chủ', id: 'hero', onClick: () => { navigate('/'); scrollToTop(); }, isActive: location.pathname === '/', hasDropdown: false },
     { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features'), hasDropdown: true },
     { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions'), hasDropdown: true },
-    { name: 'Sự kiện', id: 'events', onClick: () => navigate('/events'), hasDropdown: false },
+    { name: 'Sự kiện', id: 'events', onClick: () => navigate('/events'), isActive: location.pathname.startsWith('/events'), hasDropdown: false },
     { name: 'Tài nguyên', id: 'resources', onClick: () => scrollToId('footer'), hasDropdown: false },
     { name: 'Giá', id: 'pricing', onClick: () => scrollToId('pricing'), hasDropdown: false },
   ];
@@ -50,10 +51,10 @@ const LandingNavbar = () => {
       }`}>
       <div className="max-w-7.5xl mx-auto px-6 md:px-15 flex items-center justify-between">
 
-        {/* Brand Logo - Click to Reload */}
+        {/* Brand Logo - Click to Navigate Home */}
         <div
           className="cursor-pointer group flex items-center"
-          onClick={() => window.location.reload()}
+          onClick={() => { navigate('/'); scrollToTop(); }}
         >
           <img
             src={logo}
