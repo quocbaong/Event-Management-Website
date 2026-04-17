@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -13,8 +14,10 @@ import {
 
 import logo from '../../../assets/logo.png';
 
-const SidebarItem = ({ icon: Icon, label, active = false }) => (
-  <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 rounded-xl group ${
+const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 rounded-xl group ${
     active 
       ? 'bg-primary/10 text-primary border-r-4 border-primary' 
       : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary'
@@ -25,6 +28,13 @@ const SidebarItem = ({ icon: Icon, label, active = false }) => (
 );
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Here you would clear any auth tokens/state
+    navigate('/');
+  };
+
   return (
     <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col pt-4 pb-6">
       {/* Logo */}
@@ -52,7 +62,7 @@ const Sidebar = () => {
 
         <div className="pt-4 space-y-1 border-t border-border-color">
           <SidebarItem icon={HelpCircle} label="Hỗ trợ" />
-          <SidebarItem icon={LogOut} label="Đăng xuất" />
+          <SidebarItem icon={LogOut} label="Đăng xuất" onClick={handleLogout} />
         </div>
       </div>
     </aside>
