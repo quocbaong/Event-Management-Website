@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import LandingNavbar from '../components/common/LandingNavbar';
 import LandingFooter from '../components/common/LandingFooter';
 
@@ -60,7 +62,9 @@ const FilterSection = ({ onSearch }) => {
 };
 
 const FeaturedEvents = () => {
+  const navigate = useNavigate();
   return (
+
     <div className="max-w-[1400px] mx-auto px-6 mb-16">
       <div className="flex items-end justify-between mb-8">
         <div>
@@ -75,7 +79,11 @@ const FeaturedEvents = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto">
         {/* Big Card */}
-        <div className="lg:col-span-2 group relative rounded-3xl overflow-hidden cursor-pointer h-[400px] lg:h-[480px]">
+        <div 
+          className="lg:col-span-2 group relative rounded-3xl overflow-hidden cursor-pointer h-[400px] lg:h-[480px]"
+          onClick={() => navigate('/events/1')}
+        >
+
           <img
             src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1200&h=800"
             alt="AI Summit"
@@ -100,7 +108,11 @@ const FeaturedEvents = () => {
         {/* Small Cards Stack */}
         <div className="flex flex-col gap-6 h-[480px] lg:h-[480px]">
           {/* Card 1 */}
-          <div className="flex-1 group relative rounded-3xl overflow-hidden cursor-pointer">
+          <div 
+            className="flex-1 group relative rounded-3xl overflow-hidden cursor-pointer"
+            onClick={() => navigate('/events/2')}
+          >
+
             <img
               src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=600&h=400"
               alt="Networking"
@@ -112,7 +124,11 @@ const FeaturedEvents = () => {
             </div>
           </div>
           {/* Card 2 */}
-          <div className="flex-1 group relative rounded-3xl overflow-hidden cursor-pointer">
+          <div 
+            className="flex-1 group relative rounded-3xl overflow-hidden cursor-pointer"
+            onClick={() => navigate('/events/3')}
+          >
+
             <img
               src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=600&h=400"
               alt="Indie Music"
@@ -130,7 +146,9 @@ const FeaturedEvents = () => {
 };
 
 const DiscoverEvents = ({ searchQuery = "" }) => {
+  const navigate = useNavigate();
   const tabs = ['Tất cả', 'Âm nhạc', 'Công nghệ', 'Ẩm thực', 'Nghệ thuật', 'Doanh nghiệp'];
+
   const [activeTab, setActiveTab] = useState('Tất cả');
 
   const events = [
@@ -235,7 +253,12 @@ const DiscoverEvents = ({ searchQuery = "" }) => {
       {displayEvents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-slate-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group cursor-pointer flex flex-col h-full">
+            <div 
+              key={event.id} 
+              className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-slate-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group cursor-pointer flex flex-col h-full"
+              onClick={() => navigate(`/events/${event.id}`)}
+            >
+
             <div className="relative h-[220px] overflow-hidden">
               <img
                 src={event.image}
