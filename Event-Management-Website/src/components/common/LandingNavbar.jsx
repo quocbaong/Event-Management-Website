@@ -37,8 +37,8 @@ const LandingNavbar = () => {
 
   const navLinks = [
     { name: 'Trang chủ', id: 'hero', onClick: () => { navigate('/'); scrollToTop(); }, isActive: location.pathname === '/', hasDropdown: false },
-    { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features'), hasDropdown: true },
-    { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions'), hasDropdown: true },
+    { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features'), hasDropdown: false },
+    { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions'), hasDropdown: false },
     { name: 'Sự kiện', id: 'events', onClick: () => navigate('/events'), isActive: location.pathname.startsWith('/events'), hasDropdown: false },
     { name: 'Tài nguyên', id: 'resources', onClick: () => scrollToId('footer'), hasDropdown: false },
     { name: 'Giá', id: 'pricing', onClick: () => scrollToId('pricing'), hasDropdown: false },

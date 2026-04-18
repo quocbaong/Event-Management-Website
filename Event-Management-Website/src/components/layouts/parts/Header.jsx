@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, Mail, ChevronRight } from 'lucide-react';
+import UserProfileModal from '../../modals/UserProfileModal';
 
 const Header = () => {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   return (
     <header className="h-[var(--topbar-height)] border-b border-border-color bg-white/80 backdrop-blur-md sticky top-0 z-10 px-8 flex items-center justify-between">
       {/* Breadcrumbs */}
@@ -35,12 +38,15 @@ const Header = () => {
         </div>
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-6 border-l border-border-color">
+        <div 
+          className="flex items-center gap-3 pl-6 border-l border-border-color cursor-pointer group"
+          onClick={() => setIsProfileModalOpen(true)}
+        >
           <div className="text-right">
-            <h4 className="text-sm font-bold text-text-primary leading-tight">Minh Phan</h4>
+            <h4 className="text-sm font-bold text-text-primary leading-tight group-hover:text-primary transition-colors">Minh Phan</h4>
             <p className="text-[11px] text-text-secondary font-medium">Quản trị viên</p>
           </div>
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 group-hover:border-primary transition-all">
             <img 
               src="https://avatar.vercel.sh/minh.png?size=40" 
               alt="Avatar" 
@@ -49,8 +55,27 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      <UserProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+        user={{
+          name: 'Nguyễn Văn An',
+          id: '#EA-10293',
+          role: 'Ban tổ chức',
+          email: 'an.nguyen@email.com',
+          phone: '+84 90 123 4567',
+          address: 'Quận 7, TP. Hồ Chí Minh, Việt Nam',
+          events: 12,
+          rating: 4.8,
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+          status: 'Đã định danh (eKYC)'
+        }}
+      />
     </header>
   );
 };
 
 export default Header;
+
