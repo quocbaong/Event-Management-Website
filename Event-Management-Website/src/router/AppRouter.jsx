@@ -7,6 +7,7 @@ import DashboardPage from '../pages/DashboardPage';
 import LandingPage from '../pages/LandingPage';
 import EventsPage from '../pages/EventsPage';
 import GlobalEventsPage from '../pages/GlobalEventsPage';
+import EventDetailPage from '../pages/EventDetailPage';
 
 const AppRouter = () => {
   return (
@@ -15,6 +16,8 @@ const AppRouter = () => {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/:id" element={<EventDetailPage />} />
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         
