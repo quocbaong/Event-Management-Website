@@ -25,7 +25,6 @@ const AppRouter = () => {
           {/* Add other protected routes here */}
         </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );
