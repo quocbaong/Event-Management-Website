@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -29,11 +29,20 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    // Here you would clear any auth tokens/state
     navigate('/');
   };
+
+  const menuItems = [
+    { icon: LayoutDashboard, label: "Tổng quan", path: "/dashboard" },
+    { icon: Calendar, label: "Sự kiện", path: "/admin/events" },
+    { icon: Users, label: "Khách mời", path: "/admin/guests" },
+    { icon: BarChart3, label: "Báo cáo", path: "/admin/reports" },
+    { icon: Wallet, label: "Tài chính", path: "/admin/finance" },
+    { icon: Settings, label: "Cài đặt", path: "/admin/settings" },
+  ];
 
   return (
     <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col pt-4 pb-6">
@@ -44,12 +53,15 @@ const Sidebar = () => {
 
       {/* Main Menu */}
       <nav className="flex-1 px-4 space-y-2">
-        <SidebarItem icon={LayoutDashboard} label="Tổng quan" active />
-        <SidebarItem icon={Calendar} label="Sự kiện" />
-        <SidebarItem icon={Users} label="Khách mời" />
-        <SidebarItem icon={BarChart3} label="Báo cáo" />
-        <SidebarItem icon={Wallet} label="Tài chính" />
-        <SidebarItem icon={Settings} label="Cài đặt" />
+        {menuItems.map((item) => (
+          <SidebarItem 
+            key={item.label}
+            icon={item.icon} 
+            label={item.label} 
+            active={location.pathname === item.path}
+            onClick={() => navigate(item.path)}
+          />
+        ))}
       </nav>
 
       {/* Bottom Section */}

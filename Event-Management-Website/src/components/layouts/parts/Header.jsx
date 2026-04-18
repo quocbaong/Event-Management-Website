@@ -1,17 +1,46 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Search, Bell, Mail, ChevronRight } from 'lucide-react';
 import UserProfileModal from '../../modals/UserProfileModal';
 
 const Header = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const location = useLocation();
+
+  const getBreadcrumbs = () => {
+    switch(location.pathname) {
+      case '/admin/events':
+        return (
+          <>
+            <span className="text-text-secondary">Hệ thống</span>
+            <ChevronRight className="w-3 h-3 text-gray-300" />
+            <span className="text-primary font-black uppercase tracking-wider">Quản lý Sự kiện Toàn cầu</span>
+          </>
+        );
+      case '/dashboard':
+        return (
+          <>
+            <span className="text-text-secondary">Bảng điều khiển</span>
+            <ChevronRight className="w-4 h-4 text-gray-300" />
+            <span className="text-primary font-bold">Tổng quan</span>
+          </>
+        );
+      default:
+        return (
+          <>
+            <span>Bảng điều khiển</span>
+            <ChevronRight className="w-4 h-4 text-gray-300" />
+            <span className="text-primary">Chi tiết quản trị</span>
+          </>
+        );
+    }
+  };
 
   return (
     <header className="h-[var(--topbar-height)] border-b border-border-color bg-white/80 backdrop-blur-md sticky top-0 z-10 px-8 flex items-center justify-between">
-      {/* Breadcrumbs */}
-      <div className="flex items-center gap-2 text-sm text-text-secondary font-medium">
-        <span>Bảng điều khiển</span>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-primary">Chi tiết quản trị</span>
+      {/* Dynamic Breadcrumbs */}
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
+        {getBreadcrumbs()}
       </div>
 
       {/* Right Actions */}
@@ -25,7 +54,6 @@ const Header = () => {
             className="w-full bg-gray-100 border-none rounded-2xl py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
           />
         </div>
-
         {/* Icons */}
         <div className="flex items-center gap-3">
           <button className="relative p-2.5 rounded-xl hover:bg-gray-100 text-text-secondary hover:text-primary transition-all">
