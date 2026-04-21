@@ -14,6 +14,8 @@ import FeedbackPage from '../pages/FeedbackPage';
 import SettingsPage from '../pages/SettingsPage';
 import AttendeeDashboardPage from '../pages/AttendeeDashboardPage';
 import AttendeeTicketsPage from '../pages/AttendeeTicketsPage';
+import AttendeeEventsPage from '../pages/AttendeeEventsPage';
+import AttendeeExplorePage from '../pages/AttendeeExplorePage';
 
 
 const AppRouter = () => {
@@ -42,6 +44,8 @@ const AppRouter = () => {
         <Route element={<AttendeeLayout />}>
           <Route path="/attendee/dashboard" element={<AttendeeDashboardPage />} />
           <Route path="/attendee/tickets" element={<AttendeeTicketsPage />} />
+          <Route path="/attendee/events" element={<AttendeeEventsPage />} />
+          <Route path="/attendee/explore" element={<AttendeeExplorePage />} />
           {/* Add other attendee routes here: /attendee/tickets, /attendee/calendar, etc. */}
         </Route>
 
