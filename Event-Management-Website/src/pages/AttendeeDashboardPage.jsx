@@ -180,28 +180,54 @@ const AttendeeDashboardPage = () => {
   return (
     <div className="p-12 space-y-14 animate-in fade-in slide-in-from-bottom-8 duration-1000 bg-[#fbfcff] min-h-screen pb-20">
       
-      {/* 1. Refined Greeting & 2 Stats Cards */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-10">
-        <div className="max-w-[600px]">
-          <h2 className="text-[42px] font-black text-slate-900 tracking-tight leading-[1.1] mb-5">
-            Chào mừng quay trở lại, Minh! 👋
-          </h2>
-          <div className="inline-flex items-center bg-indigo-50 px-5 py-2.5 rounded-2xl border border-indigo-100 shadow-sm transition-transform hover:scale-105 cursor-default">
-            <span className="text-[11px] font-black uppercase tracking-[0.1em] text-indigo-700">
-              Tài khoản Premium
-            </span>
+      {/* 1. Compact Premium Greeting Section */}
+      <div className="relative overflow-hidden bg-slate-900 rounded-[40px] p-8 xl:px-12 xl:py-10 text-white shadow-2xl shadow-indigo-100">
+        {/* Background Decor */}
+        <div className="absolute top-[-80px] right-[-80px] w-64 h-64 bg-indigo-600/20 blur-[100px] rounded-full" />
+        
+        <div className="relative z-10 flex flex-col xl:flex-row justify-between items-center gap-10">
+          {/* Left: Content */}
+          <div className="flex-1">
+             <div className="flex items-center gap-3 mb-4 opacity-80">
+                <span className="h-[1px] w-8 bg-indigo-500"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">HỘI VIÊN CHÍNH THỨC</span>
+             </div>
+             <h2 className="text-[36px] lg:text-[44px] font-black leading-tight mb-6 tracking-tight">
+                Chào mừng quay lại, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Minh!</span> 👋
+             </h2>
+             <div className="flex flex-wrap items-center gap-3">
+                <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2.5">
+                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]"></div>
+                   <span className="text-[11px] font-extrabold tracking-wider uppercase text-white/80">Premium</span>
+                </div>
+                <div className="bg-emerald-500/5 border border-emerald-500/10 px-4 py-2 rounded-xl flex items-center gap-2.5">
+                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                   <span className="text-[11px] font-extrabold tracking-wider uppercase text-emerald-400">Sẵn sàng</span>
+                </div>
+             </div>
           </div>
-        </div>
 
-        <div className="flex flex-wrap gap-8 flex-1 w-full xl:w-auto">
-          <StatCard 
-            icon={Calendar} iconBg="bg-blue-50" iconColor="text-blue-600"
-            label="Sự kiện sắp tới" value="12" badge="+2 mới"
-          />
-          <StatCard 
-            icon={Ticket} iconBg="bg-purple-50" iconColor="text-purple-600"
-            label="Vé đã đăng ký" value="05"
-          />
+          {/* Right: Compact Stats Cards */}
+          <div className="flex gap-4 xl:gap-6 w-full xl:w-auto">
+             <div className="flex-1 xl:w-[200px] bg-white/[0.03] border border-white/10 p-6 rounded-[32px] group hover:bg-white/[0.07] transition-all">
+                <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
+                   <Calendar className="w-5 h-5" />
+                </div>
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Sắp tới</p>
+                <div className="flex items-baseline gap-2">
+                   <h4 className="text-3xl font-black">12</h4>
+                   <span className="text-[9px] font-black text-emerald-400 bg-emerald-400/5 px-2 py-0.5 rounded-md">MỚI</span>
+                </div>
+             </div>
+
+             <div className="flex-1 xl:w-[200px] bg-white/[0.03] border border-white/10 p-6 rounded-[32px] group hover:bg-white/[0.07] transition-all">
+                <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
+                   <Ticket className="w-5 h-5" />
+                </div>
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Vé của tôi</p>
+                <h4 className="text-3xl font-black">05</h4>
+             </div>
+          </div>
         </div>
       </div>
 

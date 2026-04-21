@@ -9,10 +9,11 @@ import LandingPage from '../pages/LandingPage';
 import EventsPage from '../pages/EventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
 import GlobalEventsPage from '../pages/GlobalEventsPage';
-import EventDetailPage from '../pages/EventDetailPage';
 import BroadcastPage from '../pages/BroadcastPage';
 import FeedbackPage from '../pages/FeedbackPage';
 import SettingsPage from '../pages/SettingsPage';
+import AttendeeDashboardPage from '../pages/AttendeeDashboardPage';
+import AttendeeTicketsPage from '../pages/AttendeeTicketsPage';
 
 
 const AppRouter = () => {
@@ -40,6 +41,7 @@ const AppRouter = () => {
         {/* Attendee Protected Routes - Separate Layout */}
         <Route element={<AttendeeLayout />}>
           <Route path="/attendee/dashboard" element={<AttendeeDashboardPage />} />
+          <Route path="/attendee/tickets" element={<AttendeeTicketsPage />} />
           {/* Add other attendee routes here: /attendee/tickets, /attendee/calendar, etc. */}
         </Route>
 
