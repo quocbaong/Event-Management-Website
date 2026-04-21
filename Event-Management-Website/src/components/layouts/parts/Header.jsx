@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Search, Bell, Mail, ChevronRight, Settings, User as UserIcon } from 'lucide-react';
 import UserProfileModal from '../../modals/UserProfileModal';
+import NotificationDropdown from '../../common/NotificationDropdown';
 
 const Header = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const location = useLocation();
 
   const getBreadcrumbs = () => {
@@ -62,7 +64,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="h-[var(--topbar-height)] border-b border-border-color bg-white sticky top-0 z-10 px-8 flex items-center justify-between">
+      <header className="h-[var(--topbar-height)] border-b border-border-color bg-white sticky top-0 z-[100] px-8 flex items-center justify-between">
         {/* Title / Breadcrumbs */}
         <div className="flex items-center gap-2">
           {getBreadcrumbs()}
@@ -85,14 +87,20 @@ const Header = () => {
           )}
           
           {/* Icons */}
-          <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-xl hover:bg-gray-50 text-slate-600 transition-all">
+          <div className="flex items-center gap-2 relative">
+            <button 
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              className={`relative p-2 rounded-xl transition-all ${isNotifOpen ? 'bg-primary/10 text-primary' : 'hover:bg-gray-50 text-slate-600'}`}
+            >
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <button className="p-2 rounded-xl hover:bg-gray-50 text-slate-600 transition-all">
+            
+            <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+
+            <Link to="/admin/settings" className="p-2 rounded-xl hover:bg-gray-50 text-slate-600 transition-all">
                <Settings className="w-5 h-5" />
-            </button>
+            </Link>
           </div>
 
           <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
