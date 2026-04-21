@@ -52,7 +52,7 @@ const Sidebar = () => {
     <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col pt-4 pb-6">
       {/* Logo */}
       <div className="px-6 mb-8">
-        <img src={logo} alt="Prestige Planner" className="h-14 w-auto object-contain" />
+        <img src={logo} alt="EventArchitect" className="h-14 w-auto object-contain" />
       </div>
 
       {/* Main Menu */}

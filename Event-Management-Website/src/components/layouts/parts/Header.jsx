@@ -11,34 +11,50 @@ const Header = () => {
     switch(location.pathname) {
       case '/admin/broadcast':
         return (
-          <h1 className="text-xl font-bold text-[#1e293b]">Trung tâm Phát tin</h1>
+          <>
+            <span className="text-slate-400 font-medium">Hệ thống</span>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-primary font-black uppercase tracking-wider text-sm">Phát tin toàn cầu</span>
+          </>
         );
       case '/admin/feedback':
         return (
-          <h1 className="text-xl font-bold text-[#1e293b]">Kiểm duyệt Phản hồi</h1>
+          <>
+            <span className="text-slate-400 font-medium">Hệ thống</span>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-primary font-black uppercase tracking-wider text-sm">Kiểm duyệt phản hồi</span>
+          </>
+        );
+      case '/admin/settings':
+        return (
+          <>
+            <span className="text-slate-400 font-medium">Hệ thống</span>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-primary font-black uppercase tracking-wider text-sm">Cấu hình hệ thống</span>
+          </>
         );
       case '/admin/events':
         return (
           <>
-            <span className="text-text-secondary">Hệ thống</span>
-            <ChevronRight className="w-3 h-3 text-gray-300" />
-            <span className="text-primary font-black uppercase tracking-wider">Quản lý Sự kiện Toàn cầu</span>
+            <span className="text-slate-400 font-medium">Hệ thống</span>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-primary font-black uppercase tracking-wider text-sm">Quản lý Sự kiện</span>
           </>
         );
       case '/dashboard':
         return (
           <>
-            <span className="text-text-secondary">Bảng điều khiển</span>
-            <ChevronRight className="w-4 h-4 text-gray-300" />
-            <span className="text-primary font-bold">Tổng quan</span>
+            <span className="text-slate-400 font-medium">Bảng điều khiển</span>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-primary font-black uppercase tracking-wider text-sm">Tổng quan</span>
           </>
         );
       default:
         return (
           <>
-            <span>Bảng điều khiển</span>
-            <ChevronRight className="w-4 h-4 text-gray-300" />
-            <span className="text-primary">Chi tiết quản trị</span>
+            <span className="text-slate-400 font-medium">Quản trị</span>
+            <ChevronRight className="w-3 h-3 text-slate-300" />
+            <span className="text-primary font-black uppercase tracking-wider text-sm">Chi tiết</span>
           </>
         );
     }
@@ -52,10 +68,12 @@ const Header = () => {
           {getBreadcrumbs()}
         </div>
 
+        {/* Center Nav removed for synchronization */}
+
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          {/* Search Bar - hidden for broadcast, shown for feedback and others */}
-          {location.pathname !== '/admin/broadcast' && (
+          {/* Search Bar - hidden for broadcast and settings */}
+          {!['/admin/broadcast', '/admin/settings'].includes(location.pathname) && (
             <div className="relative w-[320px] mr-2">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
               <input 
@@ -84,9 +102,13 @@ const Header = () => {
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => setIsProfileModalOpen(true)}
           >
-            <span className="text-sm font-medium text-slate-600">Hệ thống</span>
-            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border border-slate-200 group-hover:border-primary transition-all">
-              <UserIcon className="w-4 h-4" />
+            {location.pathname !== '/admin/settings' && <span className="text-sm font-medium text-slate-600">Hệ thống</span>}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+              location.pathname === '/admin/settings' 
+              ? 'bg-primary text-white border border-primary/20' 
+              : 'bg-slate-100 text-slate-500 border border-slate-200 group-hover:border-primary'
+            }`}>
+              {location.pathname === '/admin/settings' ? 'AD' : <UserIcon className="w-4 h-4" />}
             </div>
           </div>
         </div>
