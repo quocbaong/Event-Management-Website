@@ -9,6 +9,7 @@ import EventsPage from '../pages/EventsPage';
 import GlobalEventsPage from '../pages/GlobalEventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
 import BroadcastPage from '../pages/BroadcastPage';
+import FeedbackPage from '../pages/FeedbackPage';
 
 
 const AppRouter = () => {
@@ -28,6 +29,7 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin/events" element={<GlobalEventsPage />} />
           <Route path="/admin/broadcast" element={<BroadcastPage />} />
+          <Route path="/admin/feedback" element={<FeedbackPage />} />
           {/* Add other protected routes here */}
         </Route>
 
@@ -37,4 +39,5 @@ const AppRouter = () => {
 };
 
 export default AppRouter;
+
 

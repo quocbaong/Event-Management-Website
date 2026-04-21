@@ -13,6 +13,10 @@ const Header = () => {
         return (
           <h1 className="text-xl font-bold text-[#1e293b]">Trung tâm Phát tin</h1>
         );
+      case '/admin/feedback':
+        return (
+          <h1 className="text-xl font-bold text-[#1e293b]">Kiểm duyệt Phản hồi</h1>
+        );
       case '/admin/events':
         return (
           <>
@@ -50,14 +54,14 @@ const Header = () => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          {/* Search Bar - hidden for broadcast to match image */}
+          {/* Search Bar - hidden for broadcast, shown for feedback and others */}
           {location.pathname !== '/admin/broadcast' && (
             <div className="relative w-[320px] mr-2">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
               <input 
                 type="text" 
-                placeholder="Tìm kiếm nhanh..." 
-                className="w-full bg-gray-100 border-none rounded-2xl py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                placeholder={location.pathname === '/admin/feedback' ? "Tìm kiếm phản hồi..." : "Tìm kiếm nhanh..."} 
+                className="w-full bg-slate-100 border-none rounded-full py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
               />
             </div>
           )}
