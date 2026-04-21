@@ -7,12 +7,12 @@ import SignUpPage from '../pages/SignUpPage';
 import DashboardPage from '../pages/DashboardPage';
 import LandingPage from '../pages/LandingPage';
 import EventsPage from '../pages/EventsPage';
+import EventDetailPage from '../pages/EventDetailPage';
 import GlobalEventsPage from '../pages/GlobalEventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
 import BroadcastPage from '../pages/BroadcastPage';
 import FeedbackPage from '../pages/FeedbackPage';
 import SettingsPage from '../pages/SettingsPage';
-
 
 
 const AppRouter = () => {
