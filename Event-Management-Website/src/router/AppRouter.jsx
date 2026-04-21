@@ -8,6 +8,8 @@ import LandingPage from '../pages/LandingPage';
 import EventsPage from '../pages/EventsPage';
 import GlobalEventsPage from '../pages/GlobalEventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
+import BroadcastPage from '../pages/BroadcastPage';
+
 
 const AppRouter = () => {
   return (
@@ -25,6 +27,7 @@ const AppRouter = () => {
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/admin/events" element={<GlobalEventsPage />} />
+          <Route path="/admin/broadcast" element={<BroadcastPage />} />
           {/* Add other protected routes here */}
         </Route>
 

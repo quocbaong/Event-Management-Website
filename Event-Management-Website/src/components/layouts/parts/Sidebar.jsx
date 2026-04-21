@@ -9,7 +9,8 @@ import {
   Settings, 
   Plus, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Megaphone 
 } from 'lucide-react';
 
 import logo from '../../../assets/logo.png';
@@ -38,6 +39,7 @@ const Sidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Tổng quan", path: "/dashboard" },
     { icon: Calendar, label: "Sự kiện", path: "/admin/events" },
+    { icon: Megaphone, label: "Phát tin", path: "/admin/broadcast" },
     { icon: Users, label: "Khách mời", path: "/admin/guests" },
     { icon: BarChart3, label: "Báo cáo", path: "/admin/reports" },
     { icon: Wallet, label: "Tài chính", path: "/admin/finance" },
