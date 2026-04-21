@@ -9,7 +9,9 @@ import {
   Settings, 
   Plus, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Megaphone,
+  MessageSquare
 } from 'lucide-react';
 
 import logo from '../../../assets/logo.png';
@@ -38,6 +40,8 @@ const Sidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Tổng quan", path: "/dashboard" },
     { icon: Calendar, label: "Sự kiện", path: "/admin/events" },
+    { icon: Megaphone, label: "Phát tin", path: "/admin/broadcast" },
+    { icon: MessageSquare, label: "Phản hồi", path: "/admin/feedback" },
     { icon: Users, label: "Khách mời", path: "/admin/guests" },
     { icon: BarChart3, label: "Báo cáo", path: "/admin/reports" },
     { icon: Wallet, label: "Tài chính", path: "/admin/finance" },
@@ -48,7 +52,7 @@ const Sidebar = () => {
     <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col pt-4 pb-6">
       {/* Logo */}
       <div className="px-6 mb-8">
-        <img src={logo} alt="Prestige Planner" className="h-14 w-auto object-contain" />
+        <img src={logo} alt="EventArchitect" className="h-14 w-auto object-contain" />
       </div>
 
       {/* Main Menu */}

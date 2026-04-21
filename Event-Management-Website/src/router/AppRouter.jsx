@@ -9,7 +9,11 @@ import LandingPage from '../pages/LandingPage';
 import EventsPage from '../pages/EventsPage';
 import GlobalEventsPage from '../pages/GlobalEventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
-import AttendeeDashboardPage from '../pages/AttendeeDashboardPage';
+import BroadcastPage from '../pages/BroadcastPage';
+import FeedbackPage from '../pages/FeedbackPage';
+import SettingsPage from '../pages/SettingsPage';
+
+
 
 const AppRouter = () => {
   return (
@@ -26,8 +30,11 @@ const AppRouter = () => {
         {/* Organizer Protected Routes - With Sidebar/Header */}
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-            
-          {/* Add other organizer routes here */}
+          <Route path="/admin/events" element={<GlobalEventsPage />} />
+          <Route path="/admin/broadcast" element={<BroadcastPage />} />
+          <Route path="/admin/feedback" element={<FeedbackPage />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
+          {/* Add other protected routes here */}
         </Route>
 
         {/* Attendee Protected Routes - Separate Layout */}
@@ -43,4 +50,5 @@ const AppRouter = () => {
 };
 
 export default AppRouter;
+
 
