@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './parts/Sidebar';
 import Header from './parts/Header';
+import LandingFooter from '../common/LandingFooter';
 
 const MainLayout = () => {
   return (
@@ -11,6 +12,7 @@ const MainLayout = () => {
         <Header />
         <main className="flex-1 overflow-y-auto w-full">
           <Outlet />
+          <LandingFooter />
         </main>
       </div>
     </div>

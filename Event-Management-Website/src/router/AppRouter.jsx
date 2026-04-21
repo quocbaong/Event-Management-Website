@@ -7,9 +7,9 @@ import SignUpPage from '../pages/SignUpPage';
 import DashboardPage from '../pages/DashboardPage';
 import LandingPage from '../pages/LandingPage';
 import EventsPage from '../pages/EventsPage';
+import GlobalEventsPage from '../pages/GlobalEventsPage';
 import EventDetailPage from '../pages/EventDetailPage';
 import AttendeeDashboardPage from '../pages/AttendeeDashboardPage';
-
 
 const AppRouter = () => {
   return (
@@ -26,6 +26,7 @@ const AppRouter = () => {
         {/* Organizer Protected Routes - With Sidebar/Header */}
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+            
           {/* Add other organizer routes here */}
         </Route>
 
