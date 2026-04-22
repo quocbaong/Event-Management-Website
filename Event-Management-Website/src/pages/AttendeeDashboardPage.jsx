@@ -16,7 +16,7 @@ const AttendeeDashboardPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-8 lg:p-12 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 bg-[#fbfcff] min-h-screen pb-32">
+    <div className="p-6 lg:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 bg-[#fbfcff] min-h-screen pb-20">
       
       {/* 1. Compact Premium Greeting Section */}
       <div className="relative overflow-hidden bg-slate-900 rounded-[48px] p-10 lg:p-14 text-white shadow-2xl shadow-indigo-100/20">

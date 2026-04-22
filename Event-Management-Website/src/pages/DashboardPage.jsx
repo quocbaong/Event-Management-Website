@@ -103,7 +103,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Welcome Section */}
       <div className="flex justify-between items-end">
         <div>
