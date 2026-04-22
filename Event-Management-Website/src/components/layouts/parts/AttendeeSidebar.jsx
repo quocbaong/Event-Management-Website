@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../../assets/logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -36,19 +37,14 @@ const AttendeeSidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-slate-100 flex flex-col pt-10 pb-6 px-4">
-      {/* Brand & Greeting Section matched to Image 1 */}
-      <div className="px-5 mb-10">
-        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.05em] mb-1">
-          Chào mừng quay lại
-        </p>
-        <p className="text-[22px] font-black text-indigo-700 tracking-tight leading-tight">
-          Người tham dự
-        </p>
+    <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-slate-100 flex flex-col pt-4 pb-6">
+      {/* Brand Section */}
+      <div className="px-6 mb-8">
+        <img src={logo} alt="Nexus Events" className="h-14 w-auto object-contain" />
       </div>
 
       {/* Main Menu */}
-      <nav className="flex-1 space-y-2 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
         <SidebarItem
           icon={LayoutDashboard}
           label="Tổng quan"
@@ -86,8 +82,6 @@ const AttendeeSidebar = () => {
           onClick={() => navigate('/attendee/favorites')}
         />
       </nav>
-
-      {/* Bottom info or contact could go here in future */}
     </aside>
   );
 };

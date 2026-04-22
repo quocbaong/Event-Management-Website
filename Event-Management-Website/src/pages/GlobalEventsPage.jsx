@@ -86,7 +86,7 @@ const GlobalEventsPage = () => {
   ];
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfbfd]">
+    <div className="p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#fbfbfd]">
       {/* Header Section */}
       <div className="flex justify-between items-start">
         <div className="max-w-2xl">

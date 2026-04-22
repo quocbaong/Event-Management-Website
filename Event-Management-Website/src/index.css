@@ -113,6 +113,18 @@
   animation: fadeIn 0.8s ease-out forwards;
 }
 
+@keyframes scan-line {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.animate-scan-line {
+  animation: scan-line 2.5s linear infinite;
+  position: absolute;
+}
+
 .clip-hexagon {
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
