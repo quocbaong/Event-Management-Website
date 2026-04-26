@@ -34,7 +34,7 @@ const AppRouter = () => {
         
         {/* Organizer Protected Routes - With Sidebar/Header */}
         <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/admin/events" element={<GlobalEventsPage />} />
           <Route path="/admin/broadcast" element={<BroadcastPage />} />
           <Route path="/admin/feedback" element={<FeedbackPage />} />
