@@ -24,22 +24,29 @@
   --brand-muted: #666e75;
 
   /* Premium System Tokens (User's Blue Theme) */
-  --primary: #1e40af; /* Blue 800 */
-  --primary-hover: #1e3a8a; /* Blue 900 */
-  --primary-light: #dbeafe; /* Blue 100 */
-  
-  --secondary: #ec4899; /* Pink 500 */
+  --primary: #1e40af;
+  /* Blue 800 */
+  --primary-hover: #1e3a8a;
+  /* Blue 900 */
+  --primary-light: #dbeafe;
+  /* Blue 100 */
+
+  --secondary: #ec4899;
+  /* Pink 500 */
   --secondary-hover: #db2777;
-  
-  --bg-default: #f8fafc; /* Slate 50 */
+
+  --bg-default: #f8fafc;
+  /* Slate 50 */
   --bg-paper: #ffffff;
-  
-  --text-primary: #0f172a; /* Slate 900 */
-  --text-secondary: #64748b; /* Slate 500 */
+
+  --text-primary: #0f172a;
+  /* Slate 900 */
+  --text-secondary: #64748b;
+  /* Slate 500 */
   --border-color: #e2e8f0;
-  
+
   --surface-glass: rgba(255, 255, 255, 0.7);
-  
+
   /* Layout */
   --sidebar-width: 280px;
   --topbar-height: 72px;
@@ -50,25 +57,31 @@
 }
 
 .dark-mode {
-  --primary: #60a5fa; /* Blue 400 */
-  --primary-hover: #3b82f6; /* Blue 500 */
+  --primary: #60a5fa;
+  /* Blue 400 */
+  --primary-hover: #3b82f6;
+  /* Blue 500 */
   --primary-light: rgba(96, 165, 250, 0.2);
-  
+
   --secondary: #f472b6;
   --secondary-hover: #ec4899;
-  
+
   --bg-default: #0f172a;
   --bg-paper: #1e293b;
-  
+
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --border-color: #334155;
-  
+
   --surface-glass: rgba(30, 41, 59, 0.7);
 }
 
 @layer base {
-  html, body, #root, .App {
+
+  html,
+  body,
+  #root,
+  .App {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -96,8 +109,13 @@
 
 
 /* Landing Specific Styles */
-.font-headline { font-family: var(--font-headline); }
-.font-body { font-family: var(--font-body); }
+.font-headline {
+  font-family: var(--font-headline);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
 
 .hero-spotlight {
   background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0a0b2e 70%, #000000 100%);
@@ -105,8 +123,15 @@
 
 /* Animation utilities */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -114,10 +139,23 @@
 }
 
 @keyframes scan-line {
-  0% { top: 0%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
 }
 
 .animate-scan-line {
@@ -133,13 +171,16 @@
 ::-webkit-scrollbar {
   width: 10px;
 }
+
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 5px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #aaa;
 }
@@ -147,6 +188,7 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
