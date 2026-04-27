@@ -27,6 +27,7 @@ const OrganizerAttendeesPage = () => {
   const [selectedEvent, setSelectedEvent] = useState('Tất cả sự kiện');
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState(null);
   const itemsPerPage = 10;
 
   const [newAttendee, setNewAttendee] = useState({
@@ -35,6 +36,22 @@ const OrganizerAttendeesPage = () => {
     event: 'Vietnam Tech Summit 2024',
     ticketType: 'Thường'
   });
+
+  // Modal States
+  const [selectedAttendee, setSelectedAttendee] = useState(null);
+  const [attendeeToDelete, setAttendeeToDelete] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Toast State
+  const [toast, setToast] = useState({ message: '', type: 'success', visible: false });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type, visible: true });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+  };
 
   const stats = [
     { label: 'Tổng khách mời', value: '1,284', change: '+12%', icon: 'group', color: 'indigo', bg: 'bg-indigo-50', text: 'text-indigo-600' },
@@ -45,6 +62,13 @@ const OrganizerAttendeesPage = () => {
 
   const filters = ['Tất cả', 'VIP', 'Thường', 'Đã Check-in', 'Chưa tham gia'];
   const eventsList = ['Tất cả sự kiện', 'Vietnam Tech Summit 2024', 'Hội thảo AI & Robotics', 'Gala Dinner: Night of Stars'];
+
+  // Status Config
+  const STATUS_CONFIG = {
+    'Đã Check-in': { color: 'emerald', icon: 'check_circle', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+    'Vắng mặt': { color: 'slate', icon: 'cancel', bg: 'bg-slate-50', text: 'text-slate-500' },
+    'Đang chờ': { color: 'amber', icon: 'schedule', bg: 'bg-amber-50', text: 'text-amber-600' }
+  };
 
   // Filtering Logic
   const filteredAttendees = attendees
@@ -75,23 +99,27 @@ const OrganizerAttendeesPage = () => {
   const endItem = Math.min(currentPage * itemsPerPage, filteredAttendees.length);
 
   const handleExport = () => {
-    const headers = ['ID', 'Họ tên', 'Email', 'Sự kiện', 'Loại vé', 'Trạng thái', 'Thời gian'];
-    const csvContent = [
-      headers.join(','),
-      ...filteredAttendees.map(a => 
-        [a.id, a.name, a.email, a.event, a.ticketType, a.status, a.time].join(',')
-      )
-    ].join('\n');
+    showToast('Đang khởi tạo tệp xuất dữ liệu...', 'info');
+    setTimeout(() => {
+      const headers = ['ID', 'Họ tên', 'Email', 'Sự kiện', 'Loại vé', 'Trạng thái', 'Thời gian'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredAttendees.map(a => 
+          [a.id, a.name, a.email, a.event, a.ticketType, a.status, a.time].join(',')
+        )
+      ].join('\n');
 
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `danh_sach_khach_moi_${new Date().toLocaleDateString()}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `danh_sach_khach_moi_${new Date().toLocaleDateString()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Đã xuất danh sách thành công!', 'success');
+    }, 1000);
   };
 
   const handleAddAttendee = (e) => {
@@ -108,6 +136,26 @@ const OrganizerAttendeesPage = () => {
     setNewAttendee({ name: '', email: '', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường' });
     setShowAddModal(false);
     setCurrentPage(1);
+    showToast(`Đã thêm khách mời ${newAttendee.name} thành công!`);
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Giả lập API call
+    setTimeout(() => {
+      setAttendees(prev => prev.map(a => a.id === selectedAttendee.id ? selectedAttendee : a));
+      setIsSubmitting(false);
+      setIsEditModalOpen(false);
+      showToast(`Cập nhật thông tin ${selectedAttendee.name} thành công!`);
+    }, 1000);
+  };
+
+  const handleConfirmDelete = () => {
+    setAttendees(prev => prev.filter(a => a.id !== attendeeToDelete.id));
+    setIsDeleteModalOpen(false);
+    showToast(`Đã xóa khách mời ${attendeeToDelete.name} khỏi hệ thống.`);
   };
 
   return (
@@ -284,7 +332,7 @@ const OrganizerAttendeesPage = () => {
                 <th className="px-6 py-5 text-[13px] font-black text-slate-900 uppercase tracking-[0.15em]">Loại vé</th>
                 <th className="px-6 py-5 text-[13px] font-black text-slate-900 uppercase tracking-[0.15em]">Trạng thái</th>
                 <th className="px-6 py-5 text-[13px] font-black text-slate-900 uppercase tracking-[0.15em]">Thời gian</th>
-                <th className="px-8 py-5 text-[13px] font-black text-slate-900 uppercase tracking-[0.15em] text-right">Thao tác</th>
+                <th className="px-8 py-5 text-[13px] font-black text-slate-900 uppercase tracking-[0.15em] text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -330,10 +378,70 @@ const OrganizerAttendeesPage = () => {
                   <td className="px-6 py-4 text-sm text-slate-500 italic font-medium">
                     {attendee.time}
                   </td>
-                  <td className="px-8 py-4 text-right">
-                    <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary transition-all">
-                      <span className="material-symbols-outlined">more_horiz</span>
-                    </button>
+                  <td className="px-8 py-4 text-center relative">
+                    <div className="flex justify-center">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === attendee.id ? null : attendee.id);
+                        }}
+                        className={`w-10 h-10 flex items-center justify-center transition-all rounded-xl ${openMenuId === attendee.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'}`}
+                      >
+                        <span className="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </div>
+
+                    <AnimatePresence>
+                      {openMenuId === attendee.id && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-[10]" 
+                            onClick={() => setOpenMenuId(null)}
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="absolute right-8 top-[70%] mt-2 w-52 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 py-2 z-[20] overflow-hidden text-left"
+                          >
+                            <button 
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setSelectedAttendee(attendee);
+                                setIsDetailModalOpen(true);
+                              }}
+                            >
+                              <span className="material-symbols-outlined text-lg text-slate-400">visibility</span>
+                              Xem chi tiết
+                            </button>
+                            <button 
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setSelectedAttendee(attendee);
+                                setIsEditModalOpen(true);
+                              }}
+                            >
+                              <span className="material-symbols-outlined text-lg text-slate-400">edit_square</span>
+                              Chỉnh sửa
+                            </button>
+                            <div className="h-px bg-slate-50 my-1 mx-2" />
+                            <button 
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setAttendeeToDelete(attendee);
+                                setIsDeleteModalOpen(true);
+                              }}
+                            >
+                              <span className="material-symbols-outlined text-lg">delete</span>
+                              Xóa khách mời
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </td>
                 </tr>
               ))}
@@ -507,6 +615,165 @@ const OrganizerAttendeesPage = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Toast Notification ── */}
+      <AnimatePresence>
+        {toast.visible && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, x: 20 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, scale: 0.8, x: 20 }}
+            className="fixed bottom-10 right-10 z-[300] flex items-center gap-3 px-6 py-4 bg-slate-900 text-white rounded-2xl shadow-2xl min-w-[320px] border border-slate-800"
+          >
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${toast.type === 'success' ? 'bg-emerald-500' : toast.type === 'error' ? 'bg-rose-500' : 'bg-indigo-500'}`}>
+              <span className="material-symbols-outlined text-sm">
+                {toast.type === 'success' ? 'check' : toast.type === 'error' ? 'close' : 'info'}
+              </span>
+            </div>
+            <p className="text-sm font-black tracking-tight">{toast.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal: Chi tiết khách mời ── */}
+      <AnimatePresence>
+        {isDetailModalOpen && selectedAttendee && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDetailModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden">
+              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-indigo-100">
+                    {selectedAttendee.name.split(' ').pop().charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedAttendee.name}</h2>
+                    <p className="text-sm text-slate-500 font-bold mt-1 uppercase tracking-widest">{selectedAttendee.email}</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsDetailModalOpen(false)} className="w-12 h-12 flex items-center justify-center rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 shadow-sm"><span className="material-symbols-outlined text-2xl">close</span></button>
+              </div>
+
+              <div className="p-10 grid grid-cols-2 gap-5 bg-white">
+                {[
+                  { label: 'Sự kiện tham gia', value: selectedAttendee.event, icon: 'event', color: 'indigo' },
+                  { label: 'Loại vé', value: selectedAttendee.ticketType, icon: 'confirmation_number', color: 'amber' },
+                  { label: 'Trạng thái', value: selectedAttendee.status, icon: STATUS_CONFIG[selectedAttendee.status]?.icon || 'schedule', color: STATUS_CONFIG[selectedAttendee.status]?.color || 'orange', isBadge: true },
+                  { label: 'Thời gian Check-in', value: selectedAttendee.time, icon: 'timer', color: 'emerald' }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-6 bg-slate-50/50 border border-slate-100 rounded-[2rem] hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`p-2 rounded-xl bg-${item.color}-50 text-${item.color}-600 group-hover:scale-110 transition-transform`}><span className="material-symbols-outlined text-sm">{item.icon}</span></div>
+                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em]">{item.label}</p>
+                    </div>
+                    {item.isBadge ? (
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-${item.color}-50 text-${item.color}-600`}>
+                        {item.value}
+                      </span>
+                    ) : (
+                      <p className="text-sm font-black text-slate-900 leading-snug">{item.value}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
+                <button onClick={() => setIsDetailModalOpen(false)} className="px-8 py-4 bg-white text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-100 transition-all border border-slate-200 shadow-sm">Đóng</button>
+                <button onClick={() => { setIsDetailModalOpen(false); setIsEditModalOpen(true); }} className="px-8 py-4 bg-indigo-600 text-white font-black text-sm rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 flex items-center gap-2"><span className="material-symbols-outlined text-sm">edit</span>Chỉnh sửa khách mời</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal: Chỉnh sửa khách mời ── */}
+      <AnimatePresence>
+        {isEditModalOpen && selectedAttendee && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsEditModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden">
+              <form onSubmit={handleEditSubmit}>
+                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-inner"><span className="material-symbols-outlined text-2xl">edit_square</span></div>
+                    <div><h2 className="text-2xl font-black text-slate-900 tracking-tight">Chỉnh sửa thông tin</h2><p className="text-[11px] text-slate-500 font-black uppercase tracking-widest mt-1">Cập nhật thông tin chi tiết hệ thống</p></div>
+                  </div>
+                  <button type="button" onClick={() => setIsEditModalOpen(false)} className="w-12 h-12 flex items-center justify-center rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 shadow-sm"><span className="material-symbols-outlined text-2xl">close</span></button>
+                </div>
+
+                <div className="p-10 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Họ và tên</label>
+                      <input required type="text" value={selectedAttendee.name} onChange={e => setSelectedAttendee({...selectedAttendee, name: e.target.value})} className="w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 px-5 text-sm font-black text-slate-900 focus:border-indigo-600 transition-all outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Email</label>
+                      <input required type="email" value={selectedAttendee.email} onChange={e => setSelectedAttendee({...selectedAttendee, email: e.target.value})} className="w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 px-5 text-sm font-black text-slate-900 focus:border-indigo-600 transition-all outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Sự kiện</label>
+                      <div className="relative group">
+                        <select 
+                          value={selectedAttendee.event} 
+                          onChange={e => setSelectedAttendee({...selectedAttendee, event: e.target.value})} 
+                          className="appearance-none w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 pl-5 pr-12 text-sm font-black text-slate-900 focus:border-indigo-600 transition-all outline-none cursor-pointer"
+                        >
+                          {eventsList.map(ev => <option key={ev} value={ev}>{ev}</option>)}
+                        </select>
+                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-indigo-600 transition-colors">
+                          expand_more
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Loại vé</label>
+                      <div className="relative group">
+                        <select 
+                          value={selectedAttendee.ticketType} 
+                          onChange={e => setSelectedAttendee({...selectedAttendee, ticketType: e.target.value})} 
+                          className="appearance-none w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 pl-5 pr-12 text-sm font-black text-slate-900 focus:border-indigo-600 transition-all outline-none cursor-pointer"
+                        >
+                          <option value="Thường">Thường</option>
+                          <option value="VIP">VIP</option>
+                        </select>
+                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-indigo-600 transition-colors">
+                          expand_more
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-5">
+                  <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-10 py-4 bg-white border-2 border-slate-200 text-slate-600 font-black text-sm hover:bg-slate-50 transition-all rounded-2xl shadow-sm">Hủy bỏ</button>
+                  <button disabled={isSubmitting} className="px-12 py-4 bg-indigo-600 text-white font-black text-sm rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-100 flex items-center gap-3 min-w-[200px] justify-center active:scale-95 duration-200">
+                    {isSubmitting ? (<><svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>Đang xử lý...</>) : (<><span className="material-symbols-outlined text-sm">check_circle</span>Lưu thay đổi</>)}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal: Xác nhận xóa ── */}
+      <AnimatePresence>
+        {isDeleteModalOpen && attendeeToDelete && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDeleteModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl p-10 text-center">
+              <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-6"><span className="material-symbols-outlined text-4xl text-rose-600 animate-pulse">warning</span></div>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-3">Xác nhận xóa?</h2>
+              <p className="text-sm text-slate-500 font-bold leading-relaxed mb-8">Bạn có chắc chắn muốn xóa khách mời <span className="text-slate-900 font-black">{attendeeToDelete.name}</span>? Hành động này không thể hoàn tác.</p>
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => setIsDeleteModalOpen(false)} className="py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all">Hủy bỏ</button>
+                <button onClick={handleConfirmDelete} className="py-4 bg-rose-600 text-white font-black text-sm rounded-2xl hover:bg-rose-700 transition-all shadow-xl shadow-rose-100">Xác nhận xóa</button>
               </div>
             </motion.div>
           </div>
