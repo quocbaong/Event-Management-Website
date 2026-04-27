@@ -18,6 +18,8 @@ import AttendeeEventsPage from '../pages/AttendeeEventsPage';
 import AttendeeExplorePage from '../pages/AttendeeExplorePage';
 import AttendeeQRPage from '../pages/AttendeeQRPage';
 import AttendeeReviewPage from '../pages/AttendeeReviewPage';
+import OrganizerLayout from '../components/layouts/OrganizerLayout';
+import OrganizerDashboardPage from '../pages/OrganizerDashboardPage';
 
 
 const AppRouter = () => {
@@ -51,6 +53,12 @@ const AppRouter = () => {
           <Route path="/attendee/qr" element={<AttendeeQRPage />} />
           <Route path="/attendee/reviews" element={<AttendeeReviewPage />} />
           {/* Add other attendee routes here: /attendee/tickets, /attendee/calendar, etc. */}
+        </Route>
+
+        {/* Organizer Protected Routes - New Role Layout */}
+        <Route element={<OrganizerLayout />}>
+          <Route path="/organizer/dashboard" element={<OrganizerDashboardPage />} />
+          {/* Add other organizer routes here */}
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  Wallet, 
-  Settings, 
-  Plus, 
-  HelpCircle, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  BarChart3,
+  Wallet,
+  Settings,
+  Plus,
+  HelpCircle,
   LogOut,
   Megaphone,
   MessageSquare
@@ -17,13 +17,12 @@ import {
 import logo from '../../../assets/logo.png';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
-  <div 
+  <div
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 rounded-xl group ${
-    active 
-      ? 'bg-primary/10 text-primary border-r-4 border-primary' 
-      : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary'
-  }`}>
+    className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 rounded-xl group ${active
+        ? 'bg-primary/10 text-primary border-r-4 border-primary'
+        : 'text-text-secondary hover:bg-gray-50 hover:text-text-primary'
+      }`}>
     <Icon className={`w-5 h-5 ${active ? 'text-primary' : 'text-text-secondary group-hover:text-text-primary'}`} />
     <span className="font-semibold text-[15px]">{label}</span>
   </div>
@@ -58,10 +57,10 @@ const Sidebar = () => {
       {/* Main Menu */}
       <nav className="flex-1 px-4 space-y-2">
         {menuItems.map((item) => (
-          <SidebarItem 
+          <SidebarItem
             key={item.label}
-            icon={item.icon} 
-            label={item.label} 
+            icon={item.icon}
+            label={item.label}
             active={location.pathname === item.path}
             onClick={() => navigate(item.path)}
           />
