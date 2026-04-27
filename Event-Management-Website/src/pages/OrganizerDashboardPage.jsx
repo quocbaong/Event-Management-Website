@@ -52,12 +52,12 @@ const OrganizerDashboardPage = () => {
             className="bg-white p-5 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 hover:shadow-[0_20px_50px_rgba(79,70,229,0.08)] transition-all duration-500 group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-slate-50 to-transparent opacity-50 rounded-full -mr-12 -mt-12"></div>
-            <div className="flex justify-between items-start mb-6 relative z-10">
+            <div className="flex items-center justify-between mb-6 relative z-10">
               <div className="flex items-center gap-3">
                 <div className={`p-2 bg-${card.color}-50 rounded-xl group-hover:bg-${card.color}-100 transition-colors duration-300`}>
                   <span className={`material-symbols-outlined text-${card.color}-600 text-base`} style={{ fontVariationSettings: "'FILL' 1" }}>{card.icon}</span>
                 </div>
-                <p className="text-slate-500 text-[10px] font-bold font-headline uppercase tracking-wider">{card.label}</p>
+                <p className="text-slate-500 text-xs font-black font-headline uppercase tracking-wider">{card.label}</p>
               </div>
               <span className={`text-[9px] font-black ${card.change.startsWith('+') ? 'text-green-600 bg-green-50' : 'text-slate-400 bg-slate-50'} px-2.5 py-1 rounded-full shadow-sm`}>{card.change}</span>
             </div>
@@ -275,13 +275,13 @@ const OrganizerDashboardPage = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="bg-white p-6 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/80">
             <h3 className="text-xl font-black font-headline text-slate-900 mb-6 tracking-tight">Việc cần làm</h3>
             <div className="relative space-y-1">
               {/* Refined Timeline Line */}
               <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-indigo-500 via-purple-500 to-slate-100 rounded-full"></div>
-              
+
               {[
                 { time: '09:00 AM', title: 'Họp nhà cung cấp', subtitle: 'Tech Summit 2024', color: 'indigo', dotColor: 'bg-indigo-500' },
                 { time: '02:30 PM', title: 'Duyệt Backdrop', subtitle: 'Summer Beat Festival', color: 'purple', dotColor: 'bg-purple-500' },

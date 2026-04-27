@@ -258,7 +258,6 @@ const OrganizerEventsPage = () => {
         </button>
       </div>
 
-      {/* Dashboard Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {stats.map((stat, i) => (
           <motion.div
@@ -267,12 +266,12 @@ const OrganizerEventsPage = () => {
             className="bg-white p-5 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/80 hover:shadow-[0_20px_50px_rgba(79,70,229,0.08)] transition-all duration-500 group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-slate-50 to-transparent opacity-50 rounded-full -mr-12 -mt-12"></div>
-            <div className="flex justify-between items-start mb-6 relative z-10">
+            <div className="flex items-center justify-between mb-6 relative z-10">
               <div className="flex items-center gap-3">
                 <div className={`p-2 ${stat.bg} rounded-xl group-hover:bg-opacity-80 transition-colors duration-300`}>
                   <span className={`material-symbols-outlined ${stat.text} text-base`} style={{ fontVariationSettings: "'FILL' 1" }}>{stat.icon}</span>
                 </div>
-                <p className="text-slate-500 text-[10px] font-bold font-headline uppercase tracking-wider">{stat.label}</p>
+                <p className="text-slate-500 text-xs font-black font-headline uppercase tracking-wider">{stat.label}</p>
               </div>
               <span className={`text-[9px] font-black ${stat.change.startsWith('+') ? 'text-green-600 bg-green-50' : 'text-rose-600 bg-rose-50'} px-2.5 py-1 rounded-full shadow-sm`}>
                 {stat.change}
