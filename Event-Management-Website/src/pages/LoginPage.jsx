@@ -145,7 +145,7 @@ const LoginPage = () => {
 
             <button 
               type="button" 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/admin/dashboard')}
               className="w-full bg-primary text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300 transform"
             >
               Đăng nhập vào EventArchitect
