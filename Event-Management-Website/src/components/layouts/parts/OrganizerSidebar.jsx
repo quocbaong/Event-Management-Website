@@ -7,18 +7,19 @@ const OrganizerSidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    // ... items same ...
     { icon: "dashboard", label: "Tổng quan", path: "/organizer/dashboard" },
-    { icon: "calendar_month", label: "Sự kiện của tôi", path: "/organizer/events" },
-    { icon: "event_note", label: "Lịch trình", path: "/organizer/schedule" },
-    { icon: "group", label: "Người tham gia", path: "/organizer/attendees" },
+    { icon: "calendar_month", label: "Sự kiện", path: "/organizer/events" },
+    { icon: "group", label: "Khách mời", path: "/organizer/attendees" },
     { icon: "analytics", label: "Báo cáo", path: "/organizer/reports" },
+    { icon: "payments", label: "Tài chính", path: "/organizer/finance" },
   ];
 
   const bottomItems = [
     { icon: "settings", label: "Cài đặt", path: "/organizer/settings" },
-    { icon: "help", label: "Trợ giúp", path: "/organizer/help" },
+    { icon: "help", label: "Hỗ trợ", path: "/organizer/help" },
   ];
+
+
 
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 flex flex-col p-4 border-r border-slate-200/50 dark:border-slate-800/50 z-50">
@@ -30,7 +31,7 @@ const OrganizerSidebar = () => {
           <img 
             src={logo} 
             alt="Logo" 
-            className="h-14 w-auto object-contain transition-transform group-hover:scale-105"
+            className="h-13 w-auto object-contain transition-transform group-hover:scale-105"
           />
           <div className="w-48 h-1 bg-indigo-100 dark:bg-indigo-900/50 my-2 rounded-full"></div>
           <div className="mt-0">
@@ -41,10 +42,9 @@ const OrganizerSidebar = () => {
         </div>
       </div>
 
-      <button className="mb-8 w-full py-3 px-4 bg-gradient-to-r from-primary to-primary-container text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-indigo-200/50">
-        <span className="material-symbols-outlined">add_circle</span>
-        <span>Tạo sự kiện mới</span>
-      </button>
+
+
+
 
       <nav className="flex-grow space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
@@ -69,8 +69,9 @@ const OrganizerSidebar = () => {
             </button>
           );
         })}
-
       </nav>
+
+
 
       <div className="mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-800/50 space-y-1">
         {bottomItems.map((item) => (
