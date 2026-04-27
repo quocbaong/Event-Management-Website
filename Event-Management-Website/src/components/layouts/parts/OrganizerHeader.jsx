@@ -7,6 +7,12 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
 
   const getTitle = () => {
     const path = location.pathname;
+    
+    // Check for dynamic path /organizer/events/:id/attendees
+    if (path.startsWith('/organizer/events/') && path.endsWith('/attendees')) {
+      return "Quản lý Sự kiện";
+    }
+
     const items = [
       { path: "/organizer/dashboard", label: "Tổng quan" },
       { path: "/organizer/events", label: "Quản lý Sự kiện" },
@@ -17,7 +23,7 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
       { path: "/organizer/help", label: "Trung tâm Hỗ trợ" },
     ];
     const current = items.find(item => item.path === path);
-    return current ? current.label : "Dashboard";
+    return current ? current.label : "Quản lý Sự kiện";
   };
 
   return (
