@@ -5,6 +5,21 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const location = useLocation();
 
+  const getTitle = () => {
+    const path = location.pathname;
+    const items = [
+      { path: "/organizer/dashboard", label: "Tổng quan" },
+      { path: "/organizer/events", label: "Quản lý Sự kiện" },
+      { path: "/organizer/attendees", label: "Danh sách Khách mời" },
+      { path: "/organizer/reports", label: "Báo cáo Thống kê" },
+      { path: "/organizer/finance", label: "Quản lý Tài chính" },
+      { path: "/organizer/settings", label: "Cài đặt Hệ thống" },
+      { path: "/organizer/help", label: "Trung tâm Hỗ trợ" },
+    ];
+    const current = items.find(item => item.path === path);
+    return current ? current.label : "Dashboard";
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm border-b border-slate-200/50">
       <div className="flex items-center justify-between px-8 py-4">
@@ -15,8 +30,9 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
           >
             <span className="material-symbols-outlined text-slate-500 group-hover:text-indigo-600 transition-colors">menu</span>
           </button>
-          <h1 className="text-xl font-bold text-[#6366f1] tracking-tight">Dashboard</h1>
+          <h1 className="text-xl font-bold text-[#6366f1] tracking-tight">{getTitle()}</h1>
         </div>
+
         
         <div className="flex items-center gap-6">
           <div className="relative flex items-center bg-surface-container-high rounded-full px-4 py-2 w-64">

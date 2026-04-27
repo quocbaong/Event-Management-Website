@@ -4,31 +4,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-light: var(--primary-light);
-  --color-secondary: var(--secondary);
-  --color-secondary-hover: var(--secondary-hover);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-border-color: var(--border-color);
-
-  /* MD3 tokens for Organizer role */
-  --color-surface-container: #eceef0;
-  --color-outline-variant: #c7c4d7;
-  --color-surface-bright: #f7f9fb;
-  --color-surface-container-highest: #e0e3e5;
-  --color-surface-container-high: #e6e8ea;
-  --color-surface-container-low: #f2f4f6;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-dim: #d8dadc;
-  --color-surface-variant: #e0e3e5;
-  --color-surface-tint: #494bd6;
-  
+  --color-primary: #4648d4;
+  --color-on-primary: #ffffff;
   --color-primary-container: #6063ee;
   --color-on-primary-container: #fffbff;
+  
+  --color-secondary: #6b38d4;
+  --color-on-secondary: #ffffff;
   --color-secondary-container: #8455ef;
   --color-on-secondary-container: #fffbff;
+  
+  --color-tertiary: #904900;
+  --color-on-tertiary: #ffffff;
   --color-tertiary-container: #b55d00;
   --color-on-tertiary-container: #fffbff;
   
@@ -37,13 +24,34 @@
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
   
+  --color-background: #f7f9fb;
+  --color-on-background: #191c1e;
+  --color-surface: #f7f9fb;
   --color-on-surface: #191c1e;
+  --color-surface-variant: #e0e3e5;
   --color-on-surface-variant: #464554;
-  --color-outline: #767586;
   
+  --color-outline: #767586;
+  --color-outline-variant: #c7c4d7;
+  
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-bright: #f7f9fb;
+  --color-surface-dim: #d8dadc;
+  --color-surface-tint: #494bd6;
+
+  --font-headline: "Plus Jakarta Sans";
+  --font-body: "Inter";
+  --font-label: "Inter";
+  
+  --radius-default: 1rem;
   --radius-lg: 2rem;
   --radius-xl: 3rem;
 }
+
 
 :root {
   /* Brand Palette from Main */

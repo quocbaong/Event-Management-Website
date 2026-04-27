@@ -8,7 +8,7 @@ const OrganizerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="flex min-h-screen bg-bg-default overflow-x-hidden">
+    <div className="flex min-h-screen bg-bg-default">
       <AnimatePresence mode="wait">
         {isSidebarOpen && (
           <motion.div
@@ -29,13 +29,16 @@ const OrganizerLayout = () => {
           width: isSidebarOpen ? 'calc(100% - 256px)' : '100%'
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="flex-1 flex flex-col min-h-screen"
+        className="flex-1 flex flex-col min-h-screen relative"
       >
-        <OrganizerHeader onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <main className="flex-1 w-full overflow-x-hidden">
+        <div className="sticky top-0 z-40 w-full">
+          <OrganizerHeader onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        </div>
+        <main className="flex-1 w-full">
           <Outlet />
         </main>
       </motion.div>
+
     </div>
   );
 };

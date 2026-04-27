@@ -20,6 +20,8 @@ import AttendeeQRPage from '../pages/AttendeeQRPage';
 import AttendeeReviewPage from '../pages/AttendeeReviewPage';
 import OrganizerLayout from '../components/layouts/OrganizerLayout';
 import OrganizerDashboardPage from '../pages/OrganizerDashboardPage';
+import OrganizerEventsPage from '../pages/OrganizerEventsPage';
+
 
 
 const AppRouter = () => {
@@ -58,8 +60,10 @@ const AppRouter = () => {
         {/* Organizer Protected Routes - New Role Layout */}
         <Route element={<OrganizerLayout />}>
           <Route path="/organizer/dashboard" element={<OrganizerDashboardPage />} />
+          <Route path="/organizer/events" element={<OrganizerEventsPage />} />
           {/* Add other organizer routes here */}
         </Route>
+
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
