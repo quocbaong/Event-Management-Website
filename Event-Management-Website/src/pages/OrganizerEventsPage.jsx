@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OrganizerEventsPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortOption, setSortOption] = useState('Mới nhất');
@@ -25,6 +27,17 @@ const OrganizerEventsPage = () => {
 
   const [notification, setNotification] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, event: null });
+
+  // Sync paused event status from attendees page via localStorage
+  useEffect(() => {
+    const pausedId = localStorage.getItem('pausedEventId');
+    if (pausedId) {
+      setEvents(prev => prev.map(ev =>
+        ev.id === parseInt(pausedId) ? { ...ev, status: 'Paused', statusColor: 'amber' } : ev
+      ));
+      localStorage.removeItem('pausedEventId');
+    }
+  }, []);
 
   const stats = [
     { label: 'Sự kiện đang chạy', value: '24', change: '+12%', icon: 'event_available', color: 'indigo', bg: 'bg-indigo-50', text: 'text-primary' },
@@ -307,7 +320,7 @@ const OrganizerEventsPage = () => {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="absolute left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-20 overflow-hidden"
                   >
-                    {['All', 'Live', 'Draft', 'Completed'].map((status) => (
+                    {['All', 'Live', 'Draft', 'Paused', 'Completed'].map((status) => (
                       <button
                         key={status}
                         onClick={() => {
@@ -317,7 +330,7 @@ const OrganizerEventsPage = () => {
                         className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors ${statusFilter === status ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'
                           }`}
                       >
-                        {status === 'All' ? 'Tất cả trạng thái' : status}
+                        {status === 'All' ? 'Tất cả trạng thái' : status === 'Paused' ? 'Tạm ngưng' : status}
                       </button>
                     ))}
                   </motion.div>
@@ -500,12 +513,19 @@ const OrganizerEventsPage = () => {
                   </td>
                   <td className="px-6 py-5">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider
-                      ${event.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                      ${
+                        event.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                         event.status === 'Draft' ? 'bg-slate-50 text-slate-600 border border-slate-100' :
-                          'bg-indigo-50 text-indigo-700 border border-indigo-100'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${event.status === 'Live' ? 'bg-emerald-500 animate-pulse' :
-                        event.status === 'Draft' ? 'bg-slate-400' : 'bg-indigo-500'}`}></span>
-                      {event.status}
+                        event.status === 'Paused' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                      }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        event.status === 'Live' ? 'bg-emerald-500 animate-pulse' :
+                        event.status === 'Draft' ? 'bg-slate-400' :
+                        event.status === 'Paused' ? 'bg-amber-500' :
+                        'bg-indigo-500'
+                      }`}></span>
+                      {event.status === 'Paused' ? 'Tạm ngưng' : event.status}
                     </span>
                   </td>
                   <td className="px-6 py-5">
@@ -533,6 +553,13 @@ const OrganizerEventsPage = () => {
                   </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => navigate(`/organizer/events/${event.id}/attendees`)}
+                        className="w-9 h-9 flex items-center justify-center bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                        title="Quản lý khách mời"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">group</span>
+                      </button>
                       <button
                         onClick={() => handleEdit(event)}
                         className="w-9 h-9 flex items-center justify-center bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"

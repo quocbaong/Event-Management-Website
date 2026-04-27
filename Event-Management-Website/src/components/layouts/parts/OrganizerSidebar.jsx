@@ -48,7 +48,9 @@ const OrganizerSidebar = () => {
 
       <nav className="flex-grow space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = item.label === "Sự kiện" 
+            ? location.pathname.startsWith('/organizer/events') 
+            : location.pathname === item.path;
           return (
             <button
               key={item.label}
