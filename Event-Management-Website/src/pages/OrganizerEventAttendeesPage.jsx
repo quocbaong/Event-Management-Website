@@ -144,19 +144,19 @@ const EventSettingsTab = ({ event, showToast }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-1">Tên sự kiện</label>
-            <input type="text" value={settings.name} onChange={e => setSettings({...settings, name: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" />
+            <input type="text" value={settings.name} onChange={e => setSettings({ ...settings, name: e.target.value })} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" />
           </div>
           <div className="space-y-2">
             <label className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-1">Thời gian</label>
-            <input type="text" value={settings.date} onChange={e => setSettings({...settings, date: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" />
+            <input type="text" value={settings.date} onChange={e => setSettings({ ...settings, date: e.target.value })} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" />
           </div>
           <div className="md:col-span-2 space-y-2">
             <label className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-1">Địa điểm</label>
-            <input type="text" value={settings.location} onChange={e => setSettings({...settings, location: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" />
+            <input type="text" value={settings.location} onChange={e => setSettings({ ...settings, location: e.target.value })} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none" />
           </div>
           <div className="md:col-span-2 space-y-2">
             <label className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-1">Mô tả sự kiện</label>
-            <textarea rows={4} value={settings.description} onChange={e => setSettings({...settings, description: e.target.value})} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none resize-none" />
+            <textarea rows={4} value={settings.description} onChange={e => setSettings({ ...settings, description: e.target.value })} className="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all outline-none resize-none" />
           </div>
         </div>
       </section>
@@ -181,7 +181,7 @@ const EventSettingsTab = ({ event, showToast }) => {
               </div>
               <div><p className="text-sm font-black text-slate-900">Sự kiện riêng tư</p><p className="text-xs text-slate-500 font-bold">Chỉ những người có thư mời mới có thể xem và đăng ký</p></div>
             </div>
-            <button onClick={() => setSettings({...settings, isPrivate: !settings.isPrivate})} className={`w-14 h-8 rounded-full p-1 transition-all ${settings.isPrivate ? 'bg-indigo-600' : 'bg-slate-300'}`}><div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all transform ${settings.isPrivate ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+            <button onClick={() => setSettings({ ...settings, isPrivate: !settings.isPrivate })} className={`w-14 h-8 rounded-full p-1 transition-all ${settings.isPrivate ? 'bg-indigo-600' : 'bg-slate-300'}`}><div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all transform ${settings.isPrivate ? 'translate-x-6' : 'translate-x-0'}`} /></button>
           </div>
 
           <div className="flex items-center justify-between p-5 bg-slate-50/80 rounded-[2rem] border border-slate-100">
@@ -191,18 +191,18 @@ const EventSettingsTab = ({ event, showToast }) => {
               </div>
               <div><p className="text-sm font-black text-slate-900">Tự động chấp nhận</p><p className="text-xs text-slate-500 font-bold">Khách mời đăng ký sẽ được duyệt ngay lập tức</p></div>
             </div>
-            <button onClick={() => setSettings({...settings, autoAccept: !settings.autoAccept})} className={`w-14 h-8 rounded-full p-1 transition-all ${settings.autoAccept ? 'bg-indigo-600' : 'bg-slate-300'}`}><div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all transform ${settings.autoAccept ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+            <button onClick={() => setSettings({ ...settings, autoAccept: !settings.autoAccept })} className={`w-14 h-8 rounded-full p-1 transition-all ${settings.autoAccept ? 'bg-indigo-600' : 'bg-slate-300'}`}><div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all transform ${settings.autoAccept ? 'translate-x-6' : 'translate-x-0'}`} /></button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div className="p-5 bg-slate-50/80 rounded-[2rem] border border-slate-100 space-y-3">
-                <p className="text-sm font-black text-slate-900">Giới hạn khách mời</p>
-                <input type="number" value={settings.maxAttendees} onChange={e => setSettings({...settings, maxAttendees: parseInt(e.target.value)})} className="w-full bg-white border-2 border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none focus:border-indigo-500" />
-             </div>
-             <div className="p-5 bg-slate-50/80 rounded-[2rem] border border-slate-100 flex items-center justify-between">
-                <div><p className="text-sm font-black text-slate-900">Danh sách chờ</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Kích hoạt khi hết chỗ</p></div>
-                <button onClick={() => setSettings({...settings, allowWaitlist: !settings.allowWaitlist})} className={`w-12 h-6 rounded-full p-1 transition-all ${settings.allowWaitlist ? 'bg-emerald-500' : 'bg-slate-300'}`}><div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all transform ${settings.allowWaitlist ? 'translate-x-6' : 'translate-x-0'}`} /></button>
-             </div>
+            <div className="p-5 bg-slate-50/80 rounded-[2rem] border border-slate-100 space-y-3">
+              <p className="text-sm font-black text-slate-900">Giới hạn khách mời</p>
+              <input type="number" value={settings.maxAttendees} onChange={e => setSettings({ ...settings, maxAttendees: parseInt(e.target.value) })} className="w-full bg-white border-2 border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none focus:border-indigo-500" />
+            </div>
+            <div className="p-5 bg-slate-50/80 rounded-[2rem] border border-slate-100 flex items-center justify-between">
+              <div><p className="text-sm font-black text-slate-900">Danh sách chờ</p><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Kích hoạt khi hết chỗ</p></div>
+              <button onClick={() => setSettings({ ...settings, allowWaitlist: !settings.allowWaitlist })} className={`w-12 h-6 rounded-full p-1 transition-all ${settings.allowWaitlist ? 'bg-emerald-500' : 'bg-slate-300'}`}><div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all transform ${settings.allowWaitlist ? 'translate-x-6' : 'translate-x-0'}`} /></button>
+            </div>
           </div>
         </div>
       </section>
@@ -312,10 +312,10 @@ const EmailTemplateTab = ({ event, allAttendees, showToast }) => {
           <div className="p-4 rounded-2xl border-2 border-transparent hover:border-slate-100 hover:bg-slate-50 space-y-3">
             <label className="flex items-center gap-2 text-[11px] font-black text-slate-600 uppercase tracking-widest"><span className="material-symbols-outlined text-sm text-indigo-400">palette</span>Màu chủ đạo</label>
             <div className="flex items-center gap-3">
-              {['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6'].map(c => (
-                <button key={c} onClick={() => setTemplate({...template, primaryColor: c})} className={`w-8 h-8 rounded-xl border-2 transition-all hover:scale-110 ${template.primaryColor === c ? 'border-slate-900 scale-110' : 'border-transparent'}`} style={{ backgroundColor: c }} />
+              {['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'].map(c => (
+                <button key={c} onClick={() => setTemplate({ ...template, primaryColor: c })} className={`w-8 h-8 rounded-xl border-2 transition-all hover:scale-110 ${template.primaryColor === c ? 'border-slate-900 scale-110' : 'border-transparent'}`} style={{ backgroundColor: c }} />
               ))}
-              <input type="color" value={template.primaryColor} onChange={e => setTemplate({...template, primaryColor: e.target.value})} className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer border-2 border-slate-200" title="Màu tùy chỉnh" />
+              <input type="color" value={template.primaryColor} onChange={e => setTemplate({ ...template, primaryColor: e.target.value })} className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer border-2 border-slate-200" title="Màu tùy chỉnh" />
             </div>
           </div>
         </div>
@@ -323,7 +323,7 @@ const EmailTemplateTab = ({ event, allAttendees, showToast }) => {
         <div className="p-6 border-t border-slate-100 bg-slate-50/50 space-y-3">
           <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-2xl"><span className="material-symbols-outlined text-sm text-indigo-500">group</span><p className="text-xs font-black text-indigo-700">{allAttendees.length} khách mời sẽ nhận email này</p></div>
           <button onClick={handleSendAll} disabled={isSending} className="w-full flex items-center justify-center gap-2.5 py-4 bg-indigo-600 text-white font-black text-sm rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 disabled:opacity-70">
-            {isSending ? (<><svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>Đang gửi email...</>) : (<><span className="material-symbols-outlined text-xl">send</span>Gửi đến tất cả khách mời</>)}
+            {isSending ? (<><svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>Đang gửi email...</>) : (<><span className="material-symbols-outlined text-xl">send</span>Gửi đến tất cả khách mời</>)}
           </button>
         </div>
       </div>
@@ -527,7 +527,7 @@ const OrganizerEventAttendeesPage = () => {
       ...selectedAttendee,
       initials: selectedAttendee.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
     } : a));
-    
+
     setIsSubmitting(false);
     setIsEditModalOpen(false);
     showToast(`Đã cập nhật thông tin ${selectedAttendee.name} thành công!`);
@@ -632,7 +632,7 @@ const OrganizerEventAttendeesPage = () => {
                     Sự kiện: {event.name}
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsAddModalOpen(false)}
                   className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 bg-slate-50 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all"
                 >
@@ -805,45 +805,45 @@ const OrganizerEventAttendeesPage = () => {
         {/* ── Danh sách khách mời Tab Content ── */}
         {activeTab === 'Danh sách khách mời' && (
           <>
-        {/* Table toolbar */}
-        <div className="p-7 flex flex-col md:flex-row justify-between items-start md:items-center gap-5 border-b border-slate-100">
-          <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">Danh sách khách mời</h2>
-            <p className="text-xs text-slate-400 font-bold mt-0.5 uppercase tracking-wider">{filtered.length} khách mời trong sự kiện này</p>
-          </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-72 group">
-              <input
-                type="text"
-                value={search}
-                onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-                placeholder="Tìm tên hoặc email..."
-                className="w-full bg-white border-2 border-slate-300 rounded-full py-3 pl-11 pr-4 text-sm font-black focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none placeholder:text-slate-400 text-slate-900"
-              />
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 text-lg font-black">search</span>
+            {/* Table toolbar */}
+            <div className="p-7 flex flex-col md:flex-row justify-between items-start md:items-center gap-5 border-b border-slate-100">
+              <div>
+                <h2 className="text-lg font-black text-slate-900 tracking-tight">Danh sách khách mời</h2>
+                <p className="text-xs text-slate-400 font-bold mt-0.5 uppercase tracking-wider">{filtered.length} khách mời trong sự kiện này</p>
+              </div>
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="relative flex-1 md:w-72 group">
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+                    placeholder="Tìm tên hoặc email..."
+                    className="w-full bg-white border-2 border-slate-300 rounded-full py-3 pl-11 pr-4 text-sm font-black focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 transition-all outline-none placeholder:text-slate-400 text-slate-900"
+                  />
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 text-lg font-black">search</span>
+                </div>
+                <button
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className={`flex items-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-2xl text-sm font-black hover:bg-emerald-100 transition-all border-2 border-emerald-200 shadow-sm shadow-emerald-50 ${isExporting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                  {isExporting ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Đang xuất...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-lg">download</span>
+                      Xuất
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <button 
-              onClick={handleExport}
-              disabled={isExporting}
-              className={`flex items-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-2xl text-sm font-black hover:bg-emerald-100 transition-all border-2 border-emerald-200 shadow-sm shadow-emerald-50 ${isExporting ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {isExporting ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Đang xuất...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-lg">download</span>
-                  Xuất
-                </>
-              )}
-            </button>
-          </div>
-        </div>
           </>
         )}
 
@@ -864,205 +864,205 @@ const OrganizerEventAttendeesPage = () => {
 
         {/* Table */}
         {activeTab === 'Danh sách khách mời' && (
-        <>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-100/50 border-b-2 border-slate-100">
-                <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest">Khách mời</th>
-                <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest">Công ty / Vai trò</th>
-                <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Phương thức</th>
-                <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Ngày gửi</th>
-                <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Trạng thái</th>
-                <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {paginated.length > 0 ? (
-                <>
-                  {paginated.map(att => {
-                    const sc = STATUS_CONFIG[att.status] || STATUS_CONFIG['Đang chờ'];
-                    return (
-                      <tr key={att.id} className="h-[84px] hover:bg-slate-50/60 transition-all group">
-                        <td className="px-7 py-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-sm border border-indigo-100 shrink-0 group-hover:scale-105 transition-transform duration-300">
-                              {att.initials}
-                            </div>
-                            <div>
-                              <p className="text-sm font-black text-slate-900">{att.name}</p>
-                              <p className="text-[11px] text-slate-400 font-bold mt-0.5">{att.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-7 py-5">
-                          <p className="text-sm font-bold text-slate-700">{att.company}</p>
-                          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{att.role}</p>
-                        </td>
-                        <td className="px-7 py-5 text-center">
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl">
-                            <span className="material-symbols-outlined text-slate-400 text-sm">
-                              {att.method === 'Email' ? 'alternate_email' : att.method === 'SMS' ? 'sms' : 'link'}
-                            </span>
-                            <span className="text-xs font-black text-slate-600">{att.method}</span>
-                          </div>
-                        </td>
-                        <td className="px-7 py-5 text-center">
-                          <span className="text-xs text-slate-500 font-bold tabular-nums">{att.date}</span>
-                        </td>
-                        <td className="px-7 py-5 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${sc.bg} ${sc.text} text-[10px] font-black rounded-full uppercase tracking-widest`}>
-                            <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>{sc.icon}</span>
-                            {att.status}
-                          </span>
-                        </td>
-                        <td className="px-7 py-5 text-right relative">
-                          <div className="flex justify-end items-center">
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenuId(openMenuId === att.id ? null : att.id);
-                              }}
-                              className={`p-2 transition-all rounded-xl ${openMenuId === att.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'}`}
-                            >
-                              <span className="material-symbols-outlined text-xl">more_vert</span>
-                            </button>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-100/50 border-b-2 border-slate-100">
+                    <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest">Khách mời</th>
+                    <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest">Công ty / Vai trò</th>
+                    <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Phương thức</th>
+                    <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Ngày gửi</th>
+                    <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Trạng thái</th>
+                    <th className="px-7 py-5 text-[12px] font-black text-slate-900 uppercase tracking-widest text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {paginated.length > 0 ? (
+                    <>
+                      {paginated.map(att => {
+                        const sc = STATUS_CONFIG[att.status] || STATUS_CONFIG['Đang chờ'];
+                        return (
+                          <tr key={att.id} className="h-[84px] hover:bg-slate-50/60 transition-all group">
+                            <td className="px-7 py-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-11 h-11 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-sm border border-indigo-100 shrink-0 group-hover:scale-105 transition-transform duration-300">
+                                  {att.initials}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-black text-slate-900">{att.name}</p>
+                                  <p className="text-[11px] text-slate-400 font-bold mt-0.5">{att.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-7 py-5">
+                              <p className="text-sm font-bold text-slate-700">{att.company}</p>
+                              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{att.role}</p>
+                            </td>
+                            <td className="px-7 py-5 text-center">
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl">
+                                <span className="material-symbols-outlined text-slate-400 text-sm">
+                                  {att.method === 'Email' ? 'alternate_email' : att.method === 'SMS' ? 'sms' : 'link'}
+                                </span>
+                                <span className="text-xs font-black text-slate-600">{att.method}</span>
+                              </div>
+                            </td>
+                            <td className="px-7 py-5 text-center">
+                              <span className="text-xs text-slate-500 font-bold tabular-nums">{att.date}</span>
+                            </td>
+                            <td className="px-7 py-5 text-center">
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${sc.bg} ${sc.text} text-[10px] font-black rounded-full uppercase tracking-widest`}>
+                                <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>{sc.icon}</span>
+                                {att.status}
+                              </span>
+                            </td>
+                            <td className="px-7 py-5 text-center relative">
+                              <div className="flex justify-center items-center">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenMenuId(openMenuId === att.id ? null : att.id);
+                                  }}
+                                  className={`p-2 transition-all rounded-xl ${openMenuId === att.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'}`}
+                                >
+                                  <span className="material-symbols-outlined text-xl">more_vert</span>
+                                </button>
 
-                            <AnimatePresence>
-                              {openMenuId === att.id && (
-                                <>
-                                  <div 
-                                    className="fixed inset-0 z-10" 
-                                    onClick={() => setOpenMenuId(null)}
-                                  />
-                                  <motion.div
-                                    initial={{ opacity: 0, scale: 0.95, y: 10, x: 0 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    className="absolute right-7 top-[70%] mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-20 overflow-hidden"
-                                  >
-                                    <button 
-                                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors text-left"
-                                      onClick={() => {
-                                        setOpenMenuId(null);
-                                        setSelectedAttendee(att);
-                                        setIsDetailModalOpen(true);
-                                      }}
-                                    >
-                                      <span className="material-symbols-outlined text-lg text-slate-400">visibility</span>
-                                      Xem chi tiết
-                                    </button>
-                                    <button 
-                                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors text-left"
-                                      onClick={() => {
-                                        setOpenMenuId(null);
-                                        setSelectedAttendee(att);
-                                        setIsEditModalOpen(true);
-                                      }}
-                                    >
-                                      <span className="material-symbols-outlined text-lg text-slate-400">edit_square</span>
-                                      Chỉnh sửa
-                                    </button>
-                                    <button 
-                                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors text-left"
-                                      onClick={() => {
-                                        setOpenMenuId(null);
-                                        showToast(`Đã gửi lại lời mời cho ${att.name}`, 'success');
-                                      }}
-                                    >
-                                      <span className="material-symbols-outlined text-lg text-slate-400">forward_to_inbox</span>
-                                      Gửi lại lời mời
-                                    </button>
-                                    <div className="h-px bg-slate-50 my-1 mx-2" />
-                                    <button 
-                                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors text-left"
-                                      onClick={() => {
-                                        setOpenMenuId(null);
-                                        setAttendeeToDelete(att);
-                                        setIsDeleteModalOpen(true);
-                                      }}
-                                    >
-                                      <span className="material-symbols-outlined text-lg">delete</span>
-                                      Xóa khách mời
-                                    </button>
-                                  </motion.div>
-                                </>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {/* Hàng trống để cố định kích thước table */}
-                  {paginated.length < itemsPerPage && (
-                    Array.from({ length: itemsPerPage - paginated.length }).map((_, idx) => (
-                      <tr key={`empty-${idx}`} className="h-[84px]">
-                        <td colSpan="6" className="px-7 py-5"></td>
-                      </tr>
-                    ))
+                                <AnimatePresence>
+                                  {openMenuId === att.id && (
+                                    <>
+                                      <div
+                                        className="fixed inset-0 z-10"
+                                        onClick={() => setOpenMenuId(null)}
+                                      />
+                                      <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: 10, x: 0 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                        className="absolute right-7 top-[70%] mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-20 overflow-hidden"
+                                      >
+                                        <button
+                                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors text-left"
+                                          onClick={() => {
+                                            setOpenMenuId(null);
+                                            setSelectedAttendee(att);
+                                            setIsDetailModalOpen(true);
+                                          }}
+                                        >
+                                          <span className="material-symbols-outlined text-lg text-slate-400">visibility</span>
+                                          Xem chi tiết
+                                        </button>
+                                        <button
+                                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors text-left"
+                                          onClick={() => {
+                                            setOpenMenuId(null);
+                                            setSelectedAttendee(att);
+                                            setIsEditModalOpen(true);
+                                          }}
+                                        >
+                                          <span className="material-symbols-outlined text-lg text-slate-400">edit_square</span>
+                                          Chỉnh sửa
+                                        </button>
+                                        <button
+                                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors text-left"
+                                          onClick={() => {
+                                            setOpenMenuId(null);
+                                            showToast(`Đã gửi lại lời mời cho ${att.name}`, 'success');
+                                          }}
+                                        >
+                                          <span className="material-symbols-outlined text-lg text-slate-400">forward_to_inbox</span>
+                                          Gửi lại lời mời
+                                        </button>
+                                        <div className="h-px bg-slate-50 my-1 mx-2" />
+                                        <button
+                                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                                          onClick={() => {
+                                            setOpenMenuId(null);
+                                            setAttendeeToDelete(att);
+                                            setIsDeleteModalOpen(true);
+                                          }}
+                                        >
+                                          <span className="material-symbols-outlined text-lg">delete</span>
+                                          Xóa khách mời
+                                        </button>
+                                      </motion.div>
+                                    </>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {/* Hàng trống để cố định kích thước table */}
+                      {paginated.length < itemsPerPage && (
+                        Array.from({ length: itemsPerPage - paginated.length }).map((_, idx) => (
+                          <tr key={`empty-${idx}`} className="h-[84px]">
+                            <td colSpan="6" className="px-7 py-5"></td>
+                          </tr>
+                        ))
+                      )}
+                    </>
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="h-[840px] px-7 py-20 text-center">
+                        <div className="flex flex-col items-center gap-3 text-slate-300">
+                          <span className="material-symbols-outlined text-5xl">group_off</span>
+                          <p className="text-sm font-black uppercase tracking-widest">Không tìm thấy khách mời</p>
+                        </div>
+                      </td>
+                    </tr>
                   )}
-                </>
-              ) : (
-                <tr>
-                  <td colSpan="6" className="h-[840px] px-7 py-20 text-center">
-                    <div className="flex flex-col items-center gap-3 text-slate-300">
-                      <span className="material-symbols-outlined text-5xl">group_off</span>
-                      <p className="text-sm font-black uppercase tracking-widest">Không tìm thấy khách mời</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </tbody>
+              </table>
+            </div>
 
-        {/* Pagination */}
-        <div className="px-7 py-5 flex justify-between items-center border-t border-slate-100 bg-slate-50/30">
-          <p className="text-xs text-slate-400 font-black uppercase tracking-wider">
-            Hiển thị {Math.min((currentPage - 1) * itemsPerPage + 1, filtered.length)}–{Math.min(currentPage * itemsPerPage, filtered.length)} trong {filtered.length} khách mời
-          </p>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              <span className="material-symbols-outlined text-base">chevron_left</span>
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i + 1}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-9 h-9 flex items-center justify-center rounded-xl font-black text-sm transition-all ${currentPage === i + 1
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                    : 'text-slate-400 hover:bg-slate-100'
-                  }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              <span className="material-symbols-outlined text-base">chevron_right</span>
-            </button>
-          </div>
-        </div>
-        </>
+            {/* Pagination */}
+            <div className="px-7 py-5 flex justify-between items-center border-t border-slate-100 bg-slate-50/30">
+              <p className="text-xs text-slate-400 font-black uppercase tracking-wider">
+                Hiển thị {Math.min((currentPage - 1) * itemsPerPage + 1, filtered.length)}–{Math.min(currentPage * itemsPerPage, filtered.length)} trong {filtered.length} khách mời
+              </p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  <span className="material-symbols-outlined text-base">chevron_left</span>
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`w-9 h-9 flex items-center justify-center rounded-xl font-black text-sm transition-all ${currentPage === i + 1
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                      : 'text-slate-400 hover:bg-slate-100'
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  <span className="material-symbols-outlined text-base">chevron_right</span>
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
       <AnimatePresence>
         {isDetailModalOpen && selectedAttendee && (
           <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDetailModalOpen(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1088,7 +1088,7 @@ const OrganizerEventAttendeesPage = () => {
                     </div>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsDetailModalOpen(false)}
                   className="w-12 h-12 flex items-center justify-center rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 shadow-sm group"
                 >
@@ -1103,12 +1103,12 @@ const OrganizerEventAttendeesPage = () => {
                   { label: 'Công ty', value: selectedAttendee.company, icon: 'business', color: 'amber' },
                   { label: 'Vai trò', value: selectedAttendee.role, icon: 'badge', color: 'emerald' },
                   { label: 'Phương thức', value: selectedAttendee.method, icon: selectedAttendee.method === 'Email' ? 'alternate_email' : selectedAttendee.method === 'SMS' ? 'sms' : 'link', color: 'violet' },
-                  { 
-                    label: 'Trạng thái', 
-                    value: selectedAttendee.status, 
-                    icon: STATUS_CONFIG[selectedAttendee.status]?.icon || 'schedule', 
+                  {
+                    label: 'Trạng thái',
+                    value: selectedAttendee.status,
+                    icon: STATUS_CONFIG[selectedAttendee.status]?.icon || 'schedule',
                     color: STATUS_CONFIG[selectedAttendee.status]?.bg?.split('-')[1] || 'orange',
-                    isBadge: true 
+                    isBadge: true
                   }
                 ].map((item, idx) => (
                   <div key={idx} className="p-5 bg-slate-50/50 border border-slate-100 rounded-[2rem] hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group">
@@ -1131,13 +1131,13 @@ const OrganizerEventAttendeesPage = () => {
               </div>
 
               <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-4 relative z-10">
-                <button 
+                <button
                   onClick={() => setIsDetailModalOpen(false)}
                   className="px-8 py-4 bg-white text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-100 transition-all border border-slate-200 shadow-sm"
                 >
                   Đóng cửa sổ
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     setIsDetailModalOpen(false);
                     setIsEditModalOpen(true);
@@ -1156,12 +1156,12 @@ const OrganizerEventAttendeesPage = () => {
       <AnimatePresence>
         {isEditModalOpen && selectedAttendee && (
           <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsEditModalOpen(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1179,7 +1179,7 @@ const OrganizerEventAttendeesPage = () => {
                     <p className="text-[11px] text-slate-500 font-black uppercase tracking-widest mt-2">Cập nhật thông tin chi tiết hệ thống</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsEditModalOpen(false)}
                   className="w-12 h-12 flex items-center justify-center rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all border border-slate-100 shadow-sm group"
                 >
@@ -1197,7 +1197,7 @@ const OrganizerEventAttendeesPage = () => {
                           required
                           type="text"
                           value={selectedAttendee.name}
-                          onChange={e => setSelectedAttendee({...selectedAttendee, name: e.target.value})}
+                          onChange={e => setSelectedAttendee({ ...selectedAttendee, name: e.target.value })}
                           className="w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 pl-12 pr-4 text-[15px] font-black text-slate-900 placeholder:text-slate-300 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 transition-all outline-none shadow-sm"
                           placeholder="Ví dụ: Nguyễn Văn A"
                         />
@@ -1211,7 +1211,7 @@ const OrganizerEventAttendeesPage = () => {
                           required
                           type="email"
                           value={selectedAttendee.email}
-                          onChange={e => setSelectedAttendee({...selectedAttendee, email: e.target.value})}
+                          onChange={e => setSelectedAttendee({ ...selectedAttendee, email: e.target.value })}
                           className="w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 pl-12 pr-4 text-[15px] font-black text-slate-900 placeholder:text-slate-300 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 transition-all outline-none shadow-sm"
                           placeholder="abc@example.com"
                         />
@@ -1227,7 +1227,7 @@ const OrganizerEventAttendeesPage = () => {
                         <input
                           type="text"
                           value={selectedAttendee.company}
-                          onChange={e => setSelectedAttendee({...selectedAttendee, company: e.target.value})}
+                          onChange={e => setSelectedAttendee({ ...selectedAttendee, company: e.target.value })}
                           className="w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 pl-12 pr-4 text-[15px] font-black text-slate-900 placeholder:text-slate-300 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 transition-all outline-none shadow-sm"
                           placeholder="Tên công ty"
                         />
@@ -1240,7 +1240,7 @@ const OrganizerEventAttendeesPage = () => {
                         <input
                           type="text"
                           value={selectedAttendee.role}
-                          onChange={e => setSelectedAttendee({...selectedAttendee, role: e.target.value})}
+                          onChange={e => setSelectedAttendee({ ...selectedAttendee, role: e.target.value })}
                           className="w-full bg-white border-2 border-slate-300 rounded-[1.5rem] py-4 pl-12 pr-4 text-[15px] font-black text-slate-900 placeholder:text-slate-300 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 transition-all outline-none shadow-sm"
                           placeholder="Vị trí công việc"
                         />
@@ -1256,12 +1256,11 @@ const OrganizerEventAttendeesPage = () => {
                         <button
                           key={method}
                           type="button"
-                          onClick={() => setSelectedAttendee({...selectedAttendee, method})}
-                          className={`flex items-center justify-center gap-3 py-4 rounded-[1.5rem] border-2 font-black text-sm transition-all duration-300 ${
-                            selectedAttendee.method === method 
-                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200' 
-                            : 'bg-white border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/30'
-                          }`}
+                          onClick={() => setSelectedAttendee({ ...selectedAttendee, method })}
+                          className={`flex items-center justify-center gap-3 py-4 rounded-[1.5rem] border-2 font-black text-sm transition-all duration-300 ${selectedAttendee.method === method
+                              ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200'
+                              : 'bg-white border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/30'
+                            }`}
                         >
                           <span className="material-symbols-outlined text-xl">
                             {method === 'Email' ? 'alternate_email' : method === 'SMS' ? 'sms' : 'link'}
@@ -1274,14 +1273,14 @@ const OrganizerEventAttendeesPage = () => {
                 </div>
 
                 <div className="p-10 bg-slate-50 border-t border-slate-100 flex justify-end gap-5">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setIsEditModalOpen(false)}
                     className="px-10 py-4 bg-white border-2 border-slate-200 text-slate-600 font-black text-sm hover:bg-slate-50 hover:border-slate-300 transition-all rounded-2xl shadow-sm"
                   >
                     Hủy bỏ
                   </button>
-                  <button 
+                  <button
                     disabled={isSubmitting}
                     className="px-12 py-4 bg-indigo-600 text-white font-black text-sm rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200 flex items-center gap-3 min-w-[220px] justify-center active:scale-95 duration-200"
                   >
@@ -1308,12 +1307,12 @@ const OrganizerEventAttendeesPage = () => {
       <AnimatePresence>
         {isDeleteModalOpen && attendeeToDelete && (
           <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDeleteModalOpen(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1324,21 +1323,21 @@ const OrganizerEventAttendeesPage = () => {
               <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <span className="material-symbols-outlined text-4xl text-rose-600 animate-pulse">warning</span>
               </div>
-              
+
               <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-3">Xác nhận xóa?</h2>
               <p className="text-sm text-slate-500 font-bold leading-relaxed mb-8">
-                Bạn có chắc chắn muốn xóa khách mời <span className="text-slate-900 font-black">{attendeeToDelete.name}</span>? 
+                Bạn có chắc chắn muốn xóa khách mời <span className="text-slate-900 font-black">{attendeeToDelete.name}</span>?
                 Hành động này không thể hoàn tác.
               </p>
 
               <div className="grid grid-cols-2 gap-4">
-                <button 
+                <button
                   onClick={() => setIsDeleteModalOpen(false)}
                   className="py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all"
                 >
                   Hủy bỏ
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     setAllAttendees(prev => prev.filter(a => a.id !== attendeeToDelete.id));
                     setIsDeleteModalOpen(false);
