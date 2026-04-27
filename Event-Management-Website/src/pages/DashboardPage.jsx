@@ -1,11 +1,11 @@
 import React from 'react';
 import StatCard from '../components/ui/StatCard';
-import { 
-  Ticket, 
-  CalendarCheck, 
-  Users2, 
-  Smile, 
-  ChevronRight, 
+import {
+  Ticket,
+  CalendarCheck,
+  Users2,
+  Smile,
+  ChevronRight,
   Download,
   Calendar as CalendarIcon,
   CircleDot
@@ -59,8 +59,8 @@ const DeadlineItem = ({ title, event, time, progress, color, date }) => (
       </div>
     </div>
     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-      <div 
-        className={`h-full ${color} rounded-full transition-all duration-1000`} 
+      <div
+        className={`h-full ${color} rounded-full transition-all duration-1000`}
         style={{ width: `${progress}%` }}
       ></div>
     </div>
@@ -128,7 +128,7 @@ const DashboardPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
+        <StatCard
           title="Tổng doanh thu"
           value="428.500.000đ"
           subtext="so với tháng trước"
@@ -138,7 +138,7 @@ const DashboardPage = () => {
           iconBg="bg-blue-50"
           iconColor="text-blue-500"
         />
-        <StatCard 
+        <StatCard
           title="Sự kiện đang chạy"
           value="24"
           subtext="mới tuần này"
@@ -148,7 +148,7 @@ const DashboardPage = () => {
           iconBg="bg-purple-50"
           iconColor="text-purple-500"
         />
-        <StatCard 
+        <StatCard
           title="Người tham dự"
           value="12.480"
           subtext="Tỉ lệ lấp đầy: 84%"
@@ -156,7 +156,7 @@ const DashboardPage = () => {
           iconBg="bg-indigo-50"
           iconColor="text-indigo-500"
         />
-        <StatCard 
+        <StatCard
           title="Độ hài lòng"
           value="4.8/5"
           subtext=""
@@ -188,17 +188,17 @@ const DashboardPage = () => {
             </div>
           </div>
           <div className="h-[300px]">
-            <Bar 
-              data={barData} 
-              options={{ 
-                responsive: true, 
+            <Bar
+              data={barData}
+              options={{
+                responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                   y: { display: false },
                   x: { grid: { display: false }, border: { display: false } }
                 }
-              }} 
+              }}
             />
           </div>
         </div>
@@ -207,14 +207,14 @@ const DashboardPage = () => {
         <div className="bg-white p-8 rounded-[32px] border border-border-color flex flex-col">
           <h3 className="text-lg font-bold text-text-primary mb-1">Phân loại sự kiện</h3>
           <p className="text-xs text-text-secondary mb-8">Phân bổ theo loại hình tổ chức</p>
-          
+
           <div className="flex-1 relative flex items-center justify-center min-h-[220px]">
-            <Doughnut 
+            <Doughnut
               data={doughnutData}
-              options={{ 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: false } } 
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
               }}
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -260,26 +260,26 @@ const DashboardPage = () => {
             </button>
           </div>
           <div className="space-y-2">
-            <ActivityItem 
-              icon={Ticket} 
+            <ActivityItem
+              icon={Ticket}
               color="bg-blue-50 text-blue-500"
               title='Vé sự kiện "Tech Summit 2023" vừa được bán cho Nguyễn Văn A.'
               time="2 phút trước"
             />
-            <ActivityItem 
-              icon={CircleDot} 
+            <ActivityItem
+              icon={CircleDot}
               color="bg-green-50 text-green-500"
               title="Thủ tục thanh toán cho Hotel Majestic đã hoàn tất."
               time="1 giờ trước"
             />
-            <ActivityItem 
-              icon={CalendarIcon} 
+            <ActivityItem
+              icon={CalendarIcon}
               color="bg-orange-50 text-orange-500"
               title="Yêu cầu thay đổi menu từ Lễ cưới Tuấn & Lan cần được duyệt."
               time="4 giờ trước"
             />
-            <ActivityItem 
-              icon={Users2} 
+            <ActivityItem
+              icon={Users2}
               color="bg-indigo-50 text-indigo-500"
               title="Hoàng Linh đã tham gia vào đội ngũ quản lý sự kiện."
               time="Hôm qua"
@@ -301,7 +301,7 @@ const DashboardPage = () => {
             </span>
           </div>
           <div className="space-y-4">
-            <DeadlineItem 
+            <DeadlineItem
               title="Chốt danh sách báo chí"
               event="Digital Marketing Expo"
               time="Hôm nay"
@@ -309,7 +309,7 @@ const DashboardPage = () => {
               progress={90}
               color="bg-red-500"
             />
-            <DeadlineItem 
+            <DeadlineItem
               title="Thanh toán đợt 2 cho đơn vị âm thanh"
               event="Festival Âm Nhạc Mùa Thu"
               time="Ngày mai"
@@ -317,7 +317,7 @@ const DashboardPage = () => {
               progress={65}
               color="bg-blue-500"
             />
-            <DeadlineItem 
+            <DeadlineItem
               title="Gửi thiệp mời VIP"
               event="Gala Dinner Cuối Năm"
               time="Còn 3 ngày"
