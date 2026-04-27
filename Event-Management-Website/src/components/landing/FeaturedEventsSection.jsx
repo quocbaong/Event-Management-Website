@@ -1,11 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import eventTech from '../../assets/event_tech.png';
 import eventMusic from '../../assets/event_music.png';
 import eventMarketing from '../../assets/event_marketing.png';
 
 const events = [
   {
+    id: 1,
     title: 'Vietnam Tech Summit 2024',
     category: 'CÔNG NGHỆ',
     tagColor: 'text-indigo-600 bg-indigo-50',
@@ -14,6 +16,7 @@ const events = [
     image: eventTech
   },
   {
+    id: 2,
     title: 'Summer Harmony Festival',
     category: 'GIẢI TRÍ',
     tagColor: 'text-purple-600 bg-purple-50',
@@ -22,6 +25,7 @@ const events = [
     image: eventMusic
   },
   {
+    id: 3,
     title: 'Digital Growth Seminar',
     category: 'MARKETING',
     tagColor: 'text-orange-600 bg-orange-50',
@@ -32,6 +36,8 @@ const events = [
 ];
 
 const FeaturedEventsSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-24 bg-[#f8fafc]" id="events">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
@@ -46,7 +52,10 @@ const FeaturedEventsSection = () => {
               Khám phá các sự kiện đang diễn ra trên nền tảng
             </p>
           </div>
-          <button className="text-indigo-600 font-headline font-bold hover:underline transition-all">
+          <button 
+            onClick={() => navigate('/events')}
+            className="text-indigo-600 font-headline font-bold hover:underline transition-all"
+          >
             Xem tất cả
           </button>
         </div>
@@ -60,7 +69,8 @@ const FeaturedEventsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
-              className="group bg-white rounded-[2.2rem] p-4 shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500"
+              onClick={() => navigate(`/events/${event.id}`)}
+              className="group bg-white rounded-[2.2rem] p-4 shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 cursor-pointer"
             >
               {/* Image Container */}
               <div className="relative aspect-[16/10] rounded-[1.8rem] overflow-hidden mb-6 shadow-inner">

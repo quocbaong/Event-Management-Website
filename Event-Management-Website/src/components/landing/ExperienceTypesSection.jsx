@@ -36,7 +36,7 @@ const ExperienceTypesSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-[#f8fafc] overflow-hidden">
+    <section className="py-24 bg-[#f8fafc] overflow-hidden" id="solutions">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
 
         <div className="text-center mb-16 relative">
