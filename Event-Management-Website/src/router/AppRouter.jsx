@@ -21,6 +21,7 @@ import AttendeeReviewPage from '../pages/AttendeeReviewPage';
 import OrganizerLayout from '../components/layouts/OrganizerLayout';
 import OrganizerDashboardPage from '../pages/OrganizerDashboardPage';
 import OrganizerEventsPage from '../pages/OrganizerEventsPage';
+import OrganizerAttendeesPage from '../pages/OrganizerAttendeesPage';
 
 
 
@@ -61,6 +62,7 @@ const AppRouter = () => {
         <Route element={<OrganizerLayout />}>
           <Route path="/organizer/dashboard" element={<OrganizerDashboardPage />} />
           <Route path="/organizer/events" element={<OrganizerEventsPage />} />
+          <Route path="/organizer/attendees" element={<OrganizerAttendeesPage />} />
           {/* Add other organizer routes here */}
         </Route>
 
