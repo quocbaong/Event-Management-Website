@@ -16,9 +16,11 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
     const items = [
       { path: "/organizer/dashboard", label: "Tổng quan" },
       { path: "/organizer/events", label: "Quản lý Sự kiện" },
-      { path: "/organizer/attendees", label: "Danh sách Khách mời" },
-      { path: "/organizer/reports", label: "Báo cáo Thống kê" },
-      { path: "/organizer/finance", label: "Quản lý Tài chính" },
+      { path: "/organizer/notifications", label: "Quản lý Thông báo" },
+      { path: "/organizer/schedule", label: "Quản lý Lịch trình" },
+      { path: "/organizer/timeline", label: "Quản lý Dòng thời gian" },
+      { path: "/organizer/finance", label: "Báo cáo tài chính" },
+      { path: "/organizer/profile", label: "Quản lý Hồ sơ" },
       { path: "/organizer/settings", label: "Cài đặt Hệ thống" },
       { path: "/organizer/help", label: "Trung tâm Hỗ trợ" },
     ];

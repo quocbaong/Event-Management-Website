@@ -9,9 +9,10 @@ const OrganizerSidebar = () => {
   const menuItems = [
     { icon: "dashboard", label: "Tổng quan", path: "/organizer/dashboard" },
     { icon: "calendar_month", label: "Sự kiện", path: "/organizer/events" },
-    { icon: "group", label: "Khách mời", path: "/organizer/attendees" },
-    { icon: "analytics", label: "Báo cáo", path: "/organizer/reports" },
-    { icon: "payments", label: "Tài chính", path: "/organizer/finance" },
+    { icon: "event_note", label: "Lịch trình", path: "/organizer/schedule" },
+    { icon: "timeline", label: "Dòng thời gian", path: "/organizer/timeline" },
+    { icon: "payments", label: "Báo cáo tài chính", path: "/organizer/finance" },
+    { icon: "person", label: "Hồ sơ", path: "/organizer/profile" },
   ];
 
   const bottomItems = [
