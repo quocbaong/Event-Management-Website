@@ -180,7 +180,7 @@ const SignUpPage = () => {
 
             <button 
               type="button"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/admin/dashboard')}
               className="w-full bg-primary text-white py-3 px-6 rounded-2xl font-bold text-base hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300"
             >
               Tạo tài khoản của tôi

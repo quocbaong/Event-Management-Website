@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 const StatCard = ({ title, value, valueColor = "text-text-primary", footer }) => (
-  <div className="bg-white p-4 rounded-2xl border border-border-color shadow-sm flex flex-col gap-2 min-w-[150px] flex-1">
+  <div className="bg-white p-3 rounded-2xl border border-border-color shadow-sm flex flex-col gap-1.5 min-w-[120px] flex-1">
     <span className="text-[9px] uppercase tracking-widest font-black text-text-secondary/60">
       {title}
     </span>
@@ -90,7 +90,7 @@ const GlobalEventsPage = () => {
       {/* Header Section */}
       <div className="flex justify-between items-start">
         <div className="max-w-2xl">
-          <h1 className="text-4xl font-extrabold text-text-primary tracking-tight mb-2">
+          <h1 className="text-4xl font-extrabold text-text-primary tracking-tight mb-2 whitespace-nowrap">
             Quản lý Sự kiện Toàn cầu
           </h1>
           <p className="text-text-secondary font-medium">
@@ -100,7 +100,7 @@ const GlobalEventsPage = () => {
         </div>
         
         {/* Top Summary Stats */}
-        <div className="flex gap-3 w-full max-w-3xl">
+        <div className="flex gap-2 w-full max-w-2xl">
           <StatCard 
             title="Tổng sự kiện" 
             value="12,842" 
