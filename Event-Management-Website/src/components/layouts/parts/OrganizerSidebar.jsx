@@ -52,6 +52,8 @@ const OrganizerSidebar = () => {
         {menuItems.map((item) => {
           const isActive = item.label === "Sự kiện" 
             ? location.pathname.startsWith('/organizer/events') 
+            : item.label === "Báo cáo"
+            ? location.pathname.startsWith('/organizer/reports')
             : location.pathname === item.path;
           return (
             <button

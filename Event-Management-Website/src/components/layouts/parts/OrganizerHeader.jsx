@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const OrganizerHeader = ({ onToggleSidebar }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getTitle = () => {
     const path = location.pathname;
     
+    // Xử lý tiêu đề cho module Báo cáo với phân cấp
+    if (path === '/organizer/reports') return { main: "Báo cáo & Phân tích" };
+    if (path === '/organizer/reports/analytics') return { parent: "Báo cáo thống kê", parentPath: "/organizer/reports", child: "Phân tích Chuyên sâu" };
+    if (path === '/organizer/reports/templates') return { parent: "Báo cáo thống kê", parentPath: "/organizer/reports", child: "Thư viện Mẫu Báo cáo" };
+
     // Check for dynamic path /organizer/events/:id/attendees
     if (path.startsWith('/organizer/events/') && path.endsWith('/attendees')) {
-      return "Quản lý Sự kiện";
+      return { main: "Quản lý Sự kiện" };
     }
 
     const items = [
@@ -19,26 +25,46 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
       { path: "/organizer/attendees", label: "Danh sách Khách mời" },
       { path: "/organizer/schedule", label: "Quản lý Lịch trình" },
       { path: "/organizer/timeline", label: "Quản lý Dòng thời gian" },
-      { path: "/organizer/reports", label: "Báo cáo thống kê" },
       { path: "/organizer/finance", label: "Quản lý tài chính" },
       { path: "/organizer/settings", label: "Cài đặt Hệ thống" },
       { path: "/organizer/help", label: "Trung tâm Hỗ trợ" },
     ];
     const current = items.find(item => item.path === path);
-    return current ? current.label : "Quản lý Sự kiện";
+    return { main: current ? current.label : "Quản lý Sự kiện" };
   };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm border-b border-slate-200/50">
       <div className="flex items-center justify-between px-8 py-4">
-        <div className="flex items-center gap-4">
+        {/* Page Title / Breadcrumb */}
+        <div className="flex items-center gap-2">
           <button 
             onClick={onToggleSidebar}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center justify-center group"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors mr-1"
           >
-            <span className="material-symbols-outlined text-slate-500 group-hover:text-indigo-600 transition-colors">menu</span>
+            <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">menu</span>
           </button>
-          <h1 className="text-xl font-bold text-[#6366f1] tracking-tight">{getTitle()}</h1>
+          
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            {getTitle().parent ? (
+              <>
+                <button 
+                  onClick={() => navigate(getTitle().parentPath)}
+                  className="text-[15px] font-medium text-slate-400 whitespace-nowrap hover:text-indigo-500 transition-colors"
+                >
+                  {getTitle().parent}
+                </button>
+                <span className="material-symbols-outlined text-[16px] text-slate-300 mt-0.5">chevron_right</span>
+                <h2 className="text-[15px] font-bold text-indigo-600 truncate">
+                  {getTitle().child}
+                </h2>
+              </>
+            ) : (
+              <h2 className="text-[15px] font-bold text-indigo-600 truncate">
+                {getTitle().main}
+              </h2>
+            )}
+          </div>
         </div>
 
         
