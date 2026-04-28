@@ -21,7 +21,6 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
       { path: "/organizer/timeline", label: "Quản lý Dòng thời gian" },
       { path: "/organizer/reports", label: "Báo cáo thống kê" },
       { path: "/organizer/finance", label: "Quản lý tài chính" },
-      { path: "/organizer/profile", label: "Quản lý Hồ sơ" },
       { path: "/organizer/settings", label: "Cài đặt Hệ thống" },
       { path: "/organizer/help", label: "Trung tâm Hỗ trợ" },
     ];
