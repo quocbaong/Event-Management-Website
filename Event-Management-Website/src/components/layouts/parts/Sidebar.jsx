@@ -37,7 +37,7 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Tổng quan", path: "/dashboard" },
+    { icon: LayoutDashboard, label: "Tổng quan", path: "/admin/dashboard" },
     { icon: Calendar, label: "Sự kiện", path: "/admin/events" },
     { icon: Megaphone, label: "Phát tin", path: "/admin/broadcast" },
     { icon: MessageSquare, label: "Phản hồi", path: "/admin/feedback" },

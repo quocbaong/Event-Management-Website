@@ -14,7 +14,6 @@ const OrganizerSidebar = () => {
     { icon: "timeline", label: "Dòng thời gian", path: "/organizer/timeline" },
     { icon: "analytics", label: "Báo cáo", path: "/organizer/reports" },
     { icon: "payments", label: "Tài chính", path: "/organizer/finance" },
-    { icon: "person", label: "Hồ sơ", path: "/organizer/profile" },
   ];
 
   const bottomItems = [
@@ -53,6 +52,8 @@ const OrganizerSidebar = () => {
         {menuItems.map((item) => {
           const isActive = item.label === "Sự kiện" 
             ? location.pathname.startsWith('/organizer/events') 
+            : item.label === "Báo cáo"
+            ? location.pathname.startsWith('/organizer/reports')
             : location.pathname === item.path;
           return (
             <button

@@ -6,7 +6,7 @@ import LandingFooter from '../common/LandingFooter';
 
 const MainLayout = () => {
   const location = useLocation();
-  const showFooter = location.pathname === '/dashboard' || location.pathname === '/';
+  const showFooter = location.pathname === '/admin/dashboard' || location.pathname === '/';
 
   return (
     <div className="flex min-h-screen bg-bg-default overflow-hidden">

@@ -43,7 +43,7 @@ const Header = () => {
             <span className="text-primary font-black uppercase tracking-wider text-sm">Quản lý Sự kiện</span>
           </>
         );
-      case '/dashboard':
+      case '/admin/dashboard':
         return (
           <>
             <span className="text-slate-400 font-medium">Bảng điều khiển</span>

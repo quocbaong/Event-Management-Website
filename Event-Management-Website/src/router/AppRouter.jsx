@@ -25,6 +25,9 @@ import OrganizerAttendeesPage from '../pages/OrganizerAttendeesPage';
 import OrganizerEventAttendeesPage from '../pages/OrganizerEventAttendeesPage';
 import OrganizerSchedulePage from '../pages/OrganizerSchedulePage';
 import OrganizerTimelinePage from '../pages/OrganizerTimelinePage';
+import OrganizerReportPage from '../pages/OrganizerReportPage';
+import OrganizerReportAnalyticsPage from '../pages/OrganizerReportAnalyticsPage';
+import OrganizerReportTemplatesPage from '../pages/OrganizerReportTemplatesPage';
 
 
 
@@ -36,7 +39,6 @@ const AppRouter = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
-
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         
@@ -69,6 +71,9 @@ const AppRouter = () => {
           <Route path="/organizer/events/:id/attendees" element={<OrganizerEventAttendeesPage />} />
           <Route path="/organizer/schedule" element={<OrganizerSchedulePage />} />
           <Route path="/organizer/timeline" element={<OrganizerTimelinePage />} />
+          <Route path="/organizer/reports" element={<OrganizerReportPage />} />
+          <Route path="/organizer/reports/analytics" element={<OrganizerReportAnalyticsPage />} />
+          <Route path="/organizer/reports/templates" element={<OrganizerReportTemplatesPage />} />
           {/* Add other organizer routes here */}
         </Route>
 
