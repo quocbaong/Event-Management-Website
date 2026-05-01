@@ -28,7 +28,7 @@ Dựa trên quá trình phát triển, hệ thống cung cấp các tính năng 
 - **Node.js**: Phiên bản >= 18.x (khuyến nghị sử dụng phiên bản LTS mới nhất)
 - **NPM** hoặc **Yarn**
 
-### Các bước cài đặt
+### Các bước cài đặt hệ thống
 
 1. **Clone repository (nếu chưa có)**
    ```bash
