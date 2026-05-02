@@ -7,21 +7,17 @@ const OrganizerSchedulePage = () => {
   const [selectedDay, setSelectedDay] = useState(null); // for modal
 
   const generateDays = (month, year) => {
-    // This is a simplified generator for the demo
-    // In a real app, you'd use date-fns or similar
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    // Get the Monday of the week containing the 1st of the month
     const startDay = new Date(firstDay);
-    const dayOfWeek = startDay.getDay(); // 0 is Sunday
-    const diff = (dayOfWeek === 0 ? 6 : dayOfWeek - 1); // Adjust to Monday start
+    const dayOfWeek = startDay.getDay();
+    const diff = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
     startDay.setDate(startDay.getDate() - diff);
 
     const days = [];
     const tempDate = new Date(startDay);
 
-    // Generate 35 days (5 weeks)
     for (let i = 0; i < 35; i++) {
       const isToday = tempDate.getDate() === 28 && tempDate.getMonth() === 3 && tempDate.getFullYear() === 2026;
       const isPrevMonth = tempDate.getMonth() < month && tempDate.getFullYear() <= year;
@@ -36,7 +32,6 @@ const OrganizerSchedulePage = () => {
         events: []
       };
 
-      // Add some mock events for specific dates
       if (tempDate.getDate() === 4 && tempDate.getMonth() === month) {
         dayObj.hasDot = true;
         dayObj.events = [
@@ -96,7 +91,6 @@ const OrganizerSchedulePage = () => {
     }
 
     if (viewMode === 'week') {
-      // Check if currentDate is in the same week as today
       const startOfCurrentWeek = new Date(currentDate);
       const day = startOfCurrentWeek.getDay();
       const diff = (day === 0 ? 6 : day - 1);
@@ -111,7 +105,6 @@ const OrganizerSchedulePage = () => {
         return "Tuần này";
       }
 
-      // Calculate week number of month (approximate for demo)
       const weekNum = Math.ceil(currentDate.getDate() / 7);
       return `Tuần ${weekNum}`;
     }
@@ -169,7 +162,7 @@ const OrganizerSchedulePage = () => {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden mb-4">
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden mb-10">
 
         {/* Days Header */}
         {viewMode !== 'day' && (
@@ -209,6 +202,9 @@ const OrganizerSchedulePage = () => {
                       </span>
                     )}
                   </div>
+                  {dayObj.hasDot && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 mr-1"></span>
+                  )}
                 </div>
 
                 {/* Event Dot Indicators */}
@@ -238,18 +234,14 @@ const OrganizerSchedulePage = () => {
         {viewMode === 'week' && (
           <div className="grid grid-cols-7 min-h-[300px] xl:min-h-[400px] divide-x divide-slate-100/60 bg-white">
             {(() => {
-              // Find the start of the week for currentDate
               const startOfWeek = new Date(currentDate);
               const day = startOfWeek.getDay();
               const diff = (day === 0 ? 6 : day - 1);
               startOfWeek.setDate(startOfWeek.getDate() - diff);
 
-              // Create a 7-day array for this week
               return Array.from({ length: 7 }).map((_, i) => {
                 const d = new Date(startOfWeek);
                 d.setDate(d.getDate() + i);
-                // Try to find this day in our generated 'days' array to get events,
-                // otherwise just create a basic day object
                 const existingDay = days.find(dayObj =>
                   dayObj.fullDate.getDate() === d.getDate() &&
                   dayObj.fullDate.getMonth() === d.getMonth()
@@ -260,12 +252,12 @@ const OrganizerSchedulePage = () => {
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-2">
                       {dayObj.isToday ? (
-                          <div className="flex items-center gap-3">
-                            <span className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-lg shadow-md shadow-indigo-200">
-                              {dayObj.date}
-                            </span>
-                            <span className="text-[10px] font-black text-primary uppercase tracking-widest">Hôm nay</span>
-                          </div>
+                        <div className="flex items-center gap-3">
+                          <span className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-black text-lg shadow-md shadow-indigo-200">
+                            {dayObj.date}
+                          </span>
+                          <span className="text-[10px] font-black text-primary uppercase tracking-widest">Hôm nay</span>
+                        </div>
                       ) : (
                         <span className="font-black text-xl text-slate-700 ml-1">
                           {dayObj.date}
@@ -282,7 +274,24 @@ const OrganizerSchedulePage = () => {
                         whileHover={{ scale: 1.02 }}
                         className={`px-4 py-3 rounded-2xl text-sm cursor-pointer transition-all ${event.style}`}
                       >
-                        <div className="font-bold">{event.title}</div>
+                        <div className="font-bold mb-1">{event.title}</div>
+                        {event.time && <div className="text-xs opacity-80 font-medium">{event.time}</div>}
+                        {event.location && (
+                          <div className="flex items-center gap-1 mt-2 opacity-90">
+                            <span className="material-symbols-outlined text-[14px]">{event.icon || 'location_on'}</span>
+                            <span className="text-xs font-medium truncate">{event.location}</span>
+                          </div>
+                        )}
+                        {event.subtitle && <div className="text-xs opacity-70 font-medium mt-1">{event.subtitle}</div>}
+                        {event.avatars && (
+                          <div className="flex items-center gap-1 mt-3">
+                            <div className="flex -space-x-2">
+                              <img src="https://i.pravatar.cc/100?u=1" className="w-6 h-6 rounded-full border-2 border-white" alt="avatar" />
+                              <img src="https://i.pravatar.cc/100?u=2" className="w-6 h-6 rounded-full border-2 border-white" alt="avatar" />
+                            </div>
+                            <span className="text-xs font-bold text-primary ml-1 bg-indigo-50 px-2 py-0.5 rounded-md">+2</span>
+                          </div>
+                        )}
                       </motion.div>
                     ))}
                   </div>
@@ -350,25 +359,25 @@ const OrganizerSchedulePage = () => {
       {/* Bottom Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Highlight Card */}
-        <div className="lg:col-span-2 bg-[#f8fafc] rounded-[1.75rem] overflow-hidden flex flex-col md:flex-row relative shadow-sm border border-slate-100 group">
-          <div className="p-6 md:p-7 flex-1 z-10 bg-white md:bg-transparent">
-            <span className="inline-block bg-[#5c46e5] text-white text-[9px] font-black px-3 py-1 rounded-full mb-4 uppercase tracking-widest shadow-sm">Điểm nhấn tuần tới</span>
-            <h3 className="text-2xl font-black text-slate-900 mb-3 font-headline tracking-tight leading-tight">Đại nhạc hội Indigo Summer 2026</h3>
-            <p className="text-slate-600 font-medium mb-6 max-w-md text-sm leading-relaxed">Sự kiện âm nhạc lớn nhất năm với sự góp mặt của hơn 20 nghệ sĩ nổi tiếng toàn quốc.</p>
+        <div className="lg:col-span-2 bg-[#f8fafc] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row relative shadow-sm border border-slate-100 group">
+          <div className="p-8 md:p-10 flex-1 z-10 bg-white md:bg-transparent">
+            <span className="inline-block bg-[#5c46e5] text-white text-[10px] font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-widest shadow-sm">Điểm nhấn tuần tới</span>
+            <h3 className="text-3xl font-black text-slate-900 mb-4 font-headline tracking-tight leading-tight">Đại nhạc hội Indigo Summer 2026</h3>
+            <p className="text-slate-600 font-medium mb-8 max-w-md leading-relaxed">Sự kiện âm nhạc lớn nhất năm với sự góp mặt của hơn 20 nghệ sĩ nổi tiếng toàn quốc.</p>
 
-            <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-xs">
-                <span className="material-symbols-outlined text-primary text-[16px]">calendar_today</span>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-sm">
+                <span className="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
                 15 - 17 Tháng 4
               </div>
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-xs">
-                <span className="material-symbols-outlined text-primary text-[16px]">group</span>
+              <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-sm">
+                <span className="material-symbols-outlined text-primary text-[18px]">group</span>
                 2,500 Khách
               </div>
             </div>
           </div>
           {/* Image Background for right side */}
-          <div className="md:w-2/5 md:absolute right-0 top-0 bottom-0 overflow-hidden relative min-h-[200px]">
+          <div className="md:w-2/5 md:absolute right-0 top-0 bottom-0 overflow-hidden relative min-h-[250px]">
             {/* Gradient fade to blend image with left side */}
             <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-10 hidden md:block"></div>
             <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=800" alt="Concert" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
@@ -376,32 +385,32 @@ const OrganizerSchedulePage = () => {
         </div>
 
         {/* Stats Card */}
-        <div className="bg-[#5c46e5] rounded-[1.75rem] p-6 md:p-7 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group cursor-pointer flex flex-col justify-between">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-white/20 transition-all duration-500"></div>
+        <div className="bg-[#5c46e5] rounded-[2.5rem] p-8 md:p-10 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group cursor-pointer flex flex-col justify-between">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-white/20 transition-all duration-500"></div>
 
           <div>
-            <p className="text-[9px] font-black opacity-80 uppercase tracking-widest mb-1.5">Thống kê nhanh</p>
-            <h3 className="text-xl font-black mb-6 font-headline">Dự án hoạt động</h3>
+            <p className="text-[10px] font-black opacity-80 uppercase tracking-widest mb-2">Thống kê nhanh</p>
+            <h3 className="text-2xl font-black mb-8 font-headline">Dự án hoạt động</h3>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-6 mb-8">
               <div>
-                <p className="text-3xl font-black mb-0.5">24</p>
-                <p className="text-[10px] font-medium opacity-80">Tổng sự kiện</p>
+                <p className="text-4xl font-black mb-1">24</p>
+                <p className="text-xs font-medium opacity-80">Tổng sự kiện</p>
               </div>
               <div>
-                <p className="text-lg font-bold mb-0.5 pt-2">12</p>
-                <p className="text-[9px] font-medium opacity-80 uppercase tracking-wider">Đã hoàn thành</p>
+                <p className="text-xl font-bold mb-1 pt-3">12</p>
+                <p className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Đã hoàn thành</p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-white/20 pt-4">
+          <div className="flex items-center justify-between border-t border-white/20 pt-6">
             <div>
-              <p className="text-2xl font-black mb-0.5">08</p>
-              <p className="text-[9px] font-medium opacity-80 uppercase tracking-wider">Đang chờ</p>
+              <p className="text-3xl font-black mb-1">08</p>
+              <p className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Đang chờ</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md group-hover:bg-white group-hover:text-primary transition-all duration-300 shadow-inner">
-              <span className="material-symbols-outlined text-[18px]">trending_up</span>
+            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md group-hover:bg-white group-hover:text-primary transition-all duration-300 shadow-inner">
+              <span className="material-symbols-outlined">trending_up</span>
             </div>
           </div>
         </div>
