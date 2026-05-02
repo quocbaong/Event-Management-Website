@@ -85,4 +85,3 @@ Dự án đã được cấu hình sẵn ESLint (`eslint.config.js`) để đả
   ```
 
 ---
-*Lưu ý: Bạn có thể cập nhật thêm thông tin về các biến môi trường (`.env`) hoặc các cấu hình API backend chi tiết hơn khi dự án phát triển hoàn thiện.*
