@@ -28,6 +28,8 @@ import OrganizerTimelinePage from '../pages/OrganizerTimelinePage';
 import OrganizerReportPage from '../pages/OrganizerReportPage';
 import OrganizerReportAnalyticsPage from '../pages/OrganizerReportAnalyticsPage';
 import OrganizerReportTemplatesPage from '../pages/OrganizerReportTemplatesPage';
+import OrganizerFinancePage from '../pages/OrganizerFinancePage';
+import OrganizerEventFinancePage from '../pages/OrganizerEventFinancePage';
 
 
 
@@ -74,6 +76,8 @@ const AppRouter = () => {
           <Route path="/organizer/reports" element={<OrganizerReportPage />} />
           <Route path="/organizer/reports/analytics" element={<OrganizerReportAnalyticsPage />} />
           <Route path="/organizer/reports/templates" element={<OrganizerReportTemplatesPage />} />
+          <Route path="/organizer/finance" element={<OrganizerFinancePage />} />
+          <Route path="/organizer/finance/:id" element={<OrganizerEventFinancePage />} />
           {/* Add other organizer routes here */}
         </Route>
 

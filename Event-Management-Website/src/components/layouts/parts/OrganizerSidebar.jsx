@@ -54,6 +54,8 @@ const OrganizerSidebar = () => {
             ? location.pathname.startsWith('/organizer/events') 
             : item.label === "Báo cáo"
             ? location.pathname.startsWith('/organizer/reports')
+            : item.label === "Tài chính"
+            ? location.pathname.startsWith('/organizer/finance')
             : location.pathname === item.path;
           return (
             <button
