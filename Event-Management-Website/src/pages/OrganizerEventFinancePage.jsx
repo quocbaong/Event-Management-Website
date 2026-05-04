@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend
 } from 'recharts';
+import TransactionHistoryModal from '../components/modals/TransactionHistoryModal';
 
 const mockEventDetails = {
   1: { name: 'Lễ hội Âm nhạc Mùa Hè', date: '2026-06-15', status: 'Hoàn thành' },
@@ -18,14 +19,15 @@ const mockTicketSales = [
 ];
 
 const mockEventTransactions = [
-  { id: 'EVT-001', user: 'Nguyen Van A', ticketType: 'VIP', amount: 500000, date: '2026-05-03 10:30', status: 'Thành công' },
-  { id: 'EVT-002', user: 'Tran Thi B', ticketType: 'Regular', amount: 300000, date: '2026-05-03 11:15', status: 'Thành công' },
-  { id: 'EVT-003', user: 'Le Van C', ticketType: 'Early Bird', amount: 200000, date: '2026-05-02 09:00', status: 'Hoàn tiền' },
+  { id: 'EVT-001', description: 'Bán vé VIP - Nguyen Van A', type: 'Thu nhập', amount: 500000, date: '2026-05-03 10:30', status: 'Thành công' },
+  { id: 'EVT-002', description: 'Bán vé Regular - Tran Thi B', type: 'Thu nhập', amount: 300000, date: '2026-05-03 11:15', status: 'Thành công' },
+  { id: 'EVT-003', description: 'Hoàn vé Early Bird - Le Van C', type: 'Hoàn tiền', amount: -200000, date: '2026-05-02 09:00', status: 'Hoàn tiền' },
 ];
 
 const OrganizerEventFinancePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const event = mockEventDetails[id] || { name: 'Sự kiện không xác định', date: '---', status: '---' };
 
   const formatCurrency = (value) => {
@@ -172,7 +174,13 @@ const OrganizerEventFinancePage = () => {
       <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">Lịch sử giao dịch</h2>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsTransactionModalOpen(true)}
+              className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline"
+            >
+              Xem tất cả
+            </button>
             <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
               <span className="material-symbols-outlined text-sm">filter_list</span>
             </button>
@@ -214,6 +222,13 @@ const OrganizerEventFinancePage = () => {
           </table>
         </div>
       </div>
+
+      {/* Transaction History Modal */}
+      <TransactionHistoryModal 
+        isOpen={isTransactionModalOpen}
+        onClose={() => setIsTransactionModalOpen(false)}
+        transactions={mockEventTransactions}
+      />
     </div>
   );
 };
