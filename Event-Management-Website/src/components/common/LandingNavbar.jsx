@@ -6,6 +6,7 @@ const LandingNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,13 +16,44 @@ const LandingNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Intersection Observer for sections
+  useEffect(() => {
+    if (location.pathname !== '/') return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-80px 0px -40% 0px',
+      threshold: 0
+    };
+
+    const handleIntersect = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+    const sectionIds = ['hero', 'features', 'solutions', 'events', 'pricing', 'footer'];
+    
+    sectionIds.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [location.pathname]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveSection('hero');
   };
 
   const scrollToId = (id) => {
     const element = document.getElementById(id);
     if (element) {
+      setActiveSection(id);
       const offset = 80; // Navbar height offset
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
@@ -36,12 +68,48 @@ const LandingNavbar = () => {
   };
 
   const navLinks = [
-    { name: 'Trang chủ', id: 'hero', onClick: () => { navigate('/'); scrollToTop(); }, isActive: location.pathname === '/', hasDropdown: false },
-    { name: 'Tính năng', id: 'features', onClick: () => scrollToId('features'), hasDropdown: false },
-    { name: 'Giải pháp', id: 'solutions', onClick: () => scrollToId('solutions'), hasDropdown: false },
-    { name: 'Sự kiện', id: 'events', onClick: () => scrollToId('events'), isActive: location.pathname.startsWith('/events'), hasDropdown: false },
-    { name: 'Tài nguyên', id: 'resources', onClick: () => scrollToId('footer'), hasDropdown: false },
-    { name: 'Giá', id: 'pricing', onClick: () => scrollToId('pricing'), hasDropdown: false },
+    { 
+      name: 'Trang chủ', 
+      id: 'hero', 
+      onClick: () => { navigate('/'); scrollToTop(); }, 
+      isActive: location.pathname === '/' && activeSection === 'hero', 
+      hasDropdown: false 
+    },
+    { 
+      name: 'Tính năng', 
+      id: 'features', 
+      onClick: () => scrollToId('features'), 
+      isActive: location.pathname === '/' && activeSection === 'features',
+      hasDropdown: false 
+    },
+    { 
+      name: 'Giải pháp', 
+      id: 'solutions', 
+      onClick: () => scrollToId('solutions'), 
+      isActive: location.pathname === '/' && activeSection === 'solutions',
+      hasDropdown: false 
+    },
+    { 
+      name: 'Sự kiện', 
+      id: 'events', 
+      onClick: () => scrollToId('events'), 
+      isActive: location.pathname.startsWith('/events') || (location.pathname === '/' && activeSection === 'events'), 
+      hasDropdown: false 
+    },
+    { 
+      name: 'Tài nguyên', 
+      id: 'resources', 
+      onClick: () => scrollToId('footer'), 
+      isActive: location.pathname === '/' && activeSection === 'footer',
+      hasDropdown: false 
+    },
+    { 
+      name: 'Giá', 
+      id: 'pricing', 
+      onClick: () => scrollToId('pricing'), 
+      isActive: location.pathname === '/' && activeSection === 'pricing',
+      hasDropdown: false 
+    },
   ];
 
   return (
