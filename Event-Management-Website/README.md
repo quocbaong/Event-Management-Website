@@ -1,87 +1,96 @@
-# Event Management System - Frontend
+# 🎭 EventHub - Hệ thống Quản lý Sự kiện Toàn diện
 
-Dự án Frontend cho Hệ thống Quản lý Sự kiện (Event Management Website) được xây dựng với React và Vite, cung cấp giao diện người dùng hiện đại, tương tác cao cho cả người tham gia và nhà tổ chức sự kiện.
+![EventHub Hero](./public/readme-hero.png)
 
-## 🚀 Công nghệ sử dụng
+**EventHub** là một nền tảng quản lý sự kiện hiện đại, được thiết kế để tối ưu hóa trải nghiệm cho cả **Nhà tổ chức (Organizer)** và **Người tham gia (Attendee)**. Với giao diện tinh tế, hiệu suất cao và bộ tính năng mạnh mẽ, EventHub giúp việc quản lý sự kiện trở nên đơn giản và chuyên nghiệp hơn bao giờ hết.
 
-Dự án sử dụng các công nghệ và thư viện hiện đại nhất để đảm bảo hiệu suất và trải nghiệm người dùng:
+---
 
-- **Core**: React 19, Vite, React Router DOM
-- **UI & Styling**: TailwindCSS v4, Material UI (MUI), Framer Motion (cho animations)
-- **Biểu đồ & Thống kê**: Chart.js, react-chartjs-2, Recharts
-- **Lịch & Thời gian**: FullCalendar (@fullcalendar/react, daygrid, timegrid, interaction)
-- **Tiện ích**: Axios (gọi API), Lucide React (Icons), qrcode.react (Tạo mã QR)
+## ✨ Tính năng Nổi bật
 
-## ✨ Tính năng nổi bật
+### 👔 Dành cho Nhà tổ chức (Organizer)
+- **Bảng điều khiển thông minh**: Theo dõi tổng quan doanh thu, số lượng người tham gia và trạng thái các sự kiện theo thời gian thực.
+- **Quản lý Sự kiện Chuyên sâu**: Tạo, chỉnh sửa và quản lý vòng đời sự kiện từ lúc bắt đầu đến khi kết thúc.
+- **Quản lý Người tham gia**: Danh sách chi tiết, theo dõi check-in và xuất dữ liệu (CSV/Excel).
+- **Tài chính & Thanh toán**: Quản lý doanh thu từng sự kiện, lịch sử giao dịch và hệ thống yêu cầu rút tiền minh bạch.
+- **Lịch & Timeline**: Giao diện lịch (FullCalendar) trực quan giúp điều phối lịch trình sự kiện dễ dàng.
+- **Báo cáo & Phân tích**: Hệ thống mẫu báo cáo linh hoạt, hỗ trợ phân tích dữ liệu chuyên sâu và xuất file đa định dạng (PDF, Excel, CSV).
+- **Truyền thông (Broadcast)**: Gửi thông báo nhanh chóng đến toàn bộ người tham gia.
 
-Dựa trên quá trình phát triển, hệ thống cung cấp các tính năng chính sau (tập trung vào nghiệp vụ của Nhà tổ chức - Organizer):
+### 👤 Dành cho Người tham gia (Attendee)
+- **Khám phá Sự kiện**: Tìm kiếm và tham gia các sự kiện hấp dẫn xung quanh.
+- **Quản lý Vé (e-Ticket)**: Hệ thống vé điện tử dựa trên mã QR giúp check-in nhanh chóng và an toàn.
+- **Dashboard Cá nhân**: Theo dõi lịch sử tham gia, các sự kiện sắp tới và vé đã mua.
+- **Đánh giá & Phản hồi**: Chia sẻ trải nghiệm và đóng góp ý kiến cho các sự kiện đã tham gia.
 
-- **Bảng điều khiển Quản lý Sự kiện (Dashboard)**: Tổng quan số liệu thống kê trực quan với nhiều loại biểu đồ (Recharts, Chart.js).
-- **Lịch Sự kiện (Schedule Interface)**: Hiển thị sự kiện theo lịch (tháng, tuần, ngày) sử dụng FullCalendar. Hỗ trợ xem chi tiết sự kiện với modal chuyên nghiệp, hiệu ứng hover, và các chỉ thị trực quan (dots).
-- **Báo cáo & Phân tích (Reporting)**: Module báo cáo mạnh mẽ, cho phép tuỳ chỉnh (chọn khoảng thời gian) và xuất dữ liệu ra nhiều định dạng khác nhau (PDF, Excel, CSV).
-- **Trải nghiệm người dùng (UX)**: Giao diện hiện đại, responsive, kết hợp các hiệu ứng mượt mà từ Framer Motion và hệ thống icon từ Lucide/MUI.
-- **Tính năng mở rộng**: Hỗ trợ quét và tạo mã QR (qrcode.react) cho vé sự kiện hoặc điểm danh.
+---
 
-## 🛠 Hướng dẫn cài đặt và chạy dự án
+## 🚀 Công nghệ Sử dụng
+
+Dự án được xây dựng trên nền tảng công nghệ hiện đại nhất:
+
+| Category | Technology |
+| :--- | :--- |
+| **Core** | React 19, Vite, React Router DOM v7 |
+| **Styling** | TailwindCSS v4, Material UI (MUI), Framer Motion |
+| **Data Viz** | Chart.js, Recharts, React Chartjs 2 |
+| **Utility** | Axios, Lucide React, QR Code React |
+| **Scheduling** | FullCalendar Suite (@fullcalendar/react) |
+
+---
+
+## 🛠 Hướng dẫn Cài đặt
 
 ### Yêu cầu hệ thống
-- **Node.js**: Phiên bản >= 18.x (khuyến nghị sử dụng phiên bản LTS mới nhất)
+- **Node.js**: Phiên bản >= 18.x (Khuyên dùng LTS)
 - **NPM** hoặc **Yarn**
 
-### Các bước cài đặt hệ thống
+### Các bước thực hiện
 
-1. **Clone repository (nếu chưa có)**
+1. **Clone dự án**
    ```bash
    git clone <repository-url>
    cd Event-Management-Website/Event-Management-Website
    ```
 
-2. **Cài đặt các dependencies**
+2. **Cài đặt Dependencies**
    ```bash
    npm install
    ```
 
-3. **Chạy dự án ở môi trường phát triển (Development)**
+3. **Khởi chạy môi trường Phát triển**
    ```bash
    npm run dev
    ```
-   Dự án sẽ khởi chạy mặc định tại: `http://localhost:5173/` (Vite)
+   Ứng dụng sẽ chạy tại: `http://localhost:5173/`
 
-4. **Build dự án cho Production**
+4. **Đóng gói Production**
    ```bash
    npm run build
    ```
-   Thư mục `dist/` sẽ được tạo ra chứa các file tĩnh đã được tối ưu.
-
-5. **Xem trước bản Build (Preview)**
-   ```bash
-   npm run preview
-   ```
-
-## 📂 Cấu trúc thư mục (Tham khảo)
-
-```text
-Event-Management-Website/
-├── public/               # Tài nguyên tĩnh (images, icons,...)
-├── src/                  # Mã nguồn chính của ứng dụng
-│   ├── components/       # Các UI component có thể tái sử dụng
-│   ├── pages/            # Các trang giao diện (Ví dụ: OrganizerReportTemplatesPage, OrganizerSchedulePage,...)
-│   ├── routes/           # Cấu hình routing của ứng dụng
-│   ├── assets/           # Tài nguyên css, hình ảnh trong src
-│   ├── utils/            # Các hàm hỗ trợ
-│   ├── App.jsx           # Component gốc của React
-│   └── main.jsx          # Entry point của ứng dụng
-├── package.json          # Quản lý dependencies và scripts
-├── vite.config.js        # Cấu hình Vite
-└── tailwind.config.js    # Cấu hình TailwindCSS (nếu có)
-```
-
-## 📝 Quy ước code & Linter
-
-Dự án đã được cấu hình sẵn ESLint (`eslint.config.js`) để đảm bảo chất lượng code và tính nhất quán.
-- Chạy kiểm tra lỗi:
-  ```bash
-  npm run lint
-  ```
 
 ---
+
+## 📂 Cấu trúc Thư mục
+
+```text
+src/
+├── components/       # Các UI components dùng chung (Modals, Layouts, Tables)
+├── pages/            # Các trang giao diện chính (Organizer, Attendee, Public)
+├── router/           # Cấu hình định tuyến (AppRouter)
+├── assets/           # Tài nguyên tĩnh (CSS, Images)
+├── stores/           # Quản lý State (nếu có)
+├── App.jsx           # Component gốc
+└── main.jsx          # Điểm đầu vào (Entry point)
+```
+
+---
+
+## 📝 Quy ước Code
+
+Dự án tuân thủ tiêu chuẩn chất lượng nghiêm ngặt với **ESLint**.
+- Kiểm tra lỗi: `npm run lint`
+
+---
+
+© 2026 EventHub Project. Build with ❤️ for better event experiences.
