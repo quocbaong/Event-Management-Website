@@ -86,11 +86,4 @@ src/
 
 ---
 
-## 📝 Quy ước Code
-
-Dự án tuân thủ tiêu chuẩn chất lượng nghiêm ngặt với **ESLint**.
-- Kiểm tra lỗi: `npm run lint`
-
----
-
 © 2026 EventHub Project. Build with ❤️ for better event experiences.
