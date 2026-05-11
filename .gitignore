@@ -1,33 +1,45 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# ==========================================
+# Root Gitignore for Event Management Project
+# ==========================================
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# --- Common / OS ---
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+*.log
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
 
-# Env files (do not commit .env.local)
-.env
-.env.local
-.env.*.local
+# --- Frontend (Event-Management-Website) ---
+Event-Management-Website/node_modules/
+Event-Management-Website/dist/
+Event-Management-Website/build/
+Event-Management-Website/.env
+Event-Management-Website/.env.local
+Event-Management-Website/.env.development.local
+Event-Management-Website/.env.test.local
+Event-Management-Website/.env.production.local
+Event-Management-Website/npm-debug.log*
+Event-Management-Website/yarn-debug.log*
+Event-Management-Website/yarn-error.log*
 
-# Vite
-*.tsbuildinfo
+# --- Backend (Event-Management-Backend) ---
+Event-Management-Backend/target/
+Event-Management-Backend/!.mvn/wrapper/maven-wrapper.jar
+Event-Management-Backend/.apt_generated
+Event-Management-Backend/.classpath
+Event-Management-Backend/.factorypath
+Event-Management-Backend/.project
+Event-Management-Backend/.settings
+Event-Management-Backend/.springBeans
+Event-Management-Backend/.sts4-cache
+Event-Management-Backend/*.iws
+Event-Management-Backend/*.iml
+Event-Management-Backend/*.ipr
+Event-Management-Backend/.env
+Event-Management-Backend/.env.local
 
+# --- Docker ---
+.docker/
