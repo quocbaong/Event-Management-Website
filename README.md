@@ -1,4 +1,4 @@
-# 🎫 EventHub — Event Management System
+# 🎫 Prestige Planner — Event Management System
 
 Chào mừng bạn đến với dự án **EventHub**.
 
