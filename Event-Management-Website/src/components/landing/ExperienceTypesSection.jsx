@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import inPersonVid from '../../assets/video/inperson-event.webm';
-import virtualVid from '../../assets/video/virtual-event.webm';
-import hybridVid from '../../assets/video/hybrid-event.webm';
+import inPersonVid from '../../assets/Video/inperson-event.webm';
+import virtualVid from '../../assets/Video/virtual-event.webm';
+import hybridVid from '../../assets/Video/hybrid-event.webm';
 
 const ExperienceTypesSection = () => {
   const types = [
