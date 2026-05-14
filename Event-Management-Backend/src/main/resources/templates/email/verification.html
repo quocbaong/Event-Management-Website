@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực email</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:'Segoe UI',Arial,sans-serif">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+        style="background-color:#f4f7fa;padding:40px 0">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="560" cellspacing="0" cellpadding="0"
+                    style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+                    <tr>
+                        <td
+                            style="background:linear-gradient(135deg,#667eea,#764ba2);padding:32px 40px;text-align:center">
+                            <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:600">Prestige Planner</h1>
+                            <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px">Xác thực địa chỉ email
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:40px">
+                            <p style="margin:0 0 16px;font-size:16px;color:#333">Xin chào <strong
+                                    th:text="${displayName}">Người dùng</strong>,</p>
+                            <p style="margin:0 0 24px;font-size:15px;color:#555;line-height:1.6">
+                                Cảm ơn bạn đã đăng ký tài khoản trên <strong>Prestige Planner</strong>.
+                                Vui lòng nhấn vào nút bên dưới để xác thực địa chỉ email của bạn.
+                            </p>
+                            <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 32px">
+                                <tr>
+                                    <td
+                                        style="border-radius:8px;background:linear-gradient(135deg,#667eea,#764ba2);padding:0">
+                                        <a th:href="${verificationUrl}"
+                                            style="display:inline-block;padding:14px 40px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;border-radius:8px">Xác
+                                            thực email</a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin:0 0 8px;font-size:13px;color:#999;line-height:1.5">
+                                Hoặc copy đường dẫn sau vào trình duyệt:
+                            </p>
+                            <p style="margin:0 0 24px;font-size:12px;color:#667eea;word-break:break-all"
+                                th:text="${verificationUrl}">url</p>
+                            <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+                            <p style="margin:0;font-size:13px;color:#999;line-height:1.5">
+                                Nếu bạn không đăng ký tài khoản này, vui lòng bỏ qua email này.
+                                <br>Liên kết có hiệu lực trong 24 giờ.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#fafafa;padding:20px 40px;text-align:center;border-top:1px solid #eee">
+                            <p style="margin:0;font-size:12px;color:#aaa">&copy; 2026 EventHub. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

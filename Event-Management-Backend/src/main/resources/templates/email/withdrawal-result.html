@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả yêu cầu rút tiền</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:'Segoe UI',Arial,sans-serif">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f7fa;padding:40px 0">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+                <tr>
+                    <td th:style="'padding:32px 40px;text-align:center;background:linear-gradient(135deg,' + (${status} == 'COMPLETED' ? '#43e97b,#38f9d7' : '#f093fb,#f5576c') + ')'">
+                        <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:600">
+                            <th:block th:if="${status == 'COMPLETED'}">&#10003; Rút tiền thành công</th:block>
+                            <th:block th:if="${status != 'COMPLETED'}">&#10007; Yêu cầu bị từ chối</th:block>
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:40px">
+                        <p style="margin:0 0 20px;font-size:16px;color:#333">
+                            Xin chào <strong th:text="${organizer.organizerProfile?.companyName != null ? organizer.organizerProfile.companyName : organizer.email}">Người dùng</strong>,
+                        </p>
+                        <p style="margin:0 0 24px;font-size:15px;color:#555;line-height:1.6">
+                            <th:block th:if="${status == 'COMPLETED'}">
+                                Yêu cầu rút tiền của bạn đã được xử lý thành công. Số tiền sẽ được chuyển vào tài khoản ngân hàng của bạn trong vòng 1-3 ngày làm việc.
+                            </th:block>
+                            <th:block th:if="${status != 'COMPLETED'}">
+                                Yêu cầu rút tiền của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin và gửi yêu cầu mới.
+                            </th:block>
+                        </p>
+
+                        <div style="background-color:#f8faff;border-radius:8px;padding:20px;margin-bottom:24px">
+                            <table cellspacing="0" cellpadding="0" style="font-size:14px;color:#555;width:100%">
+                                <tr>
+                                    <td style="padding:6px 12px 6px 0;color:#888;width:140px">Mã yêu cầu</td>
+                                    <td style="padding:6px 0;font-weight:600" th:text="${request.id}">UUID</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 12px 6px 0;color:#888">Số tiền</td>
+                                    <td style="padding:6px 0;font-weight:600" th:text="${#numbers.formatDecimal(request.amount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 12px 6px 0;color:#888">Ngân hàng</td>
+                                    <td style="padding:6px 0" th:text="${request.bankName}">Bank</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 12px 6px 0;color:#888">Số tài khoản</td>
+                                    <td style="padding:6px 0" th:text="${request.bankAccount}">123456</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 12px 6px 0;color:#888">Chủ tài khoản</td>
+                                    <td style="padding:6px 0" th:text="${request.accountOwner}">Owner</td>
+                                </tr>
+                                <tr th:if="${request.adminNote != null}">
+                                    <td style="padding:6px 12px 6px 0;color:#888">Ghi chú admin</td>
+                                    <td style="padding:6px 0;font-style:italic" th:text="${request.adminNote}">Note</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <p style="margin:0;font-size:13px;color:#999;line-height:1.5">
+                            Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với bộ phận hỗ trợ qua email support@eventhub.vn.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background-color:#fafafa;padding:20px 40px;text-align:center;border-top:1px solid #eee">
+                        <p style="margin:0;font-size:12px;color:#aaa">&copy; 2026 Prestige Planner. All rights reserved.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
