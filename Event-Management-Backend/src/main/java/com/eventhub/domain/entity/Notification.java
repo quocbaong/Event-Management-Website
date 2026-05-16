@@ -42,6 +42,7 @@ public class Notification extends BaseEntity {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private NotificationType type;
 

@@ -58,11 +58,13 @@ public class Event extends BaseEntity {
     private String shortDesc;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     @Builder.Default
     private EventCategory category = EventCategory.OTHER;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     @Builder.Default
     private EventStatus status = EventStatus.DRAFT;
