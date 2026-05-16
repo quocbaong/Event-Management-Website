@@ -75,7 +75,7 @@ app:
   qr:
     secret: ${QR_SECRET:qr-secret-key-for-signing}
   email:
-    from: ${EMAIL_FROM:EventHub <noreply@eventhub.vn>}
+    from: ${EMAIL_FROM:qdai1209@gmail.com}
 
 # Swagger / OpenAPI
 springdoc:
