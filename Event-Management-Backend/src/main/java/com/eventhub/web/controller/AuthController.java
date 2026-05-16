@@ -52,10 +52,16 @@ public class AuthController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    @PostMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        authService.verifyEmail(token);
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtp(@Valid @RequestBody com.eventhub.web.dto.auth.VerifyOtpRequest request) {
+        authService.verifyOtp(request.getEmail(), request.getOtp());
         return ResponseEntity.ok("Email verified successfully");
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<String> resendOtp(@RequestParam String email) {
+        authService.resendOtp(email);
+        return ResponseEntity.ok("OTP resent successfully");
     }
 
     @PostMapping("/forgot-password")

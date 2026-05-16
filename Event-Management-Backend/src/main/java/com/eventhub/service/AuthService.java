@@ -37,6 +37,10 @@ public class AuthService {
     private final UserMapper userMapper;
     private final EmailService emailService;
     private final JwtConfig jwtProperties;
+    private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+
+    private static final String OTP_PREFIX = "otp:";
+    private static final long OTP_EXPIRY_MINUTES = 5;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -60,11 +64,61 @@ public class AuthService {
                 .build();
         attendeeProfileRepository.save(profile);
 
-        // Send verify email (Mock for now, or use a token)
-        String verifyToken = UUID.randomUUID().toString();
-        // In a real app, store this token in DB or Redis
-        emailService.sendEmail(user.getEmail(), "Verify your email", 
-                "Click here to verify: http://localhost:8080/api/v1/auth/verify-email?token=" + verifyToken);
+        // Generate and send OTP
+        String otp = generateOtp();
+        saveOtpToRedis(request.getEmail(), otp);
+        
+        emailService.sendEmail(
+            request.getEmail(), 
+            "Xác thực tài khoản EventHub", 
+            "Mã OTP của bạn là: " + otp + ". Mã có hiệu lực trong " + OTP_EXPIRY_MINUTES + " phút."
+        );
+    }
+
+    public void verifyOtp(String email, String otp) {
+        String storedOtp = redisTemplate.opsForValue().get(OTP_PREFIX + email);
+        if (storedOtp == null || !storedOtp.equals(otp)) {
+            throw new RuntimeException("Mã OTP không chính xác hoặc đã hết hạn");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        
+        user.setIsVerified(true);
+        userRepository.save(user);
+        
+        // Delete OTP after successful verification
+        redisTemplate.delete(OTP_PREFIX + email);
+    }
+
+    public void resendOtp(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        
+        if (user.getIsVerified()) {
+            throw new RuntimeException("Tài khoản đã được xác thực");
+        }
+
+        String otp = generateOtp();
+        saveOtpToRedis(email, otp);
+        
+        emailService.sendEmail(
+            email, 
+            "Gửi lại mã xác thực EventHub", 
+            "Mã OTP mới của bạn là: " + otp
+        );
+    }
+
+    private String generateOtp() {
+        return String.format("%06d", new java.util.Random().nextInt(1000000));
+    }
+
+    private void saveOtpToRedis(String email, String otp) {
+        redisTemplate.opsForValue().set(
+            OTP_PREFIX + email, 
+            otp, 
+            java.time.Duration.ofMinutes(OTP_EXPIRY_MINUTES)
+        );
     }
 
     public AuthResponse login(LoginRequest request) {
