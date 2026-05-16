@@ -1,6 +1,6 @@
 package com.eventhub.service;
 
-import com.eventhub.config.JwtProperties;
+import com.eventhub.config.JwtConfig;
 import com.eventhub.domain.entity.AttendeeProfile;
 import com.eventhub.domain.entity.RefreshToken;
 import com.eventhub.domain.entity.User;
@@ -36,7 +36,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final EmailService emailService;
-    private final JwtProperties jwtProperties;
+    private final JwtConfig jwtProperties;
 
     @Transactional
     public void register(RegisterRequest request) {
