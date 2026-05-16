@@ -3,7 +3,7 @@ spring:
     name: event-management-backend
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://127.0.0.1:5433/eventdb}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/eventdb}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     hikari:
@@ -33,7 +33,7 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:127.0.0.1}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
   cache:
@@ -42,10 +42,10 @@ spring:
       time-to-live: 300000
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: qdai1209@gmail.com
-    password: zlgzivygukzbqgov
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:qdai1209@gmail.com}
+    password: ${SMTP_PASS:zlgzivygukzbqgov}
     properties:
       mail:
         smtp:
