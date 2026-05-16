@@ -1,6 +1,6 @@
 package com.eventhub.security;
 
-import com.eventhub.config.JwtProperties;
+import com.eventhub.config.JwtConfig;
 import com.eventhub.domain.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +19,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    private final JwtProperties jwtProperties;
+    private final JwtConfig jwtProperties;
 
     public String generateAccessToken(User user) {
         Map<String, Object> claims = new HashMap<>();
