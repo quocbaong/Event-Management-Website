@@ -1,12 +1,40 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, Check } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Check, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../stores/AuthContext';
 import logo from '../assets/logo.png';
 
 const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { login } = useAuth();
   const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+    
+    try {
+      const user = await login(email, password);
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'ORGANIZER') {
+        navigate('/organizer/dashboard');
+      } else {
+        navigate('/attendee/dashboard');
+      }
+    } catch (err) {
+      setError(err || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white layout-fixed">
@@ -70,6 +98,12 @@ const LoginPage = () => {
             <p className="text-lg text-gray-500 font-medium">Đăng nhập để quản lý tầm nhìn của bạn.</p>
           </div>
 
+          {error && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+              {error}
+            </div>
+          )}
+
           {/* Social Logins */}
           <div className="flex gap-4 mb-10">
             <button className="flex-1 flex items-center justify-center gap-3 py-4 px-4 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-gray-100 hover:border-gray-200 transition-all duration-300 font-bold text-gray-700 shadow-sm active:scale-[0.98]">
@@ -94,7 +128,7 @@ const LoginPage = () => {
             <span className="relative bg-white px-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">hoặc với email</span>
           </div>
 
-          <form className="space-y-8">
+          <form className="space-y-8" onSubmit={handleSubmit}>
             <div className="group">
               <label className="block text-sm font-bold text-gray-700 mb-2.5 ml-1" htmlFor="email">Địa chỉ Email</label>
               <div className="relative">
@@ -104,8 +138,11 @@ const LoginPage = () => {
                   <input 
                     type="email" 
                     id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-14 pr-5 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
                     placeholder="name@company.com"
+                    required
                   />
               </div>
             </div>
@@ -122,8 +159,11 @@ const LoginPage = () => {
                   <input 
                     type={showPassword ? 'text' : 'password'}
                     id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="block w-full pl-14 pr-14 py-4.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium placeholder-gray-400"
                     placeholder="••••••••"
+                    required
                   />
                 <button 
                   type="button"
@@ -144,11 +184,18 @@ const LoginPage = () => {
 
 
             <button 
-              type="button" 
-              onClick={() => navigate('/admin/dashboard')}
-              className="w-full bg-primary text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300 transform"
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full bg-indigo-600 text-white py-5 px-6 rounded-2xl font-bold text-lg hover:bg-indigo-700 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300 transform flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Đăng nhập vào EventArchitect
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  Đang xử lý...
+                </>
+              ) : (
+                'Đăng nhập vào EventArchitect'
+              )}
             </button>
           </form>
 

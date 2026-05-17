@@ -30,6 +30,29 @@ import OrganizerReportAnalyticsPage from '../pages/OrganizerReportAnalyticsPage'
 import OrganizerReportTemplatesPage from '../pages/OrganizerReportTemplatesPage';
 import OrganizerFinancePage from '../pages/OrganizerFinancePage';
 import OrganizerEventFinancePage from '../pages/OrganizerEventFinancePage';
+import { useAuth } from '../stores/AuthContext';
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
 
 
@@ -45,40 +68,40 @@ const AppRouter = () => {
         <Route path="/signup" element={<SignUpPage />} />
         
         {/* Organizer Protected Routes - With Sidebar/Header */}
-        <Route element={<MainLayout />}>
-          <Route path="/admin/dashboard" element={<DashboardPage />} />
-          <Route path="/admin/events" element={<GlobalEventsPage />} />
-          <Route path="/admin/broadcast" element={<BroadcastPage />} />
-          <Route path="/admin/feedback" element={<FeedbackPage />} />
-          <Route path="/admin/settings" element={<SettingsPage />} />
-          {/* Add other protected routes here */}
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><MainLayout /></ProtectedRoute>}>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="events" element={<GlobalEventsPage />} />
+          <Route path="broadcast" element={<BroadcastPage />} />
+          <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* Attendee Protected Routes - Separate Layout */}
-        <Route element={<AttendeeLayout />}>
-          <Route path="/attendee/dashboard" element={<AttendeeDashboardPage />} />
-          <Route path="/attendee/tickets" element={<AttendeeTicketsPage />} />
-          <Route path="/attendee/events" element={<AttendeeEventsPage />} />
-          <Route path="/attendee/explore" element={<AttendeeExplorePage />} />
-          <Route path="/attendee/qr" element={<AttendeeQRPage />} />
-          <Route path="/attendee/reviews" element={<AttendeeReviewPage />} />
-          {/* Add other attendee routes here: /attendee/tickets, /attendee/calendar, etc. */}
+        <Route path="/attendee" element={<ProtectedRoute allowedRoles={['ATTENDEE']}><AttendeeLayout /></ProtectedRoute>}>
+          <Route index element={<Navigate to="/attendee/dashboard" replace />} />
+          <Route path="dashboard" element={<AttendeeDashboardPage />} />
+          <Route path="tickets" element={<AttendeeTicketsPage />} />
+          <Route path="events" element={<AttendeeEventsPage />} />
+          <Route path="explore" element={<AttendeeExplorePage />} />
+          <Route path="qr" element={<AttendeeQRPage />} />
+          <Route path="reviews" element={<AttendeeReviewPage />} />
         </Route>
 
         {/* Organizer Protected Routes - New Role Layout */}
-        <Route element={<OrganizerLayout />}>
-          <Route path="/organizer/dashboard" element={<OrganizerDashboardPage />} />
-          <Route path="/organizer/events" element={<OrganizerEventsPage />} />
-          <Route path="/organizer/attendees" element={<OrganizerAttendeesPage />} />
-          <Route path="/organizer/events/:id/attendees" element={<OrganizerEventAttendeesPage />} />
-          <Route path="/organizer/schedule" element={<OrganizerSchedulePage />} />
-          <Route path="/organizer/timeline" element={<OrganizerTimelinePage />} />
-          <Route path="/organizer/reports" element={<OrganizerReportPage />} />
-          <Route path="/organizer/reports/analytics" element={<OrganizerReportAnalyticsPage />} />
-          <Route path="/organizer/reports/templates" element={<OrganizerReportTemplatesPage />} />
-          <Route path="/organizer/finance" element={<OrganizerFinancePage />} />
-          <Route path="/organizer/finance/:id" element={<OrganizerEventFinancePage />} />
-          {/* Add other organizer routes here */}
+        <Route path="/organizer" element={<ProtectedRoute allowedRoles={['ORGANIZER']}><OrganizerLayout /></ProtectedRoute>}>
+          <Route index element={<Navigate to="/organizer/dashboard" replace />} />
+          <Route path="dashboard" element={<OrganizerDashboardPage />} />
+          <Route path="events" element={<OrganizerEventsPage />} />
+          <Route path="attendees" element={<OrganizerAttendeesPage />} />
+          <Route path="events/:id/attendees" element={<OrganizerEventAttendeesPage />} />
+          <Route path="schedule" element={<OrganizerSchedulePage />} />
+          <Route path="timeline" element={<OrganizerTimelinePage />} />
+          <Route path="reports" element={<OrganizerReportPage />} />
+          <Route path="reports/analytics" element={<OrganizerReportAnalyticsPage />} />
+          <Route path="reports/templates" element={<OrganizerReportTemplatesPage />} />
+          <Route path="finance" element={<OrganizerFinancePage />} />
+          <Route path="finance/:id" element={<OrganizerEventFinancePage />} />
         </Route>
 
 

@@ -1,14 +1,52 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Building2, Eye, EyeOff, Sparkles, LineChart, Check } from 'lucide-react';
+import { Mail, Lock, User, Building2, Eye, EyeOff, Sparkles, LineChart, Check, Loader2 } from 'lucide-react';
 import heroIllustration from '../assets/hero-illustration.png';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../stores/AuthContext';
 import logo from '../assets/logo.png';
+import OTPVerificationModal from '../components/auth/OTPVerificationModal';
 
 const SignUpPage = () => {
+  const [fullName, setFullName] = useState('');
+  const [company, setCompany] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedType, setSelectedType] = useState('Doanh nghiệp');
   const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  
+  const { register } = useAuth();
   const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!agreed) {
+      setError('Bạn phải đồng ý với Điều khoản & Điều kiện.');
+      return;
+    }
+    
+    setError('');
+    setIsSubmitting(true);
+    
+    try {
+      await register({ fullName, email, password, organizationName: company, category: selectedType });
+      setRegisteredEmail(email);
+      setShowOtpModal(true);
+    } catch (err) {
+      setError(err || 'Đăng ký thất bại. Vui lòng thử lại sau.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerified = () => {
+    setShowOtpModal(false);
+    navigate('/login');
+  };
 
   const eventTypes = [
     { en: 'Corporate', vi: 'Doanh nghiệp' },
@@ -45,14 +83,6 @@ const SignUpPage = () => {
               <img src={heroIllustration} alt="Artistic Illustration" className="w-full h-full object-cover opacity-90" />
             </div>
 
-
-
-
-
-
-
-
-
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 hover:bg-white/20 hover:border-indigo-400/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.3)] hover:-translate-y-1 transition-all duration-300 cursor-default group">
                 <div className="w-10 h-10 bg-indigo-600/40 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300">
@@ -69,7 +99,6 @@ const SignUpPage = () => {
                 <p className="text-indigo-100/60 text-xs">Dữ liệu tương tác thời gian thực</p>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -78,12 +107,17 @@ const SignUpPage = () => {
       <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-8 bg-white overflow-hidden">
         <div className="w-full max-w-[480px] animate-in fade-in slide-in-from-right-4 duration-700">
           <div className="mb-6">
-
             <h2 className="text-3xl font-bold text-gray-900 mb-1">Tạo tài khoản của bạn</h2>
             <p className="text-gray-500 font-medium text-sm">Nhập thông tin chi tiết để bắt đầu hành trình.</p>
           </div>
 
-          <form className="space-y-4">
+          {error && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="group">
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1" htmlFor="name">Họ và Tên</label>
@@ -91,11 +125,14 @@ const SignUpPage = () => {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <User className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                   </div>
-                    <input 
-                      type="text" id="name"
-                      placeholder="Nguyễn Văn A"
-                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                    />
+                  <input 
+                    type="text" id="name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Nguyễn Văn A"
+                    className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                    required
+                  />
                 </div>
               </div>
               <div className="group">
@@ -106,6 +143,8 @@ const SignUpPage = () => {
                   </div>
                   <input 
                     type="text" id="company"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
                     placeholder="Công ty của bạn"
                     className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
                   />
@@ -119,11 +158,14 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                  <input 
-                    type="email" id="email"
-                    placeholder="name@company.com"
-                    className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                  />
+                <input 
+                  type="email" id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                  required
+                />
               </div>
             </div>
 
@@ -133,12 +175,15 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
                 </div>
-                  <input 
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    placeholder="••••••••"
-                    className="block w-full pl-11 pr-12 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                  />
+                <input 
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="block w-full pl-11 pr-12 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                  required
+                />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -179,11 +224,18 @@ const SignUpPage = () => {
             </div>
 
             <button 
-              type="button"
-              onClick={() => navigate('/admin/dashboard')}
-              className="w-full bg-primary text-white py-3 px-6 rounded-2xl font-bold text-base hover:bg-primary-hover hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98] transition-all duration-300"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-indigo-600 text-white py-3 px-6 rounded-2xl font-bold text-base hover:bg-indigo-700 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Tạo tài khoản của tôi
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Đang xử lý...
+                </>
+              ) : (
+                'Tạo tài khoản của tôi'
+              )}
             </button>
           </form>
 
@@ -209,6 +261,12 @@ const SignUpPage = () => {
           </p>
         </div>
       </div>
+      <OTPVerificationModal 
+        isOpen={showOtpModal}
+        email={registeredEmail}
+        onClose={() => setShowOtpModal(false)}
+        onVerified={handleVerified}
+      />
     </div>
   );
 };
