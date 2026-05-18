@@ -565,7 +565,7 @@ const OrganizerEventsPage = () => {
           <p className="text-on-surface-variant font-body">Quản lý và theo dõi hiệu suất các sự kiện của bạn.</p>
         </div>
         <button
-          onClick={handleCreate}
+          onClick={() => navigate('/organizer/events/create')}
           className="bg-gradient-to-r from-primary to-primary-container text-white px-8 py-3.5 rounded-full font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-indigo-200"
         >
           <span className="material-symbols-outlined">add</span>
