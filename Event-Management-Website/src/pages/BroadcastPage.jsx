@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from '../lib/axios';
 import { 
   Send, 
@@ -29,7 +29,16 @@ const BroadcastPage = () => {
   const [target, setTarget] = useState('Tất cả người dùng');
   const [body, setBody] = useState('');
   const [schedule, setSchedule] = useState('now');
-  const [scheduleTime, setScheduleTime] = useState('');
+  
+  // Custom Date Time Picker State
+  const [showDateTimePicker, setShowDateTimePicker] = useState(false);
+  const [pickerMonth, setPickerMonth] = useState(new Date().getMonth());
+  const [pickerYear, setPickerYear] = useState(new Date().getFullYear());
+  const [selectedDateObj, setSelectedDateObj] = useState(new Date(Date.now() + 3600000)); // default to 1 hour later
+  const [selectedHour, setSelectedHour] = useState('09');
+  const [selectedMinute, setSelectedMinute] = useState('00');
+  
+  const dateTimePickerRef = useRef(null);
 
   // Loaded Data State
   const [history, setHistory] = useState([]);
@@ -59,7 +68,22 @@ const BroadcastPage = () => {
 
   useEffect(() => {
     fetchData();
+    
+    // Close picker when clicking outside
+    const handleClickOutside = (event) => {
+      if (dateTimePickerRef.current && !dateTimePickerRef.current.contains(event.target)) {
+        setShowDateTimePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Format string for API (YYYY-MM-DDTHH:mm)
+  const apiFormattedTime = `${selectedDateObj.getFullYear()}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${String(selectedDateObj.getDate()).padStart(2, '0')}T${selectedHour}:${selectedMinute}`;
+  
+  // Format string for UI display
+  const uiFormattedTime = `${selectedHour}:${selectedMinute} - ${String(selectedDateObj.getDate()).padStart(2, '0')}/${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}/${selectedDateObj.getFullYear()}`;
 
   const handleSendBroadcast = async () => {
     if (!title.trim()) {
@@ -79,7 +103,7 @@ const BroadcastPage = () => {
         target,
         body,
         scheduleOption: schedule,
-        scheduleTime
+        scheduleTime: schedule === 'now' ? '' : apiFormattedTime
       });
 
       alert(schedule === 'now' ? 'Bản tin đã được phát đi thành công!' : 'Đã lên lịch phát bản tin thành công!');
@@ -88,7 +112,6 @@ const BroadcastPage = () => {
       setTitle('');
       setBody('');
       setSchedule('now');
-      setScheduleTime('');
       
       // Refresh History
       fetchData();
@@ -99,6 +122,54 @@ const BroadcastPage = () => {
       setSubmitting(false);
     }
   };
+
+  // Helper to generate days grid for custom calendar
+  const generateCalendarDays = (month, year) => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Day of the week for first day (0 = Sunday, 1 = Monday, etc.)
+    // Shift so Monday is index 0
+    let startDayOfWeek = firstDay.getDay() - 1;
+    if (startDayOfWeek < 0) startDayOfWeek = 6;
+    
+    const days = [];
+    
+    // Prev Month padding
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      days.push({
+        day: prevMonthLastDay - i,
+        isCurrentMonth: false,
+        date: new Date(year, month - 1, prevMonthLastDay - i)
+      });
+    }
+    
+    // Current Month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({
+        day: i,
+        isCurrentMonth: true,
+        date: new Date(year, month, i)
+      });
+    }
+    
+    // Next Month padding
+    const remainingSlots = 42 - days.length;
+    for (let i = 1; i <= remainingSlots; i++) {
+      days.push({
+        day: i,
+        isCurrentMonth: false,
+        date: new Date(year, month + 1, i)
+      });
+    }
+    
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays(pickerMonth, pickerYear);
+  const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
 
   return (
     <div className="p-8 bg-[#f8fafc] min-h-full font-sans animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -194,7 +265,10 @@ const BroadcastPage = () => {
                         name="schedule" 
                         className="hidden" 
                         checked={schedule === 'now'} 
-                        onChange={() => setSchedule('now')}
+                        onChange={() => {
+                          setSchedule('now');
+                          setShowDateTimePicker(false);
+                        }}
                       />
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${schedule === 'now' ? 'border-primary' : 'border-slate-300'}`}>
                         {schedule === 'now' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
@@ -217,16 +291,123 @@ const BroadcastPage = () => {
                     </label>
                   </div>
 
-                  <div className="flex gap-4">
-                     <div className="relative flex-1">
-                        <input 
-                          type="datetime-local" 
-                          value={scheduleTime}
-                          onChange={(e) => setScheduleTime(e.target.value)}
-                          className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-sm text-slate-600 outline-none font-bold cursor-pointer"
-                          disabled={schedule === 'now'}
-                        />
+                  {/* PREMIUM CUSTOM DATE/TIME PICKER */}
+                  <div className="relative" ref={dateTimePickerRef}>
+                     <div 
+                       onClick={() => schedule === 'later' && setShowDateTimePicker(!showDateTimePicker)}
+                       className={`w-full flex items-center justify-between border rounded-2xl p-4 text-sm font-bold transition-all outline-none ${
+                         schedule === 'now' 
+                           ? 'bg-slate-100/50 border-slate-200 text-slate-400 cursor-not-allowed'
+                           : 'bg-white border-slate-200 text-slate-700 cursor-pointer hover:border-primary/50'
+                       }`}
+                     >
+                       <span className="flex items-center gap-2">
+                         <Calendar className={`w-4 h-4 ${schedule === 'now' ? 'text-slate-300' : 'text-primary'}`} />
+                         {schedule === 'now' ? 'Tức thời (Không cần lập lịch)' : uiFormattedTime}
+                       </span>
+                       <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
                      </div>
+
+                     {/* Dropdown Calendar & Time Popup */}
+                     {showDateTimePicker && schedule === 'later' && (
+                       <div className="absolute top-full left-0 mt-3 w-80 bg-white rounded-3xl shadow-xl shadow-black/10 border border-slate-100 p-5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                         {/* Calendar Month Header */}
+                         <div className="flex justify-between items-center mb-4">
+                           <button 
+                             onClick={() => {
+                               if (pickerMonth === 0) {
+                                 setPickerMonth(11);
+                                 setPickerYear(y => y - 1);
+                               } else {
+                                 setPickerMonth(m => m - 1);
+                               }
+                             }}
+                             className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-800 transition-colors rounded-xl"
+                           >
+                             <ChevronRight className="w-4 h-4 rotate-180" />
+                           </button>
+                           <span className="font-extrabold text-slate-800 text-sm">
+                             {monthNames[pickerMonth]}, {pickerYear}
+                           </span>
+                           <button 
+                             onClick={() => {
+                               if (pickerMonth === 11) {
+                                 setPickerMonth(0);
+                                 setPickerYear(y => y + 1);
+                               } else {
+                                 setPickerMonth(m => m + 1);
+                               }
+                             }}
+                             className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-800 transition-colors rounded-xl"
+                           >
+                             <ChevronRight className="w-4 h-4" />
+                           </button>
+                         </div>
+
+                         {/* Days of Week Header */}
+                         <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                           <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                         </div>
+
+                         {/* Days Grid */}
+                         <div className="grid grid-cols-7 gap-1 text-center mb-5">
+                           {calendarDays.map((dayObj, idx) => {
+                             const isSelected = selectedDateObj.getDate() === dayObj.date.getDate() &&
+                                                selectedDateObj.getMonth() === dayObj.date.getMonth() &&
+                                                selectedDateObj.getFullYear() === dayObj.date.getFullYear();
+                             return (
+                               <button
+                                 key={idx}
+                                 onClick={() => setSelectedDateObj(dayObj.date)}
+                                 className={`py-2 text-xs font-bold rounded-xl transition-all ${
+                                   !dayObj.isCurrentMonth ? 'text-slate-300 hover:bg-slate-50/50' :
+                                   isSelected ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' :
+                                   'text-slate-700 hover:bg-slate-50'
+                                 }`}
+                               >
+                                 {dayObj.day}
+                               </button>
+                             );
+                           })}
+                         </div>
+
+                         {/* Custom Time Selector */}
+                         <div className="border-t border-slate-100 pt-4 flex items-center justify-between gap-4 mb-4">
+                           <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                             <Clock className="w-3.5 h-3.5 text-primary" /> Giờ gửi:
+                           </span>
+                           <div className="flex items-center gap-2">
+                             <select 
+                               value={selectedHour}
+                               onChange={(e) => setSelectedHour(e.target.value)}
+                               className="bg-slate-100 rounded-xl p-2 text-xs font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-200/80 transition-colors"
+                             >
+                               {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
+                                 <option key={h} value={h}>{h}</option>
+                               ))}
+                             </select>
+                             <span className="font-extrabold text-slate-400">:</span>
+                             <select 
+                               value={selectedMinute}
+                               onChange={(e) => setSelectedMinute(e.target.value)}
+                               className="bg-slate-100 rounded-xl p-2 text-xs font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-200/80 transition-colors"
+                             >
+                               {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => (
+                                 <option key={m} value={m}>{m}</option>
+                               ))}
+                             </select>
+                           </div>
+                         </div>
+
+                         {/* Confirm Footer */}
+                         <button 
+                           onClick={() => setShowDateTimePicker(false)}
+                           className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-2xl shadow-md shadow-primary/20 transition-all hover:-translate-y-0.5"
+                         >
+                           Áp dụng thiết lập
+                         </button>
+                       </div>
+                     )}
                   </div>
                 </div>
 
