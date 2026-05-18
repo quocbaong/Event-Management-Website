@@ -104,6 +104,8 @@ const CreateEventPage = () => {
       if (!form.venue.trim()) return setError('Vui lòng nhập tên địa điểm');
       if (!form.city.trim()) return setError('Vui lòng nhập thành phố');
       if (!form.address.trim()) return setError('Vui lòng nhập địa chỉ chi tiết');
+      if (!form.maxAttendees) return setError('Vui lòng nhập số lượng người tham gia tối đa');
+      if (parseInt(form.maxAttendees) <= 0) return setError('Số lượng người tham gia tối đa phải lớn hơn 0');
       if (!form.startDate) return setError('Vui lòng nhập thời gian bắt đầu');
       if (!form.endDate) return setError('Vui lòng nhập thời gian kết thúc');
 
@@ -201,8 +203,8 @@ const CreateEventPage = () => {
             <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">Bước {step} trên 3</span>
             <span className="text-xs font-bold text-slate-400">
               {step === 1 && 'Thông tin cơ bản'}
-              {step === 2 && 'Thời gian & Địa điểm'}
-              {step === 3 && 'Hình ảnh & Giới hạn'}
+              {step === 2 && 'Thời gian, Địa điểm & Quy mô'}
+              {step === 3 && 'Hình ảnh & Quảng bá'}
             </span>
           </div>
           <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -431,9 +433,9 @@ const CreateEventPage = () => {
                   <div className="border-b border-slate-100 pb-4">
                     <h3 className="text-lg font-black text-slate-800 font-headline flex items-center gap-2">
                       <MapPin className="w-5 h-5 text-indigo-600" />
-                      Thời gian & Địa điểm
+                      Thời gian, Địa điểm & Quy mô
                     </h3>
-                    <p className="text-xs text-slate-400 font-medium">Xác định thời gian diễn ra và vị trí tổ chức sự kiện.</p>
+                    <p className="text-xs text-slate-400 font-medium">Xác định địa điểm, thời gian diễn ra và số lượng người tham gia.</p>
                   </div>
 
                   {/* Location Grid */}
@@ -485,6 +487,24 @@ const CreateEventPage = () => {
                         className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-800 placeholder-slate-400"
                       />
                     </div>
+                  </div>
+
+                  {/* Max Attendees */}
+                  <div className="space-y-2 pt-4 border-t border-slate-50">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-indigo-500" />
+                      Số lượng người tham gia tối đa *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      name="maxAttendees"
+                      value={form.maxAttendees}
+                      onChange={handleInputChange}
+                      placeholder="Ví dụ: 100"
+                      min="1"
+                      className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-800 placeholder-slate-400"
+                    />
                   </div>
 
                   {/* Dates Grid */}
@@ -552,25 +572,9 @@ const CreateEventPage = () => {
                   <div className="border-b border-slate-100 pb-4">
                     <h3 className="text-lg font-black text-slate-800 font-headline flex items-center gap-2">
                       <ImageIcon className="w-5 h-5 text-indigo-600" />
-                      Hình ảnh & Giới hạn
+                      Hình ảnh & Quảng bá
                     </h3>
-                    <p className="text-xs text-slate-400 font-medium">Đặt giới hạn số lượng khách và cung cấp hình ảnh banner.</p>
-                  </div>
-
-                  {/* Max Attendees */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      Số lượng người tham gia tối đa (Không bắt buộc)
-                    </label>
-                    <input
-                      type="number"
-                      name="maxAttendees"
-                      value={form.maxAttendees}
-                      onChange={handleInputChange}
-                      placeholder="Bỏ trống nếu không giới hạn số lượng người"
-                      className="w-full px-5 py-3.5 rounded-2xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-bold text-slate-800 placeholder-slate-400"
-                    />
+                    <p className="text-xs text-slate-400 font-medium">Cung cấp hình ảnh banner và quảng bá sự kiện.</p>
                   </div>
 
                   {/* Banner URL */}
