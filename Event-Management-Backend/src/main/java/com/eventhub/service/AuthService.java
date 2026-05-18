@@ -2,10 +2,12 @@ package com.eventhub.service;
 
 import com.eventhub.config.JwtConfig;
 import com.eventhub.domain.entity.AttendeeProfile;
+import com.eventhub.domain.entity.OrganizerProfile;
 import com.eventhub.domain.entity.RefreshToken;
 import com.eventhub.domain.entity.User;
 import com.eventhub.domain.enums.UserRole;
 import com.eventhub.repository.AttendeeProfileRepository;
+import com.eventhub.repository.OrganizerProfileRepository;
 import com.eventhub.repository.RefreshTokenRepository;
 import com.eventhub.repository.UserRepository;
 import com.eventhub.security.JwtTokenProvider;
@@ -30,6 +32,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final AttendeeProfileRepository attendeeProfileRepository;
+    private final OrganizerProfileRepository organizerProfileRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
@@ -48,21 +51,31 @@ public class AuthService {
             throw new RuntimeException("Email already exists");
         }
 
+        UserRole role = request.getRole() != null ? request.getRole() : UserRole.ATTENDEE;
+
         User user = User.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(UserRole.ATTENDEE)
+                .role(role)
                 .isVerified(false)
                 .isActive(true)
                 .build();
 
         user = userRepository.save(user);
 
-        AttendeeProfile profile = AttendeeProfile.builder()
-                .user(user)
-                .displayName(request.getFullName())
-                .build();
-        attendeeProfileRepository.save(profile);
+        if (role == UserRole.ORGANIZER) {
+            OrganizerProfile profile = OrganizerProfile.builder()
+                    .user(user)
+                    .companyName(request.getCompanyName() != null ? request.getCompanyName() : request.getFullName())
+                    .build();
+            organizerProfileRepository.save(profile);
+        } else {
+            AttendeeProfile profile = AttendeeProfile.builder()
+                    .user(user)
+                    .displayName(request.getFullName())
+                    .build();
+            attendeeProfileRepository.save(profile);
+        }
 
         // Generate and send OTP
         String otp = generateOtp();

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import logo from '../../../assets/logo.png';
+import { useAuth } from '../../../stores/AuthContext';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
   <div
@@ -31,9 +32,11 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    navigate('/');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   const menuItems = [
