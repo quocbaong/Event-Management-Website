@@ -4,12 +4,12 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 const StatCard = ({ title, value, subtext, trend, trendValue, icon: Icon, iconBg, iconColor, rating }) => {
   return (
     <div className="bg-white p-6 rounded-[24px] border border-border-color hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-text-secondary text-sm font-semibold mb-1">{title}</h3>
-          <p className="text-2xl font-extrabold text-text-primary tracking-tight">{value}</p>
+      <div className="flex justify-between items-start gap-4 mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-text-secondary text-sm font-semibold mb-1 truncate" title={title}>{title}</h3>
+          <p className="text-[19px] sm:text-2xl font-extrabold text-text-primary tracking-tight whitespace-nowrap">{value}</p>
         </div>
-        <div className={`p-3 rounded-2xl ${iconBg} ${iconColor}`}>
+        <div className={`p-3 rounded-2xl shrink-0 ${iconBg} ${iconColor}`}>
           <Icon className="w-6 h-6" />
         </div>
       </div>

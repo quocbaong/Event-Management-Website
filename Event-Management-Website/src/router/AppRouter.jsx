@@ -13,6 +13,7 @@ import BroadcastPage from '../pages/BroadcastPage';
 import FeedbackPage from '../pages/FeedbackPage';
 import SettingsPage from '../pages/SettingsPage';
 import GuestsPage from '../pages/GuestsPage';
+import AdminReportsPage from '../pages/AdminReportsPage';
 import AttendeeDashboardPage from '../pages/AttendeeDashboardPage';
 import AttendeeTicketsPage from '../pages/AttendeeTicketsPage';
 import AttendeeEventsPage from '../pages/AttendeeEventsPage';
@@ -77,6 +78,7 @@ const AppRouter = () => {
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="guests" element={<GuestsPage />} />
+          <Route path="reports" element={<AdminReportsPage />} />
         </Route>
 
         {/* Attendee Protected Routes - Separate Layout */}
