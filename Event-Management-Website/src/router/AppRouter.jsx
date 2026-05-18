@@ -34,6 +34,7 @@ import OrganizerReportTemplatesPage from '../pages/OrganizerReportTemplatesPage'
 import OrganizerFinancePage from '../pages/OrganizerFinancePage';
 import OrganizerEventFinancePage from '../pages/OrganizerEventFinancePage';
 import CreateEventPage from '../pages/CreateEventPage';
+import InvitationAcceptPage from '../pages/InvitationAcceptPage';
 import { useAuth } from '../stores/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -70,6 +71,7 @@ const AppRouter = () => {
         <Route path="/events/:id" element={<EventDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/invitations/:token" element={<InvitationAcceptPage />} />
         
         {/* Organizer Protected Routes - With Sidebar/Header */}
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><MainLayout /></ProtectedRoute>}>

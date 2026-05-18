@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../stores/AuthContext';
+import UserProfileModal from '../../modals/UserProfileModal';
 
 const OrganizerHeader = ({ onToggleSidebar }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const getTitle = () => {
     const path = location.pathname;
@@ -33,78 +39,171 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
     return { main: current ? current.label : "Quản lý Sự kiện" };
   };
 
-  return (
-    <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm border-b border-slate-200/50">
-      <div className="flex items-center justify-between px-8 py-4">
-        {/* Page Title / Breadcrumb */}
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={onToggleSidebar}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors mr-1"
-          >
-            <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">menu</span>
-          </button>
-          
-          <div className="flex items-center gap-1.5 overflow-hidden">
-            {getTitle().parent ? (
-              <>
-                <button 
-                  onClick={() => navigate(getTitle().parentPath)}
-                  className="text-[15px] font-medium text-slate-400 whitespace-nowrap hover:text-indigo-500 transition-colors"
-                >
-                  {getTitle().parent}
-                </button>
-                <span className="material-symbols-outlined text-[16px] text-slate-300 mt-0.5">chevron_right</span>
-                <h2 className="text-[15px] font-bold text-indigo-600 truncate">
-                  {getTitle().child}
-                </h2>
-              </>
-            ) : (
-              <h2 className="text-[15px] font-bold text-indigo-600 truncate">
-                {getTitle().main}
-              </h2>
-            )}
-          </div>
-        </div>
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
-        
-        <div className="flex items-center gap-6">
-          <div className="relative flex items-center bg-surface-container-high rounded-full px-4 py-2 w-64">
-            <span className="material-symbols-outlined text-slate-400 text-lg mr-2">search</span>
-            <input 
-              className="bg-transparent border-none focus:ring-0 text-sm w-full p-0 outline-none" 
-              placeholder="Tìm kiếm..." 
-              type="text"
-            />
-          </div>
-          
+
+
+  const getInitials = (name) => {
+    if (!name) return 'PP';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .map(n => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  return (
+    <>
+      <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm border-b border-slate-200/50">
+        <div className="flex items-center justify-between px-8 py-4">
+          {/* Page Title / Breadcrumb */}
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all relative"
+              onClick={onToggleSidebar}
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors mr-1"
             >
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">menu</span>
             </button>
-            <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
-              <span className="material-symbols-outlined">language</span>
-            </button>
-          </div>
-          
-          <div className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer group">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-900">Hoàng Nam</p>
-              <p className="text-xs text-slate-500 font-medium">Nhà tổ chức cấp cao</p>
+            
+            <div className="flex items-center gap-1.5 overflow-hidden">
+              {getTitle().parent ? (
+                <>
+                  <button 
+                    onClick={() => navigate(getTitle().parentPath)}
+                    className="text-[15px] font-medium text-slate-400 whitespace-nowrap hover:text-indigo-500 transition-colors"
+                  >
+                    {getTitle().parent}
+                  </button>
+                  <span className="material-symbols-outlined text-[16px] text-slate-300 mt-0.5">chevron_right</span>
+                  <h2 className="text-[15px] font-bold text-indigo-600 truncate">
+                    {getTitle().child}
+                  </h2>
+                </>
+              ) : (
+                <h2 className="text-[15px] font-bold text-indigo-600 truncate">
+                  {getTitle().main}
+                </h2>
+              )}
             </div>
-            <img 
-              alt="Ảnh đại diện người dùng" 
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-100 group-hover:ring-indigo-300 transition-all" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUuiXPJ9oY8F7KDiJelapd9FhqeTcna4hAVQoKeMlFNr6U_E5aoFVaFOXjToY_EtgN-E04v1GdCNcQMMwC5OKjjycVOrkI3FxSPfXskWwx_hQ73Cy22sfBhE2w-0wzuRZ-cfZROmYCSFTA6nYF-gOkDFd9XgFjdUyBaTVcdt0i3iSrsiKSii8RPA1mhtrDh0SKxPjkpvfkM-EQv7kUQi-cR1Th07g9EFCpsWt5hLhlE8zwdo0BaUNHz-08XNiKV3yvEvClzLPL1ZMJ"
-            />
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="relative flex items-center bg-surface-container-high rounded-full px-4 py-2 w-64">
+              <span className="material-symbols-outlined text-slate-400 text-lg mr-2">search</span>
+              <input 
+                className="bg-transparent border-none focus:ring-0 text-sm w-full p-0 outline-none" 
+                placeholder="Tìm kiếm..." 
+                type="text"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all relative"
+              >
+                <span className="material-symbols-outlined">notifications</span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              </button>
+              <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
+                <span className="material-symbols-outlined">language</span>
+              </button>
+            </div>
+            
+            {/* User Profile Trigger and Menu */}
+            <div className="relative">
+              <div 
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer group select-none"
+              >
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 transition-colors">
+                    {user?.fullName || 'Hoàng Nam'}
+                  </p>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {user?.role === 'ORGANIZER' ? 'Nhà tổ chức Prestige' : 'Ban tổ chức'}
+                  </p>
+                </div>
+                
+                {/* Custom Avatar with premium initials layout */}
+                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-gradient-to-tr from-indigo-500 to-purple-600 text-white ring-2 ring-indigo-100 dark:ring-indigo-900 group-hover:ring-indigo-300 transition-all overflow-hidden shadow-sm">
+                  {getInitials(user?.fullName)}
+                </div>
+              </div>
+
+              {/* Floating Dropdown Menu */}
+              {isProfileMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setIsProfileMenuOpen(false)} />
+                  <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 py-3 z-40 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center font-black text-base bg-gradient-to-tr from-indigo-500 to-purple-600 text-white shadow-md">
+                        {getInitials(user?.fullName)}
+                      </div>
+                      <div className="overflow-hidden">
+                        <h4 className="text-sm font-bold text-slate-950 dark:text-white truncate">
+                          {user?.fullName || 'Nhà tổ chức'}
+                        </h4>
+                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                        {user?.isVerified && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-1 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full">
+                            <span className="material-symbols-outlined text-[12px] font-black">verified</span> Đã xác thực
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="px-2 py-2 border-b border-slate-100 dark:border-slate-800">
+                      <button 
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          setIsProfileModalOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-slate-400 text-lg">person</span>
+                        Hồ sơ của tôi
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          navigate('/organizer/settings');
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-slate-400 text-lg">settings</span>
+                        Cài đặt tài khoản
+                      </button>
+                    </div>
+
+                    <div className="px-2 pt-2">
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-sm font-bold rounded-xl transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-rose-500 text-lg">logout</span>
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Glassmorphism Detailed Profile Modal (Mockup design) */}
+      <UserProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
+    </>
   );
 };
 

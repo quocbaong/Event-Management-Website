@@ -11,10 +11,18 @@ public class UserMapper {
         if (user == null) return null;
 
         String fullName = null;
+        String phone = null;
+        String website = null;
+        String address = null;
+        
         if (user.getAttendeeProfile() != null) {
             fullName = user.getAttendeeProfile().getDisplayName();
+            phone = user.getAttendeeProfile().getPhone();
         } else if (user.getOrganizerProfile() != null) {
             fullName = user.getOrganizerProfile().getCompanyName();
+            phone = user.getOrganizerProfile().getPhone();
+            website = user.getOrganizerProfile().getWebsite();
+            address = user.getOrganizerProfile().getBio(); // Ánh xạ bio sang address
         }
 
         return UserResponse.builder()
@@ -23,6 +31,9 @@ public class UserMapper {
                 .fullName(fullName)
                 .role(user.getRole())
                 .isVerified(user.getIsVerified())
+                .phone(phone)
+                .website(website)
+                .address(address)
                 .build();
     }
 }

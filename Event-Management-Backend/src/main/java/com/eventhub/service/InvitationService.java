@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -75,6 +76,26 @@ public class InvitationService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Transactional
+    public InvitationResponse acceptInvitation(String token) {
+        Invitation invitation = invitationRepository.findByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thư mời hoặc mã token không hợp lệ"));
+
+        if (invitation.getStatus() == InviteStatus.ACCEPTED) {
+            return toResponse(invitation);
+        }
+
+        if (invitation.getStatus() != InviteStatus.PENDING) {
+            throw new InvalidOperationException("Thư mời này đã ở trạng thái: " + invitation.getStatus().name());
+        }
+
+        invitation.setStatus(InviteStatus.ACCEPTED);
+        invitation.setRespondedAt(Instant.now());
+        invitation = invitationRepository.save(invitation);
+
+        return toResponse(invitation);
     }
 
     private void sendInvitationEmail(Event event, String toEmail, String token) {

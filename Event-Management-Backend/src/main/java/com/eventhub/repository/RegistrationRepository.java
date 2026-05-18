@@ -25,6 +25,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             FROM Registration r
             WHERE r.event.organizer.id = :organizerId
               AND r.status = :status
+              AND r.createdAt <= CURRENT_TIMESTAMP
             GROUP BY r.event.id, r.event.title
             ORDER BY SUM(r.finalAmount) DESC
             """)
@@ -41,6 +42,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             JOIN events e ON r.event_id = e.id
             WHERE e.organizer_id = :organizerId
               AND r.status::text = :status
+              AND r.created_at <= CURRENT_TIMESTAMP
             GROUP BY CAST(r.created_at AS DATE)
             ORDER BY group_key
             """, nativeQuery = true)
@@ -57,6 +59,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             JOIN events e ON r.event_id = e.id
             WHERE e.organizer_id = :organizerId
               AND r.status::text = :status
+              AND r.created_at <= CURRENT_TIMESTAMP
             GROUP BY TO_CHAR(r.created_at, 'YYYY-MM')
             ORDER BY group_key
             """, nativeQuery = true)
@@ -72,6 +75,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             LEFT JOIN tickets t ON t.registration_id = r.id
             WHERE e.organizer_id = :organizerId
               AND r.status::text = :status
+              AND r.created_at <= CURRENT_TIMESTAMP
             """, nativeQuery = true)
     Object[] getAttendeeStats(
             @Param("organizerId") UUID organizerId,
