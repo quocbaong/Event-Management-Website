@@ -29,6 +29,7 @@ public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final EventRepository eventRepository;
     private final EmailService emailService;
+    private final com.eventhub.infrastructure.email.EmailTemplateService emailTemplateService;
 
     public List<InvitationResponse> createInvitations(User organizer, UUID eventId, CreateInvitationRequest request) {
         Event event = eventRepository.findByIdAndOrganizerId(eventId, organizer.getId())
@@ -79,15 +80,8 @@ public class InvitationService {
     private void sendInvitationEmail(Event event, String toEmail, String token) {
         try {
             String inviteLink = "http://localhost:5173/invitations/" + token;
-            String subject = "Invitation: " + event.getTitle();
-            String html = """
-                    <html><body>
-                    <h2>You're Invited!</h2>
-                    <p>You have been invited to <strong>%s</strong>.</p>
-                    <p>Click below to respond:</p>
-                    <a href="%s" style="display:inline-block;padding:12px 24px;background:#6366f1;color:#fff;text-decoration:none;border-radius:6px;">View Invitation</a>
-                    </body></html>
-                    """.formatted(event.getTitle(), inviteLink);
+            String subject = "Lời mời tham dự sự kiện: " + event.getTitle();
+            String html = emailTemplateService.renderInvitation(event.getTitle(), inviteLink);
             emailService.sendHtmlMessage(toEmail, subject, html);
             log.info("Invitation email sent to {} for event {}", toEmail, event.getId());
         } catch (Exception e) {

@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend
 } from 'recharts';
+import { financeService } from '../services/financeService';
+import { eventService } from '../services/eventService';
+import { dashboardService } from '../services/dashboardService';
 import TransactionHistoryModal from '../components/modals/TransactionHistoryModal';
 import WithdrawalModal from '../components/modals/WithdrawalModal';
 
@@ -49,36 +52,49 @@ const OrganizerFinancePage = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [timeRange, setTimeRange] = useState('yearly'); // 'yearly' or 'monthly'
 
+  const [overview, setOverview] = useState({ totalRevenue: 0, availableBalance: 0, totalTicketsSold: 0 });
+
   useEffect(() => {
-    // Giả lập gọi API lấy dữ liệu
     const fetchFinanceData = async () => {
       setChartLoading(true);
+      setEventsLoading(true);
+      setLoading(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        let generatedData = [];
-        
-        if (timeRange === 'yearly') {
-          const currentYear = new Date().getFullYear();
-          const currentMonth = new Date().getMonth() + 1;
-          const monthsToShow = selectedYear === currentYear ? currentMonth : 12;
-          
-          generatedData = Array.from({ length: monthsToShow }, (_, i) => ({
-            name: `T${i + 1}`,
-            revenue: Math.floor(Math.random() * 5000) + 1000,
-            expenses: Math.floor(Math.random() * 3000) + 500
-          }));
-        } else {
-          // Monthly view - 30 days
-          generatedData = Array.from({ length: 30 }, (_, i) => ({
-            name: `${i + 1}`,
-            revenue: Math.floor(Math.random() * 1000) + 200,
-            expenses: Math.floor(Math.random() * 600) + 100
-          }));
-        }
+        const [overviewRes, transRes, eventsRes, revRes] = await Promise.all([
+          financeService.getOverview(),
+          financeService.getTransactions(),
+          eventService.getEvents(),
+          dashboardService.getRevenue(timeRange === 'yearly' ? 'month' : 'day')
+        ]);
 
-        setTransactions(mockRecentTransactions);
-        setEventsSummary(mockEventsSummary);
+        setOverview(overviewRes.data);
+        
+        setTransactions(transRes.data.map(t => ({
+           id: t.id,
+           type: t.type === 'INCOME' ? 'Thu nhập' : t.type === 'WITHDRAWAL' ? 'Rút tiền' : 'Hoàn tiền',
+           amount: t.type === 'WITHDRAWAL' || t.type === 'REFUND' ? -Math.abs(t.amount) : t.amount,
+           date: new Date(t.transactionDate).toLocaleString('vi-VN'),
+           description: t.description || 'Giao dịch'
+        })));
+
+        const mappedEvents = eventsRes.data.map(e => {
+            const rev = e.ticketTypes?.reduce((sum, t) => sum + (t.price * t.soldQuantity), 0) || 0;
+            return {
+                id: e.id,
+                name: e.title,
+                date: e.startDate ? new Date(e.startDate).toLocaleDateString('vi-VN') : '--',
+                revenue: rev,
+                tickets: e.currentAttendees || 0,
+                status: e.status === 'PUBLISHED' || e.status === 'ON_SALE' ? 'Đang mở bán' : e.status === 'DRAFT' ? 'Sắp diễn ra' : 'Hoàn thành'
+            };
+        });
+        setEventsSummary(mappedEvents);
+
+        const generatedData = revRes.data.map(r => ({
+            name: r.groupLabel,
+            revenue: r.revenue,
+            expenses: 0
+        }));
         setRevenueData(generatedData);
       } catch (error) {
         console.error("Error fetching finance data:", error);
@@ -129,9 +145,9 @@ const OrganizerFinancePage = () => {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Tổng Doanh Thu', value: formatCurrency(267000000), trend: 15.3, icon: 'account_balance_wallet', color: 'indigo', bg: 'bg-indigo-50', text: 'text-indigo-600' },
-          { label: 'Số Dư Khả Dụng', value: formatCurrency(85000000), subtitle: 'Sẵn sàng để rút', icon: 'payments', color: 'emerald', bg: 'bg-emerald-50', text: 'text-emerald-600' },
-          { label: 'Tổng Vé Bán Ra', value: '2,000', trend: 5, icon: 'local_activity', color: 'amber', bg: 'bg-amber-50', text: 'text-amber-600' },
+          { label: 'Tổng Doanh Thu', value: formatCurrency(overview.totalRevenue || 0), trend: 15.3, icon: 'account_balance_wallet', color: 'indigo', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+          { label: 'Số Dư Khả Dụng', value: formatCurrency(overview.availableBalance || 0), subtitle: 'Sẵn sàng để rút', icon: 'payments', color: 'emerald', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+          { label: 'Tổng Vé Bán Ra', value: overview.totalTicketsSold?.toLocaleString() || '0', trend: 5, icon: 'local_activity', color: 'amber', bg: 'bg-amber-50', text: 'text-amber-600' },
         ].map((stat, index) => (
           <motion.div
             key={index}
@@ -412,7 +428,7 @@ const OrganizerFinancePage = () => {
       <WithdrawalModal 
         isOpen={isWithdrawalModalOpen}
         onClose={() => setIsWithdrawalModalOpen(false)}
-        availableBalance={85000000}
+        availableBalance={overview.availableBalance || 0}
       />
     </div>
   );

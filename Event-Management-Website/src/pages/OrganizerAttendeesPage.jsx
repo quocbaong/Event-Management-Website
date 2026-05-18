@@ -1,24 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { eventService } from '../services/eventService';
+import { registrationService } from '../services/registrationService';
 
 const OrganizerAttendeesPage = () => {
-  const [attendees, setAttendees] = useState([
-    { id: 1, name: 'Lê Minh Anh', email: 'minhanh.le@email.com', event: 'Vietnam Tech Summit 2024', ticketType: 'VIP', status: 'Đã Check-in', time: '08:30, 24/05', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCRH6VK7Zu4rCm5nTo3CMXKlUWaPqlN5PKWQ6QLxMCzoPocFkFRu22-WAI3S5CHf26KzxM0Qh0P_2O3ckeDNJKd4OTcg-i16AyQ05N0oXMcIVf37Pkdj-ynRTSuJ0_k458AZOtTqN-artRQ39q8PWoA4cK_jyJWT_8jjNIhP7bsf3muaKvc-0VfQoSG_D2IwHZBVIgSoDV81-djG5K2xGVjh-6cOanOlUlQsl5TzPs4vy2PuE2esHKl-T4M6MLirCRN8o0ugoqF0HdW' },
-    { id: 2, name: 'Nguyễn Thành Trung', email: 'trung.nt@workmail.vn', event: 'Hội thảo AI & Robotics', ticketType: 'Thường', status: 'Vắng mặt', time: '--:--, 24/05', avatar: null },
-    { id: 3, name: 'Trần Hoàng Long', email: 'long.th@creative-agency.com', event: 'Vietnam Tech Summit 2024', ticketType: 'VIP', status: 'Đã Check-in', time: '09:15, 24/05', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAvprpCeJzOAnx-LoHVMcc-pUpA5fHzkPvEIoCe3m691NNvr3DJhdiW7liOTMgbJ6yypaTKNqmxNrgRH0fu2luocDxDOyPjQA4JsKP0_Us32UveDuwZ-TMNulMoqZj6kbQG4YOLvIL0K7qWHeYK_hcnpVFMTQvbYKRxm_fGzsKRz_Tv4iTJaP6R50idLqxlGx2q0RvoB4M5BVwjGx2bpzwOyzLQF8rnoJyQECw_Bv-s2vQTOw8wOCYvgUFcH7YStQbOOrPDC5Gh76U2' },
-    { id: 4, name: 'Phạm Thúy Hằng', email: 'hang.pt@marketinghub.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'Thường', status: 'Đang chờ', time: '--:--, --/--', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsFLHYlqHxoVmim5G01IOaD61afrRb76l13V1oDS8WxSfQai0a9twFDb0Di8all8_3XATB9CJJmDt9FrvMrH0bzAXtESdi81hsk2uEXVNzDeX2CVOCvJubWOCbYCgb6ZDEroawuuPvzZBjkDKMXxN5LDgWX_SJxbsMSCeYzb2PDOgFsSoyzfeHJzP4kaX0rKQxj_vpzLKfXY5qOcKGZLWQv-PulDDHwzML8WbS-orT1ESwsuSb2i8uh3EMMbzOH5LRkOZGVcOcTdbZ' },
-    { id: 5, name: 'Hoàng Văn Nam', email: 'nam.hv@outlook.com', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường', status: 'Đã Check-in', time: '10:00, 24/05', avatar: null },
-    { id: 6, name: 'Bùi Thị Ngọc', email: 'ngoc.bt@fpt.com.vn', event: 'Hội thảo AI & Robotics', ticketType: 'VIP', status: 'Đã Check-in', time: '08:45, 24/05', avatar: null },
-    { id: 7, name: 'Vũ Minh Đức', email: 'duc.vm@gmail.com', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường', status: 'Đang chờ', time: '--:--, --/--', avatar: null },
-    { id: 8, name: 'Đỗ Kim Liên', email: 'lien.dk@vietcombank.com.vn', event: 'Vietnam Tech Summit 2024', ticketType: 'VIP', status: 'Đã Check-in', time: '09:30, 24/05', avatar: null },
-    { id: 9, name: 'Trịnh Gia Bảo', email: 'bao.tg@vinfast.vn', event: 'Hội thảo AI & Robotics', ticketType: 'Thường', status: 'Vắng mặt', time: '--:--, 24/05', avatar: null },
-    { id: 10, name: 'Lý Thanh Hà', email: 'ha.lt@shopee.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'VIP', status: 'Đã Check-in', time: '19:15, 24/05', avatar: null },
-    { id: 11, name: 'Đặng Quốc Huy', email: 'huy.dq@grab.com', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường', status: 'Đã Check-in', time: '08:50, 24/05', avatar: null },
-    { id: 12, name: 'Mai Phương Thảo', email: 'thao.mp@vng.com.vn', event: 'Hội thảo AI & Robotics', ticketType: 'VIP', status: 'Đang chờ', time: '--:--, --/--', avatar: null },
-    { id: 13, name: 'Ngô Kiến Huy', email: 'huy.nk@showbiz.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'Thường', status: 'Đã Check-in', time: '19:45, 24/05', avatar: null },
-    { id: 14, name: 'Sơn Tùng M-TP', email: 'tung.mtp@mtp-ent.com', event: 'Gala Dinner: Night of Stars', ticketType: 'VIP', status: 'Đã Check-in', time: '20:00, 24/05', avatar: null },
-    { id: 15, name: 'Hòa Minzy', email: 'hoa.minzy@singer.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'Thường', status: 'Đang chờ', time: '--:--, --/--', avatar: null },
-  ]);
+  const [attendees, setAttendees] = useState([]);
+  const [eventsList, setEventsList] = useState(['Tất cả sự kiện']);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAttendees = async () => {
+      setLoading(true);
+      try {
+        const eventsRes = await eventService.getEvents();
+        const events = eventsRes.data;
+        const eventsNames = ['Tất cả sự kiện', ...events.map(e => e.title)];
+        setEventsList(eventsNames);
+
+        const registrationPromises = events.map(e => registrationService.getRegistrations(e.id).catch(() => ({data: []})));
+        const registrationsRes = await Promise.all(registrationPromises);
+        
+        let allAttendees = [];
+        registrationsRes.forEach((res, index) => {
+          if (!res || !res.data) return;
+          const eventTitle = events[index].title;
+          const mapped = res.data.map(r => ({
+            id: r.id,
+            name: r.attendeeName || 'Khách mời ẩn danh',
+            email: r.attendeeEmail || '',
+            event: eventTitle,
+            ticketType: r.totalAmount > 0 ? 'VIP' : 'Thường',
+            status: r.status === 'CONFIRMED' || r.status === 'CHECKED_IN' ? 'Đã Check-in' : r.status === 'PENDING' ? 'Đang chờ' : 'Vắng mặt',
+            time: r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : '--:--, --/--',
+            avatar: null
+          }));
+          allAttendees = [...allAttendees, ...mapped];
+        });
+        
+        setAttendees(allAttendees);
+      } catch (err) {
+        console.error("Error fetching attendees:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAttendees();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('Tất cả');
@@ -61,7 +88,6 @@ const OrganizerAttendeesPage = () => {
   ];
 
   const filters = ['Tất cả', 'VIP', 'Thường', 'Đã Check-in', 'Chưa tham gia'];
-  const eventsList = ['Tất cả sự kiện', 'Vietnam Tech Summit 2024', 'Hội thảo AI & Robotics', 'Gala Dinner: Night of Stars'];
 
   // Status Config
   const STATUS_CONFIG = {
@@ -336,7 +362,14 @@ const OrganizerAttendeesPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {paginatedAttendees.map((attendee) => (
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-10 text-center text-slate-500 font-bold">
+                    <span className="material-symbols-outlined text-4xl animate-spin mb-2">progress_activity</span>
+                    <p>Đang tải danh sách khách mời...</p>
+                  </td>
+                </tr>
+              ) : paginatedAttendees.map((attendee) => (
                 <tr 
                   key={attendee.id} 
                   className="hover:bg-slate-50/50 transition-colors group h-[81px]"
