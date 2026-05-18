@@ -23,6 +23,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final EntityManager entityManager;
     private final com.eventhub.repository.FeedbackRepository feedbackRepository;
+    private final com.eventhub.repository.SystemSettingRepository systemSettingRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -707,6 +708,87 @@ public class AdminServiceImpl implements AdminService {
             feedback.setResolvedAt(java.time.Instant.now());
         }
         feedbackRepository.save(feedback);
+    }
+
+    @Override
+    @Transactional
+    public com.eventhub.web.dto.admin.SystemSettingsDTO getSystemSettings() {
+        String currency = systemSettingRepository.findById("finance.currency")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("VNĐ - Việt Nam Đồng");
+
+        String commissionRate = systemSettingRepository.findById("finance.commissionRate")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("15");
+
+        String subscriptionPlan = systemSettingRepository.findById("finance.subscriptionPlan")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("NÂNG CAO");
+
+        boolean stripeActive = systemSettingRepository.findById("api.stripeActive")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .map(Boolean::parseBoolean)
+            .orElse(true);
+
+        boolean sendGridActive = systemSettingRepository.findById("api.sendGridActive")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .map(Boolean::parseBoolean)
+            .orElse(false);
+
+        boolean twoFactorEnabled = systemSettingRepository.findById("security.twoFactorEnabled")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .map(Boolean::parseBoolean)
+            .orElse(true);
+
+        String sessionTimeout = systemSettingRepository.findById("security.sessionTimeout")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("30");
+
+        String minPasswordLength = systemSettingRepository.findById("security.minPasswordLength")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("8+ ký tự");
+
+        String primaryColor = systemSettingRepository.findById("branding.primaryColor")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("#4f46e5");
+
+        String fontFamily = systemSettingRepository.findById("branding.fontFamily")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("Plus Jakarta Sans");
+
+        String logoUrl = systemSettingRepository.findById("branding.logoUrl")
+            .map(com.eventhub.domain.entity.SystemSetting::getValue)
+            .orElse("");
+
+        return com.eventhub.web.dto.admin.SystemSettingsDTO.builder()
+            .currency(currency)
+            .commissionRate(commissionRate)
+            .subscriptionPlan(subscriptionPlan)
+            .stripeActive(stripeActive)
+            .sendGridActive(sendGridActive)
+            .twoFactorEnabled(twoFactorEnabled)
+            .sessionTimeout(sessionTimeout)
+            .minPasswordLength(minPasswordLength)
+            .primaryColor(primaryColor)
+            .fontFamily(fontFamily)
+            .logoUrl(logoUrl)
+            .build();
+    }
+
+    @Override
+    @Transactional
+    public void saveSystemSettings(com.eventhub.web.dto.admin.SystemSettingsDTO dto) {
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("finance.currency", dto.getCurrency()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("finance.commissionRate", dto.getCommissionRate()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("finance.subscriptionPlan", dto.getSubscriptionPlan()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("api.stripeActive", String.valueOf(dto.isStripeActive())));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("api.sendGridActive", String.valueOf(dto.isSendGridActive())));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("security.twoFactorEnabled", String.valueOf(dto.isTwoFactorEnabled())));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("security.sessionTimeout", dto.getSessionTimeout()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("security.minPasswordLength", dto.getMinPasswordLength()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("branding.primaryColor", dto.getPrimaryColor()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("branding.fontFamily", dto.getFontFamily()));
+        systemSettingRepository.save(new com.eventhub.domain.entity.SystemSetting("branding.logoUrl", dto.getLogoUrl() != null ? dto.getLogoUrl() : ""));
     }
 }
 

@@ -19,6 +19,8 @@ public interface AdminService {
     void sendBroadcast(BroadcastRequest request);
     com.eventhub.web.dto.admin.FeedbackPageResponse getFeedbackData();
     void processFeedbackAction(com.eventhub.web.dto.admin.FeedbackActionRequest request);
+    com.eventhub.web.dto.admin.SystemSettingsDTO getSystemSettings();
+    void saveSystemSettings(com.eventhub.web.dto.admin.SystemSettingsDTO dto);
 }
 
 
