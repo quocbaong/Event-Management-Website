@@ -12,6 +12,9 @@ import GlobalEventsPage from '../pages/GlobalEventsPage';
 import BroadcastPage from '../pages/BroadcastPage';
 import FeedbackPage from '../pages/FeedbackPage';
 import SettingsPage from '../pages/SettingsPage';
+import GuestsPage from '../pages/GuestsPage';
+import AdminReportsPage from '../pages/AdminReportsPage';
+import AdminFinancePage from '../pages/AdminFinancePage';
 import AttendeeDashboardPage from '../pages/AttendeeDashboardPage';
 import AttendeeTicketsPage from '../pages/AttendeeTicketsPage';
 import AttendeeEventsPage from '../pages/AttendeeEventsPage';
@@ -30,6 +33,7 @@ import OrganizerReportAnalyticsPage from '../pages/OrganizerReportAnalyticsPage'
 import OrganizerReportTemplatesPage from '../pages/OrganizerReportTemplatesPage';
 import OrganizerFinancePage from '../pages/OrganizerFinancePage';
 import OrganizerEventFinancePage from '../pages/OrganizerEventFinancePage';
+import CreateEventPage from '../pages/CreateEventPage';
 import { useAuth } from '../stores/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -72,9 +76,13 @@ const AppRouter = () => {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="events" element={<GlobalEventsPage />} />
+          <Route path="events/create" element={<CreateEventPage />} />
           <Route path="broadcast" element={<BroadcastPage />} />
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="guests" element={<GuestsPage />} />
+          <Route path="reports" element={<AdminReportsPage />} />
+          <Route path="finance" element={<AdminFinancePage />} />
         </Route>
 
         {/* Attendee Protected Routes - Separate Layout */}
@@ -93,6 +101,7 @@ const AppRouter = () => {
           <Route index element={<Navigate to="/organizer/dashboard" replace />} />
           <Route path="dashboard" element={<OrganizerDashboardPage />} />
           <Route path="events" element={<OrganizerEventsPage />} />
+          <Route path="events/create" element={<CreateEventPage />} />
           <Route path="attendees" element={<OrganizerAttendeesPage />} />
           <Route path="events/:id/attendees" element={<OrganizerEventAttendeesPage />} />
           <Route path="schedule" element={<OrganizerSchedulePage />} />
