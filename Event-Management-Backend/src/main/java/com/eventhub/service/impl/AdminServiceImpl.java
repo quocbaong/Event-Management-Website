@@ -468,7 +468,8 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public com.eventhub.web.dto.admin.FeedbackPageResponse getFeedbackData() {
-        if (feedbackRepository.count() == 0) {
+        long pendingCount = feedbackRepository.findAll().stream().filter(f -> "PENDING".equals(f.getStatus())).count();
+        if (feedbackRepository.count() == 0 || pendingCount == 0) {
             com.eventhub.domain.entity.User attendee = null;
             try {
                 attendee = entityManager.createQuery("SELECT u FROM com.eventhub.domain.entity.User u WHERE u.role = 'ATTENDEE'", com.eventhub.domain.entity.User.class)
@@ -499,6 +500,38 @@ public class AdminServiceImpl implements AdminService {
                 .subject("Trần Hoàng Nam")
                 .category("TECH_ISSUE")
                 .message("Không thể tải lên tệp vé PDF từ thiết bị Android. Hệ thống báo lỗi 403 mặc dù tôi đã đăng nhập.")
+                .status("PENDING")
+                .build());
+
+            feedbackRepository.save(com.eventhub.domain.entity.Feedback.builder()
+                .user(attendee)
+                .subject("Hoàng Văn Nam")
+                .category("CONTENT_REPORT")
+                .message("Sự kiện 'Giao lưu Ca nhạc Acoustic' sử dụng hình ảnh nghệ sĩ nổi tiếng để PR nhưng thực tế danh sách biểu diễn chỉ có các ca sĩ nghiệp dư. Có dấu hiệu treo đầu dê bán thịt chó.")
+                .status("PENDING")
+                .build());
+
+            feedbackRepository.save(com.eventhub.domain.entity.Feedback.builder()
+                .user(attendee)
+                .subject("Phạm Minh Hoàng")
+                .category("TECH_ISSUE")
+                .message("Tôi không nhận được mã OTP xác thực qua email khi thực hiện mua vé. Đã thử gửi lại nhiều lần nhưng hộp thư đến vẫn trống.")
+                .status("PENDING")
+                .build());
+
+            feedbackRepository.save(com.eventhub.domain.entity.Feedback.builder()
+                .user(attendee)
+                .subject("Đỗ Thị Kim Anh")
+                .category("SUGGESTION")
+                .message("Đề xuất thêm phương thức thanh toán Momo hoặc ZaloPay để người dùng Việt Nam tiện lợi hơn khi đặt vé sự kiện.")
+                .status("PENDING")
+                .build());
+
+            feedbackRepository.save(com.eventhub.domain.entity.Feedback.builder()
+                .user(attendee)
+                .subject("Bùi Anh Tuấn")
+                .category("CONTENT_REPORT")
+                .message("Sự kiện 'Đại hội cosplay' bán vé với giá cắt cổ nhưng địa điểm tổ chức thực tế là một quán cafe nhỏ hẹp, không có điều hòa.")
                 .status("PENDING")
                 .build());
         }
