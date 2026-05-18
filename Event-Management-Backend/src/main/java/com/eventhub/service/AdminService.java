@@ -17,6 +17,8 @@ public interface AdminService {
     void bulkSuspend(List<UUID> ids);
     BroadcastPageResponse getBroadcastData();
     void sendBroadcast(BroadcastRequest request);
+    com.eventhub.web.dto.admin.FeedbackPageResponse getFeedbackData();
+    void processFeedbackAction(com.eventhub.web.dto.admin.FeedbackActionRequest request);
 }
 
 

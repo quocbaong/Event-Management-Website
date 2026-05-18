@@ -87,6 +87,17 @@ public class AdminController {
         adminService.sendBroadcast(request);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/feedback")
+    public ResponseEntity<com.eventhub.web.dto.admin.FeedbackPageResponse> getFeedbackData() {
+        return ResponseEntity.ok(adminService.getFeedbackData());
+    }
+
+    @PostMapping("/feedback/action")
+    public ResponseEntity<Void> processFeedbackAction(@RequestBody com.eventhub.web.dto.admin.FeedbackActionRequest request) {
+        adminService.processFeedbackAction(request);
+        return ResponseEntity.ok().build();
+    }
 }
 
 
