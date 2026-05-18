@@ -42,23 +42,7 @@ const OrganizerSidebar = () => {
             className="h-13 w-auto object-contain transition-transform group-hover:scale-105"
           />
           <div className="w-48 h-1 bg-indigo-100 dark:bg-indigo-900/50 my-2 rounded-full"></div>
-          <div className="mt-0">
-            <span className="text-ml font-extrabold text-[#6366f1] tracking-tight block">
-              Nhà tổ chức
-            </span>
-          </div>
         </div>
-      </div>
-
-      {/* Create Event Button */}
-      <div className="mb-6 px-2">
-        <button 
-          onClick={() => navigate('/organizer/events/create')}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 animate-in fade-in slide-in-from-bottom duration-300"
-        >
-          <span className="material-symbols-outlined text-xl">add</span>
-          <span>Tạo sự kiện mới</span>
-        </button>
       </div>
 
       <nav className="flex-grow space-y-1 overflow-y-auto">
