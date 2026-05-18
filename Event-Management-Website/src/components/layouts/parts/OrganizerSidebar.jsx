@@ -1,10 +1,16 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../../assets/logo.png';
-
+import { useAuth } from '../../../stores/AuthContext';
 const OrganizerSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const menuItems = [
     { icon: "dashboard", label: "Tổng quan", path: "/organizer/dashboard" },
@@ -92,6 +98,13 @@ const OrganizerSidebar = () => {
             <span className="font-headline text-sm">{item.label}</span>
           </button>
         ))}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-transform hover:translate-x-1"
+        >
+          <span className="material-symbols-outlined">logout</span>
+          <span className="font-headline text-sm">Đăng xuất</span>
+        </button>
       </div>
     </aside>
   );

@@ -12,6 +12,7 @@ const SignUpPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('ATTENDEE'); // ADDED ROLE STATE
   const [selectedType, setSelectedType] = useState('Doanh nghiệp');
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +34,13 @@ const SignUpPage = () => {
     setIsSubmitting(true);
     
     try {
-      await register({ fullName, email, password, organizationName: company, category: selectedType });
+      await register({ 
+        fullName, 
+        email, 
+        password, 
+        role, 
+        companyName: role === 'ORGANIZER' ? company : undefined 
+      }); 
       setRegisteredEmail(email);
       setShowOtpModal(true);
     } catch (err) {
@@ -136,20 +143,51 @@ const SignUpPage = () => {
                   />
                 </div>
               </div>
-              <div className="group">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1" htmlFor="company">Tên Công ty</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Building2 className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+              
+              {role === 'ORGANIZER' && (
+                <div className="group animate-in fade-in slide-in-from-right-2">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1" htmlFor="company">Tên Công ty</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Building2 className="h-4 w-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                    </div>
+                    <input 
+                      type="text" id="company"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      placeholder="Công ty của bạn"
+                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
+                    />
                   </div>
-                  <input 
-                    type="text" id="company"
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    placeholder="Công ty của bạn"
-                    className="block w-full pl-11 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none text-gray-900 font-medium"
-                  />
                 </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Đăng ký với tư cách</label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setRole('ATTENDEE')}
+                  className={`flex-1 py-3 px-4 rounded-2xl font-bold text-sm transition-all duration-300 border-2 ${
+                    role === 'ATTENDEE'
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                      : 'border-transparent bg-gray-50 text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  Khách tham dự
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('ORGANIZER')}
+                  className={`flex-1 py-3 px-4 rounded-2xl font-bold text-sm transition-all duration-300 border-2 ${
+                    role === 'ORGANIZER'
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                      : 'border-transparent bg-gray-50 text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  Nhà tổ chức
+                </button>
               </div>
             </div>
 

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../lib/axios';
 import StatCard from '../components/ui/StatCard';
 import {
   Ticket,
@@ -68,20 +69,70 @@ const DeadlineItem = ({ title, event, time, progress, color, date }) => (
 );
 
 const DashboardPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+  
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [pickerYear, setPickerYear] = useState(() => parseInt(selectedDate.split('-')[0]));
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const [year, month] = selectedDate.split('-');
+      const response = await axios.get('/admin/dashboard', {
+        params: { month: parseInt(month), year: parseInt(year) }
+      });
+      setStats(response.data);
+    } catch (error) {
+      console.error('Lỗi khi tải dữ liệu dashboard', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [selectedDate]);
+
+  const handleExport = async () => {
+    try {
+      const [year, month] = selectedDate.split('-');
+      const response = await axios.get('/admin/dashboard/export', {
+        params: { month: parseInt(month), year: parseInt(year) },
+        responseType: 'blob',
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `dashboard_report_Th${month}_${year}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Lỗi khi xuất báo cáo', error);
+    }
+  };
+
   // Chart Data
   const barData = {
-    labels: ['Th.5', 'Th.6', 'Th.7', 'Th.8', 'Th.9', 'Th.10'],
+    labels: stats?.monthlyRevenue?.map(r => r.month) || ['Th.1', 'Th.2', 'Th.3', 'Th.4', 'Th.5', 'Th.6'],
     datasets: [
       {
         label: 'Doanh thu',
-        data: [35, 45, 30, 55, 40, 65],
+        data: stats?.monthlyRevenue?.map(r => r.revenue) || [0, 0, 0, 0, 0, 0],
         backgroundColor: '#1e40af',
         borderRadius: 8,
         barThickness: 20,
       },
       {
         label: 'Mục tiêu',
-        data: [50, 50, 50, 50, 50, 50],
+        data: stats?.monthlyRevenue?.map(r => r.revenue > 0 ? r.revenue * 1.2 : 50000000) || [50000000, 50000000, 50000000, 50000000, 50000000, 50000000],
         backgroundColor: '#e2e8f0',
         borderRadius: 8,
         barThickness: 20,
@@ -90,11 +141,11 @@ const DashboardPage = () => {
   };
 
   const doughnutData = {
-    labels: ['Hội thảo & Workshop', 'Lễ ra mắt sản phẩm', 'Tiệc công ty'],
+    labels: stats?.eventCategories?.map(c => c.name) || ['Hội thảo & Workshop', 'Lễ ra mắt sản phẩm', 'Tiệc công ty'],
     datasets: [
       {
-        data: [45, 25, 20],
-        backgroundColor: ['#1e40af', '#1d4ed8', '#7dd3fc'],
+        data: stats?.eventCategories?.map(c => c.percent) || [45, 25, 20],
+        backgroundColor: ['#1e40af', '#1d4ed8', '#7dd3fc', '#38bdf8', '#bae6fd'],
         borderWidth: 0,
         hoverOffset: 4,
         cutout: '75%',
@@ -115,11 +166,55 @@ const DashboardPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl border border-border-color font-bold text-sm text-text-primary hover:bg-gray-50 transition-all">
-            <CalendarIcon className="w-4 h-4" />
-            Tháng 10, 2023
-          </button>
-          <button className="flex items-center gap-2 bg-primary px-5 py-2.5 rounded-xl text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all">
+          <div className="relative">
+            <button 
+              onClick={() => setShowMonthPicker(!showMonthPicker)}
+              className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl border border-border-color font-bold text-sm text-text-primary hover:bg-gray-50 transition-all"
+            >
+              <CalendarIcon className="w-4 h-4" />
+              {selectedDate ? `Tháng ${selectedDate.split('-')[1]}, ${selectedDate.split('-')[0]}` : 'Chọn tháng'}
+            </button>
+
+            {showMonthPicker && (
+              <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl shadow-black/5 border border-border-color p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center mb-4">
+                  <button onClick={() => setPickerYear(y => y - 1)} className="p-1.5 text-text-secondary hover:bg-gray-100 hover:text-text-primary transition-colors rounded-lg">
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                  </button>
+                  <span className="font-bold text-text-primary text-sm">Năm {pickerYear}</span>
+                  <button onClick={() => setPickerYear(y => y + 1)} className="p-1.5 text-text-secondary hover:bg-gray-100 hover:text-text-primary transition-colors rounded-lg">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => {
+                    const monthStr = String(m).padStart(2, '0');
+                    const isSelected = selectedDate === `${pickerYear}-${monthStr}`;
+                    return (
+                      <button
+                        key={m}
+                        onClick={() => {
+                          setSelectedDate(`${pickerYear}-${monthStr}`);
+                          setShowMonthPicker(false);
+                        }}
+                        className={`py-2 text-sm font-bold rounded-xl transition-all ${
+                          isSelected 
+                            ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                            : 'bg-gray-50 hover:bg-gray-100 text-text-secondary hover:text-primary'
+                        }`}
+                      >
+                        Th.{m}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 bg-primary px-5 py-2.5 rounded-xl text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all"
+          >
             <Download className="w-4 h-4" />
             Xuất báo cáo
           </button>
@@ -130,7 +225,7 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Tổng doanh thu"
-          value="428.500.000đ"
+          value={stats ? `${stats.totalRevenue.toLocaleString('vi-VN')}đ` : '0đ'}
           subtext="so với tháng trước"
           trend="up"
           trendValue="+12.5%"
@@ -140,7 +235,7 @@ const DashboardPage = () => {
         />
         <StatCard
           title="Sự kiện đang chạy"
-          value="24"
+          value={stats ? stats.totalEvents.toString() : '0'}
           subtext="mới tuần này"
           trend="up"
           trendValue="+2"
@@ -150,7 +245,7 @@ const DashboardPage = () => {
         />
         <StatCard
           title="Người tham dự"
-          value="12.480"
+          value={stats ? stats.totalAttendees.toLocaleString('vi-VN') : '0'}
           subtext="Tỉ lệ lấp đầy: 84%"
           icon={Users2}
           iconBg="bg-indigo-50"
@@ -158,9 +253,9 @@ const DashboardPage = () => {
         />
         <StatCard
           title="Độ hài lòng"
-          value="4.8/5"
+          value={stats ? `${stats.satisfactionRate}/5` : '0/5'}
           subtext=""
-          rating={4.8}
+          rating={stats ? stats.satisfactionRate : 0}
           icon={Smile}
           iconBg="bg-orange-50"
           iconColor="text-orange-500"
@@ -218,33 +313,27 @@ const DashboardPage = () => {
               }}
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-extrabold text-text-primary leading-none">124</span>
+              <span className="text-3xl font-extrabold text-text-primary leading-none">{stats ? stats.totalEvents : 0}</span>
               <span className="text-[10px] text-text-secondary font-bold uppercase mt-1">Sự kiện</span>
             </div>
           </div>
 
           <div className="mt-8 space-y-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#1e40af]"></div>
-                <span className="text-sm font-medium text-text-secondary">Hội thảo & Workshop</span>
-              </div>
-              <span className="text-sm font-bold text-text-primary">45%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#1d4ed8]"></div>
-                <span className="text-sm font-medium text-text-secondary">Lễ ra mắt sản phẩm</span>
-              </div>
-              <span className="text-sm font-bold text-text-primary">25%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#7dd3fc]"></div>
-                <span className="text-sm font-medium text-text-secondary">Tiệc công ty</span>
-              </div>
-              <span className="text-sm font-bold text-text-primary">20%</span>
-            </div>
+            {stats?.eventCategories?.map((cat, index) => {
+              const colors = ['bg-[#1e40af]', 'bg-[#1d4ed8]', 'bg-[#7dd3fc]', 'bg-[#38bdf8]', 'bg-[#bae6fd]'];
+              return (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2.5 h-2.5 rounded-full ${colors[index % colors.length]}`}></div>
+                    <span className="text-sm font-medium text-text-secondary">{cat.name}</span>
+                  </div>
+                  <span className="text-sm font-bold text-text-primary">{cat.percent}%</span>
+                </div>
+              );
+            })}
+            {(!stats?.eventCategories || stats.eventCategories.length === 0) && (
+              <p className="text-sm text-text-secondary text-center italic mt-4">Chưa có dữ liệu</p>
+            )}
           </div>
         </div>
       </div>

@@ -7,8 +7,10 @@ import {
   Ticket,
   QrCode,
   Star,
-  Heart
+  Heart,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../../../stores/AuthContext';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
   <div
@@ -33,6 +35,12 @@ const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
 const AttendeeSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -82,6 +90,15 @@ const AttendeeSidebar = () => {
           onClick={() => navigate('/attendee/favorites')}
         />
       </nav>
+
+      {/* Logout Section */}
+      <div className="px-4 pt-4 border-t border-slate-100">
+        <SidebarItem
+          icon={LogOut}
+          label="Đăng xuất"
+          onClick={handleLogout}
+        />
+      </div>
     </aside>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, Check, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../stores/AuthContext';
+import ForgotPasswordModal from '../components/auth/ForgotPasswordModal';
 import logo from '../assets/logo.png';
 
 const LoginPage = () => {
@@ -11,6 +12,7 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -150,7 +152,7 @@ const LoginPage = () => {
             <div className="group">
               <div className="flex justify-between mb-2.5 px-1">
                 <label className="text-sm font-bold text-gray-700" htmlFor="password">Mật khẩu</label>
-                <a href="#" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Quên mật khẩu?</a>
+                <button type="button" onClick={() => setShowForgotModal(true)} className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Quên mật khẩu?</button>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
@@ -210,6 +212,11 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
+      
+      <ForgotPasswordModal 
+        isOpen={showForgotModal} 
+        onClose={() => setShowForgotModal(false)} 
+      />
     </div>
   );
 };
