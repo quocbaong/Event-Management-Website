@@ -80,7 +80,7 @@ public class EventService {
 
     @Cacheable(value = "eventTimeline", key = "#eventId")
     public List<EventTimelineResponse> getEventTimeline(UUID eventId) {
-        return eventMapper.toTimelineResponseList(eventTimelineRepository.findByEventIdOrderBySortOrderAsc(eventId));
+        return eventMapper.toTimelineResponseList(eventTimelineRepository.findByEventIdOrderBySortOrderAscDueDateAsc(eventId));
     }
 
     public EventResponse createEvent(User organizer, CreateEventRequest request) {
