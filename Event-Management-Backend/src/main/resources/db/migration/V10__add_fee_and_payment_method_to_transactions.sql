@@ -1,0 +1,3 @@
+ALTER TABLE transactions
+    ADD COLUMN fee NUMERIC(19,2) NOT NULL DEFAULT 0,
+    ADD COLUMN payment_method VARCHAR(50);
