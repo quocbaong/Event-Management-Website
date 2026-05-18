@@ -98,6 +98,17 @@ public class AdminController {
         adminService.processFeedbackAction(request);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/settings")
+    public ResponseEntity<com.eventhub.web.dto.admin.SystemSettingsDTO> getSystemSettings() {
+        return ResponseEntity.ok(adminService.getSystemSettings());
+    }
+
+    @PostMapping("/settings")
+    public ResponseEntity<Void> saveSystemSettings(@RequestBody com.eventhub.web.dto.admin.SystemSettingsDTO dto) {
+        adminService.saveSystemSettings(dto);
+        return ResponseEntity.ok().build();
+    }
 }
 
 
