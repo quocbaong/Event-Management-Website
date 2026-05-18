@@ -14,7 +14,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FeedbackPageResponse {
     private SentimentDTO sentiment;
-    private List<TrendDTO> trends;
+    private List<TrendDTO> trendsThisMonth;
+    private List<TrendDTO> trendsLastMonth;
     private List<FeedbackItemDTO> items;
     private List<CommunicationLogDTO> logs;
 

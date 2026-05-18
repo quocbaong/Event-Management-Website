@@ -29,7 +29,7 @@ const FeedbackPage = () => {
   
   // Loaded Stats & Stream Data
   const [sentiment, setSentiment] = useState({ positive: 68, neutral: 22, negative: 10 });
-  const [trends, setTrends] = useState([
+  const [trendsThisMonth, setTrendsThisMonth] = useState([
     { category: 'SPAM', count: 40 },
     { category: 'NỘI DUNG', count: 80 },
     { category: 'GIẢ MẠO', count: 30 },
@@ -37,6 +37,15 @@ const FeedbackPage = () => {
     { category: 'THANH TOÁN', count: 60 },
     { category: 'KHÁC', count: 45 }
   ]);
+  const [trendsLastMonth, setTrendsLastMonth] = useState([
+    { category: 'SPAM', count: 60 },
+    { category: 'NỘI DUNG', count: 50 },
+    { category: 'GIẢ MẠO', count: 45 },
+    { category: 'KỸ THUẬT', count: 90 },
+    { category: 'THANH TOÁN', count: 110 },
+    { category: 'KHÁC', count: 30 }
+  ]);
+  const [activeMonth, setActiveMonth] = useState('thisMonth'); // 'thisMonth' or 'lastMonth'
   const [items, setItems] = useState([]);
   const [logs, setLogs] = useState([]);
 
@@ -53,7 +62,8 @@ const FeedbackPage = () => {
       const response = await axios.get('/admin/feedback');
       if (response.data) {
         if (response.data.sentiment) setSentiment(response.data.sentiment);
-        if (response.data.trends) setTrends(response.data.trends);
+        if (response.data.trendsThisMonth) setTrendsThisMonth(response.data.trendsThisMonth);
+        if (response.data.trendsLastMonth) setTrendsLastMonth(response.data.trendsLastMonth);
         if (response.data.items) setItems(response.data.items);
         if (response.data.logs) setLogs(response.data.logs);
       }
@@ -114,7 +124,8 @@ const FeedbackPage = () => {
     return matchesStatus && matchesSearch;
   });
 
-  const maxTrendCount = Math.max(...trends.map(t => t.count), 1);
+  const currentTrends = activeMonth === 'thisMonth' ? trendsThisMonth : trendsLastMonth;
+  const maxTrendCount = Math.max(...currentTrends.map(t => t.count), 1);
 
   return (
     <div className="p-8 bg-[#f8fafc] min-h-full font-sans animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -196,8 +207,26 @@ const FeedbackPage = () => {
                 <h2 className="text-lg font-extrabold text-slate-800">Xu hướng Báo cáo Sự cố</h2>
               </div>
               <div className="flex bg-slate-50 p-1 rounded-xl">
-                 <button className="px-4 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-primary transition-all">Tháng này</button>
-                 <button className="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-600 transition-all">Tháng trước</button>
+                 <button 
+                   onClick={() => setActiveMonth('thisMonth')}
+                   className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                     activeMonth === 'thisMonth' 
+                       ? 'bg-white shadow-sm text-primary' 
+                       : 'text-slate-400 hover:text-slate-600'
+                   }`}
+                 >
+                   Tháng này
+                 </button>
+                 <button 
+                   onClick={() => setActiveMonth('lastMonth')}
+                   className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                     activeMonth === 'lastMonth' 
+                       ? 'bg-white shadow-sm text-primary' 
+                       : 'text-slate-400 hover:text-slate-600'
+                   }`}
+                 >
+                   Tháng trước
+                 </button>
               </div>
             </div>
 
@@ -209,7 +238,7 @@ const FeedbackPage = () => {
                    <div className="border-t border-slate-900 w-full h-[1px]"></div>
                 </div>
 
-                {trends.map((t, idx) => {
+                {currentTrends.map((t, idx) => {
                   const barHeight = Math.max(30, (t.count / maxTrendCount) * 140);
                   const isTech = t.category === 'KỸ THUẬT';
                   return (

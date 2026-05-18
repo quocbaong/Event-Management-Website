@@ -539,14 +539,23 @@ public class AdminServiceImpl implements AdminService {
                 .negative(negPercent)
                 .build();
 
-        // Incidents trends list
-        List<com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO> trends = new java.util.ArrayList<>();
-        trends.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("SPAM", 40));
-        trends.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("NỘI DUNG", 80));
-        trends.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("GIẢ MẠO", 30));
-        trends.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("KỸ THUẬT", 120));
-        trends.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("THANH TOÁN", 60));
-        trends.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("KHÁC", 45));
+        // Incidents trends list for This Month
+        List<com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO> trendsThisMonth = new java.util.ArrayList<>();
+        trendsThisMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("SPAM", 40));
+        trendsThisMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("NỘI DUNG", 80));
+        trendsThisMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("GIẢ MẠO", 30));
+        trendsThisMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("KỸ THUẬT", 120));
+        trendsThisMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("THANH TOÁN", 60));
+        trendsThisMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("KHÁC", 45));
+
+        // Incidents trends list for Last Month
+        List<com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO> trendsLastMonth = new java.util.ArrayList<>();
+        trendsLastMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("SPAM", 60));
+        trendsLastMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("NỘI DUNG", 50));
+        trendsLastMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("GIẢ MẠO", 45));
+        trendsLastMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("KỸ THUẬT", 90));
+        trendsLastMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("THANH TOÁN", 110));
+        trendsLastMonth.add(new com.eventhub.web.dto.admin.FeedbackPageResponse.TrendDTO("KHÁC", 30));
 
         // Map feedback items
         List<com.eventhub.web.dto.admin.FeedbackPageResponse.FeedbackItemDTO> items = new java.util.ArrayList<>();
@@ -637,7 +646,8 @@ public class AdminServiceImpl implements AdminService {
 
         return com.eventhub.web.dto.admin.FeedbackPageResponse.builder()
             .sentiment(sentiment)
-            .trends(trends)
+            .trendsThisMonth(trendsThisMonth)
+            .trendsLastMonth(trendsLastMonth)
             .items(items)
             .logs(logs)
             .build();
