@@ -43,6 +43,7 @@ public class AuthService {
     private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
 
     private static final String OTP_PREFIX = "otp:";
+    private static final String RESET_OTP_PREFIX = "reset_otp:";
     private static final long OTP_EXPIRY_MINUTES = 5;
 
     @Transactional
@@ -190,17 +191,44 @@ public class AuthService {
 
     public void forgotPassword(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
 
-        String resetToken = UUID.randomUUID().toString();
-        // Store resetToken in Redis or DB
-        emailService.sendEmail(user.getEmail(), "Reset your password",
-                "Click here to reset: http://localhost:8080/api/v1/auth/reset-password?token=" + resetToken);
+        String otp = generateOtp();
+        redisTemplate.opsForValue().set(
+                RESET_OTP_PREFIX + email,
+                otp,
+                java.time.Duration.ofMinutes(OTP_EXPIRY_MINUTES));
+
+        emailService.sendEmail(
+                user.getEmail(),
+                "Yêu cầu khôi phục mật khẩu EventHub",
+                "Mã OTP khôi phục mật khẩu của bạn là: " + otp + ". Mã có hiệu lực trong " + OTP_EXPIRY_MINUTES + " phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.");
+    }
+
+    public void verifyResetOtp(String email, String otp) {
+        String storedOtp = redisTemplate.opsForValue().get(RESET_OTP_PREFIX + email);
+        if (storedOtp == null || !storedOtp.equals(otp)) {
+            throw new RuntimeException("Mã OTP không chính xác hoặc đã hết hạn");
+        }
     }
 
     @Transactional
-    public void resetPassword(String token, String newPassword) {
-        // Implementation for reset
+    public void resetPassword(String email, String otp, String newPassword) {
+        String storedOtp = redisTemplate.opsForValue().get(RESET_OTP_PREFIX + email);
+        if (storedOtp == null || !storedOtp.equals(otp)) {
+            throw new RuntimeException("Mã OTP không chính xác hoặc đã hết hạn");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Đăng xuất khỏi mọi thiết bị
+        refreshTokenRepository.deleteByUser(user);
+
+        redisTemplate.delete(RESET_OTP_PREFIX + email);
     }
 
     private void saveRefreshToken(User user, String token) {

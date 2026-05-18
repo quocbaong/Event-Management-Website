@@ -7,6 +7,8 @@ import com.eventhub.web.dto.auth.AuthResponse;
 import com.eventhub.web.dto.auth.LoginRequest;
 import com.eventhub.web.dto.auth.RefreshTokenRequest;
 import com.eventhub.web.dto.auth.RegisterRequest;
+import com.eventhub.web.dto.auth.ResetPasswordRequest;
+import com.eventhub.web.dto.auth.VerifyOtpRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +55,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@Valid @RequestBody com.eventhub.web.dto.auth.VerifyOtpRequest request) {
+    public ResponseEntity<String> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyOtp(request.getEmail(), request.getOtp());
         return ResponseEntity.ok("Email verified successfully");
     }
@@ -70,9 +72,15 @@ public class AuthController {
         return ResponseEntity.ok("Reset password email sent");
     }
 
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<String> verifyResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        authService.verifyResetOtp(request.getEmail(), request.getOtp());
+        return ResponseEntity.ok("OTP verified successfully");
+    }
+
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        authService.resetPassword(token, newPassword);
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
         return ResponseEntity.ok("Password reset successfully");
     }
 }
