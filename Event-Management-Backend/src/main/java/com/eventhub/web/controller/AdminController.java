@@ -2,14 +2,15 @@ package com.eventhub.web.controller;
 
 import com.eventhub.service.AdminService;
 import com.eventhub.web.dto.admin.DashboardResponse;
+import com.eventhub.web.dto.admin.GlobalEventsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -40,4 +41,40 @@ public class AdminController {
                 .headers(headers)
                 .body(csvData);
     }
+
+    @GetMapping("/events")
+    public ResponseEntity<GlobalEventsResponse> getGlobalEvents(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String organizerRole,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(adminService.getGlobalEvents(search, category, organizerRole, status, page, size));
+    }
+
+    @PostMapping("/events/{id}/approve")
+    public ResponseEntity<Void> approveEvent(@PathVariable UUID id) {
+        adminService.approveEvent(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/events/{id}/suspend")
+    public ResponseEntity<Void> suspendEvent(@PathVariable UUID id) {
+        adminService.suspendEvent(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/events/bulk-approve")
+    public ResponseEntity<Void> bulkApprove(@RequestBody List<UUID> ids) {
+        adminService.bulkApprove(ids);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/events/bulk-suspend")
+    public ResponseEntity<Void> bulkSuspend(@RequestBody List<UUID> ids) {
+        adminService.bulkSuspend(ids);
+        return ResponseEntity.ok().build();
+    }
 }
+
