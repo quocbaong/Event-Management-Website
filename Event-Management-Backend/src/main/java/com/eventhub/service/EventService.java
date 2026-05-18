@@ -12,7 +12,19 @@ import com.eventhub.web.dto.request.PublishEventRequest;
 import com.eventhub.web.dto.request.UpdateEventRequest;
 import com.eventhub.web.dto.response.EventResponse;
 import com.eventhub.web.dto.response.EventSummaryResponse;
+import com.eventhub.web.dto.response.EventDetailResponse;
+import com.eventhub.web.dto.response.EventScheduleResponse;
+import com.eventhub.web.dto.response.EventTimelineResponse;
+import com.eventhub.web.dto.request.EventFilterRequest;
+import com.eventhub.repository.EventScheduleRepository;
+import com.eventhub.repository.EventTimelineRepository;
+import com.eventhub.repository.specification.EventSpecification;
+import com.eventhub.web.mapper.EventMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +39,49 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final EventScheduleRepository eventScheduleRepository;
+    private final EventTimelineRepository eventTimelineRepository;
+    private final EventMapper eventMapper;
+
+    public Page<EventSummaryResponse> getEvents(EventFilterRequest filter, Pageable pageable) {
+        Page<Event> events = eventRepository.findAll(EventSpecification.filterPublicEvents(filter), pageable);
+        return events.map(eventMapper::toSummaryResponse);
+    }
+
+    @Cacheable(value = "featuredEvents", key = "'featured'")
+    public List<EventSummaryResponse> getFeaturedEvents() {
+        Pageable limit = PageRequest.of(0, 10);
+        return eventRepository.findByIsFeaturedTrueAndStatus(EventStatus.PUBLISHED, limit)
+                .stream()
+                .map(eventMapper::toSummaryResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "upcomingEvents", key = "'upcoming'")
+    public List<EventSummaryResponse> getUpcomingEvents() {
+        Pageable limit = PageRequest.of(0, 10);
+        return eventRepository.findByStatusOrderByStartDateAsc(EventStatus.PUBLISHED, limit)
+                .stream()
+                .map(eventMapper::toSummaryResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "eventDetail", key = "#slug")
+    public EventDetailResponse getEventBySlug(String slug) {
+        Event event = eventRepository.findBySlugAndStatus(slug, EventStatus.PUBLISHED)
+                .orElseThrow(() -> new RuntimeException("Event not found with slug: " + slug));
+        return eventMapper.toDetailResponse(event);
+    }
+
+    @Cacheable(value = "eventSchedules", key = "#eventId")
+    public List<EventScheduleResponse> getEventSchedules(UUID eventId) {
+        return eventMapper.toScheduleResponseList(eventScheduleRepository.findByEventIdOrderBySortOrderAscStartTimeAsc(eventId));
+    }
+
+    @Cacheable(value = "eventTimeline", key = "#eventId")
+    public List<EventTimelineResponse> getEventTimeline(UUID eventId) {
+        return eventMapper.toTimelineResponseList(eventTimelineRepository.findByEventIdOrderBySortOrderAsc(eventId));
+    }
 
     public EventResponse createEvent(User organizer, CreateEventRequest request) {
         String slug = generateSlug(request.getTitle());
