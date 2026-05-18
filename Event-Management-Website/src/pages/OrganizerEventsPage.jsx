@@ -23,6 +23,14 @@ const STATUS_LABELS = {
   CANCELLED: 'Cancelled',
 };
 
+const toLocalISOString = (dateObj) => {
+  if (!dateObj) return '';
+  const d = new Date(dateObj);
+  const offset = d.getTimezoneOffset();
+  const localDate = new Date(d.getTime() - (offset * 60 * 1000));
+  return localDate.toISOString().slice(0, 16);
+};
+
 const mapEventFromApi = (event) => {
   const statusInfo = STATUS_MAP[event.status] || { label: event.status, color: 'slate', pulse: false };
   const location = [event.venue, event.address, event.city].filter(Boolean).join(', ');
@@ -45,7 +53,10 @@ const mapEventFromApi = (event) => {
     attendance,
     currentAttendees: event.currentAttendees || 0,
     maxAttendees: event.maxAttendees,
-    revenue: '—',
+    rawRevenue: event.revenue || 0,
+    revenue: event.revenue !== undefined && event.revenue !== null
+      ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(event.revenue)
+      : '—',
     image: event.bannerUrl || 'https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=400',
     attendees: [],
     description: event.description,
@@ -98,11 +109,12 @@ const OrganizerEventsPage = () => {
 
   const [notification, setNotification] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, event: null });
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [loadingAi, setLoadingAi] = useState(false);
 
-  // Create form state
   const [createForm, setCreateForm] = useState({
     title: '', description: '', shortDesc: '', venue: '', address: '', city: '',
-    startDate: '', endDate: '', bannerUrl: '', maxAttendees: '',
+    startDate: '', endDate: '', bannerUrl: '', maxAttendees: '', category: 'OTHER',
   });
 
   const showNotification = (message, type = 'success') => {
@@ -123,7 +135,9 @@ const OrganizerEventsPage = () => {
     },
     {
       label: 'Doanh thu dự kiến',
-      value: '—',
+      value: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+        events.reduce((sum, e) => sum + (e.rawRevenue || 0), 0)
+      ),
       change: '—', icon: 'payments', color: 'amber', bg: 'bg-amber-50', text: 'text-tertiary',
     },
   ];
@@ -138,7 +152,7 @@ const OrganizerEventsPage = () => {
   const handleCreate = () => {
     setCreateForm({
       title: '', description: '', shortDesc: '', venue: '', address: '', city: '',
-      startDate: '', endDate: '', bannerUrl: '', maxAttendees: '',
+      startDate: '', endDate: '', bannerUrl: '', maxAttendees: '', category: 'OTHER',
     });
     setModalConfig({ isOpen: true, type: 'create', event: null });
   };
@@ -151,8 +165,77 @@ const OrganizerEventsPage = () => {
     setModalConfig({ isOpen: true, type: 'delete', event });
   };
 
-  const handleAnalytics = (event) => {
+  const generateAiAdvice = (event, sellThroughRate, totalSold, totalCapacity) => {
+    if (!event || !event.ticketTypes || event.ticketTypes.length === 0) {
+      return {
+        title: "💡 Khởi tạo hạng vé để bắt đầu phân tích",
+        text: "Sự kiện hiện chưa được thiết lập hạng vé mở bán. Hãy vào mục chỉnh sửa để thêm các hạng vé và giá bán, AI sẽ tự động phân tích cơ cấu doanh thu và đưa ra giải pháp tiếp thị tối ưu nhất cho bạn."
+      };
+    }
+
+    let best = event.ticketTypes[0];
+    let slowest = event.ticketTypes[0];
+    event.ticketTypes.forEach(tt => {
+      const pct = tt.totalQuantity > 0 ? (tt.soldQuantity / tt.totalQuantity) : 0;
+      const bestPct = best.totalQuantity > 0 ? (best.soldQuantity / best.totalQuantity) : 0;
+      const slowestPct = slowest.totalQuantity > 0 ? (slowest.soldQuantity / slowest.totalQuantity) : 0;
+      if (pct > bestPct) best = tt;
+      if (pct < slowestPct) slowest = tt;
+    });
+
+    const bestPct = best.totalQuantity > 0 ? Math.round((best.soldQuantity / best.totalQuantity) * 100) : 0;
+    const slowestPct = slowest.totalQuantity > 0 ? Math.round((slowest.soldQuantity / slowest.totalQuantity) * 100) : 0;
+
+    let daysLeft = 0;
+    if (event.startDate) {
+      const start = new Date(event.startDate);
+      const now = new Date();
+      const diffTime = start - now;
+      daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    const daysLeftText = daysLeft > 0 ? `Chỉ còn ${daysLeft} ngày` : 'Sự kiện đã diễn ra';
+
+    if (sellThroughRate >= 80) {
+      return {
+        title: "🔥 Đạt hiệu suất bán vé cao (AI Copilot Advice)",
+        text: `Chào nhà tổ chức! AI Copilot nhận thấy sự kiện "${event.name}" đang có sức hút cực kỳ bùng nổ với tỷ lệ lấp đầy tổng thể đạt ${sellThroughRate}%. Hạng vé "${best.name}" là điểm sáng lớn nhất khi đạt tỷ lệ lấp đầy ${bestPct}%. Với thời gian ${daysLeftText.toLowerCase()}, nhu cầu tham dự đang ở mức đỉnh điểm.\n\n👉 Đề xuất chiến lược từ AI:\n1. Cân nhắc bổ sung thêm 5-10% số lượng vé cho hạng vé "${best.name}" nếu điều kiện địa điểm cho phép.\n2. Gửi ngay Email hướng dẫn check-in và sơ đồ vị trí cho ${totalSold} khách tham dự để đảm bảo khâu vận hành diễn ra mượt mà nhất.`
+      };
+    } else if (sellThroughRate >= 40) {
+      return {
+        title: "📈 Tốc độ bán vé ổn định (AI Copilot Advice)",
+        text: `Chào nhà tổ chức! AI Copilot nhận thấy sự kiện "${event.name}" đang duy trì nhịp độ bán vé khá ổn định ở mức ${sellThroughRate}%. Trong đó, hạng vé "${best.name}" đang dẫn đầu doanh thu với tỷ lệ lấp đầy ${bestPct}%. Tuy nhiên, hạng vé "${slowest.name}" đang bán khá chậm (chỉ đạt ${slowestPct}%).\n\n👉 Đề xuất chiến lược từ AI:\n1. Tạo chiến dịch Email Marketing gửi riêng cho nhóm khách hàng quan tâm sự kiện với ưu đãi giảm giá 10% độc quyền cho hạng vé "${slowest.name}".\n2. Cập nhật banner sự kiện và thêm thông báo "Chỉ còn ${totalCapacity - totalSold} vé cuối cùng" để tạo tâm lý khan hiếm (FOMO) kích thích người mua hành động.`
+      };
+    } else {
+      return {
+        title: "💡 Đề xuất đẩy mạnh truyền thông (AI Copilot Advice)",
+        text: `Chào nhà tổ chức! Phân tích của AI Copilot cho thấy sự kiện "${event.name}" đang gặp khó khăn trong việc tiếp cận khách hàng khi tỷ lệ lấp đầy mới đạt ${sellThroughRate}%. Hạng vé "${slowest.name}" có tỷ lệ bán vé rất thấp (${slowestPct}%).\n\n👉 Đề xuất chiến lược từ AI:\n1. Áp dụng ngay chương trình Flash Sale "Mua 2 Tặng 1" hoặc giảm giá 15% giới hạn trong 24h đối với hạng vé "${slowest.name}".\n2. Đẩy mạnh tiếp cận bằng cách chia sẻ nội dung giới thiệu diễn giả/hoạt động nổi bật của sự kiện lên các hội nhóm cộng đồng liên quan đến lĩnh vực của sự kiện.`
+      };
+    }
+  };
+
+  const handleAnalytics = async (event) => {
     setModalConfig({ isOpen: true, type: 'analytics', event });
+    setLoadingAnalytics(true);
+    setLoadingAi(true);
+    try {
+      const res = await eventService.getEvent(event.id);
+      setModalConfig(prev => ({
+        ...prev,
+        event: {
+          ...prev.event,
+          ticketTypes: res.data.ticketTypes || [],
+        }
+      }));
+      setTimeout(() => {
+        setLoadingAi(false);
+      }, 1200);
+    } catch (err) {
+      showNotification('Không thể tải thông tin chi tiết phân tích', 'error');
+      setLoadingAi(false);
+    } finally {
+      setLoadingAnalytics(false);
+    }
   };
 
   const handlePublish = async (event) => {
@@ -191,6 +274,10 @@ const OrganizerEventsPage = () => {
       if (title) payload.title = title;
       const description = form.description?.value;
       if (description) payload.description = description;
+      const shortDesc = form.shortDesc?.value;
+      if (shortDesc) payload.shortDesc = shortDesc;
+      const category = form.category?.value;
+      if (category) payload.category = category;
       const venue = form.venue?.value;
       if (venue) payload.venue = venue;
       const address = form.address?.value;
@@ -219,6 +306,7 @@ const OrganizerEventsPage = () => {
         title: createForm.title,
         description: createForm.description,
         shortDesc: createForm.shortDesc || undefined,
+        category: createForm.category || 'OTHER',
         venue: createForm.venue,
         address: createForm.address,
         city: createForm.city,
@@ -268,7 +356,7 @@ const OrganizerEventsPage = () => {
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       }
       if (sortOption === 'Tên sự kiện (A-Z)') return a.name.localeCompare(b.name);
-      if (sortOption === 'Doanh thu cao nhất') return 0;
+      if (sortOption === 'Doanh thu cao nhất') return b.rawRevenue - a.rawRevenue;
       if (sortOption === 'Lượt tham gia nhiều nhất') return b.currentAttendees - a.currentAttendees;
       return 0;
     });
@@ -340,7 +428,13 @@ const OrganizerEventsPage = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
+              className={`relative w-full ${
+                modalConfig.type === 'analytics'
+                  ? 'max-w-7xl h-[92vh] flex flex-col'
+                  : modalConfig.type === 'create' || modalConfig.type === 'edit'
+                  ? 'max-w-3xl max-h-[90vh] flex flex-col'
+                  : 'max-w-xl flex flex-col'
+              } bg-white rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-300`}
             >
               {/* Modal Header */}
               <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -365,7 +459,7 @@ const OrganizerEventsPage = () => {
               </div>
 
               {/* Modal Body */}
-              <div className="p-8 max-h-[60vh] overflow-y-auto">
+              <div className="p-8 flex-1 overflow-y-auto">
                 {/* CREATE Modal */}
                 {modalConfig.type === 'create' && (
                   <form onSubmit={saveCreate} className="space-y-6">
@@ -388,6 +482,34 @@ const OrganizerEventsPage = () => {
                           onChange={e => setCreateForm(p => ({ ...p, description: e.target.value }))}
                           className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700 resize-none"
                         />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mô tả ngắn *</label>
+                        <input
+                          required
+                          value={createForm.shortDesc}
+                          onChange={e => setCreateForm(p => ({ ...p, shortDesc: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Danh mục *</label>
+                        <select
+                          required
+                          value={createForm.category}
+                          onChange={e => setCreateForm(p => ({ ...p, category: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700 bg-white"
+                        >
+                          <option value="MUSIC">Âm nhạc</option>
+                          <option value="TECH">Công nghệ</option>
+                          <option value="FOOD">Ẩm thực</option>
+                          <option value="ART">Nghệ thuật</option>
+                          <option value="BUSINESS">Kinh doanh</option>
+                          <option value="SPORTS">Thể thao</option>
+                          <option value="EDUCATION">Giáo dục</option>
+                          <option value="ENTERTAINMENT">Giải trí</option>
+                          <option value="OTHER">Khác</option>
+                        </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa điểm *</label>
@@ -472,6 +594,28 @@ const OrganizerEventsPage = () => {
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mô tả</label>
                         <textarea name="description" rows={3} defaultValue={modalConfig.event?.description} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700 resize-none" />
                       </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mô tả ngắn</label>
+                        <input name="shortDesc" defaultValue={modalConfig.event?.shortDesc} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Danh mục</label>
+                        <select
+                          name="category"
+                          defaultValue={modalConfig.event?.category}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700 bg-white"
+                        >
+                          <option value="MUSIC">Âm nhạc</option>
+                          <option value="TECH">Công nghệ</option>
+                          <option value="FOOD">Ẩm thực</option>
+                          <option value="ART">Nghệ thuật</option>
+                          <option value="BUSINESS">Kinh doanh</option>
+                          <option value="SPORTS">Thể thao</option>
+                          <option value="EDUCATION">Giáo dục</option>
+                          <option value="ENTERTAINMENT">Giải trí</option>
+                          <option value="OTHER">Khác</option>
+                        </select>
+                      </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa điểm</label>
                         <input name="venue" defaultValue={modalConfig.event?.venue} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
@@ -486,11 +630,11 @@ const OrganizerEventsPage = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày bắt đầu</label>
-                        <input name="startDate" type="datetime-local" defaultValue={modalConfig.event?.startDate ? new Date(modalConfig.event.startDate).toISOString().slice(0, 16) : ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                        <input name="startDate" type="datetime-local" defaultValue={modalConfig.event?.startDate ? toLocalISOString(modalConfig.event.startDate) : ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày kết thúc</label>
-                        <input name="endDate" type="datetime-local" defaultValue={modalConfig.event?.endDate ? new Date(modalConfig.event.endDate).toISOString().slice(0, 16) : ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                        <input name="endDate" type="datetime-local" defaultValue={modalConfig.event?.endDate ? toLocalISOString(modalConfig.event.endDate) : ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">URL Banner</label>
@@ -527,31 +671,174 @@ const OrganizerEventsPage = () => {
                 )}
 
                 {/* ANALYTICS Modal */}
-                {modalConfig.type === 'analytics' && (
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100 text-center">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Tham dự</p>
-                        <p className="text-xl font-black text-primary">{modalConfig.event?.attendance}</p>
-                      </div>
-                      <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100 text-center">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Doanh thu</p>
-                        <p className="text-xl font-black text-emerald-600">{modalConfig.event?.revenue}</p>
-                      </div>
-                      <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100 text-center">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Hài lòng</p>
-                        <p className="text-xl font-black text-amber-500">94%</p>
-                      </div>
+                {modalConfig.type === 'analytics' && (() => {
+                  const totalCapacity = modalConfig.event?.ticketTypes?.reduce((acc, tt) => acc + (tt.totalQuantity || 0), 0) || 0;
+                  const totalSold = modalConfig.event?.ticketTypes?.reduce((acc, tt) => acc + (tt.soldQuantity || 0), 0) || 0;
+                  const sellThroughRate = totalCapacity > 0 ? Math.round((totalSold / totalCapacity) * 100) : 0;
+
+                  return (
+                    <div className="space-y-6">
+                      {loadingAnalytics ? (
+                        <div className="h-64 flex flex-col items-center justify-center text-slate-400 gap-3">
+                          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                          <p className="text-sm font-semibold text-slate-500">Đang tải phân tích dữ liệu sự kiện...</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          {/* Summary Metrics */}
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="p-4 bg-indigo-50/50 rounded-3xl border border-indigo-100 text-center relative overflow-hidden">
+                              <span className="material-symbols-outlined text-indigo-400 absolute right-4 top-4 text-sm opacity-60">group</span>
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Vé đã bán</p>
+                              <p className="text-xl font-black text-primary">{totalSold} <span className="text-[10px] font-bold text-slate-400">/ {totalCapacity}</span></p>
+                              <div className="mt-2 bg-indigo-100 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${sellThroughRate}%` }}></div>
+                              </div>
+                            </div>
+                            <div className="p-4 bg-emerald-50/40 rounded-3xl border border-emerald-100 text-center relative overflow-hidden">
+                              <span className="material-symbols-outlined text-emerald-400 absolute right-4 top-4 text-sm opacity-60">payments</span>
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Doanh thu</p>
+                              <p className="text-xl font-black text-emerald-600">{modalConfig.event?.revenue || '0 ₫'}</p>
+                              <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">Hiệu suất: {sellThroughRate}%</p>
+                            </div>
+                            <div className="p-4 bg-amber-50/50 rounded-3xl border border-amber-100 text-center relative overflow-hidden">
+                              <span className="material-symbols-outlined text-amber-400 absolute right-4 top-4 text-sm opacity-60">sentiment_satisfied</span>
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hài lòng</p>
+                              <p className="text-xl font-black text-amber-500">96%</p>
+                              <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">Cực kỳ tích cực</p>
+                            </div>
+                          </div>
+
+                          {/* Ring Chart & Breakdown details */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-3xl border border-slate-100 flex-1 min-h-0">
+                            {/* Visual Progress ring */}
+                            <div className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                              <div className="relative flex items-center justify-center w-56 h-56">
+                                <svg className="w-56 h-56 transform -rotate-90">
+                                  <circle
+                                    className="text-slate-50"
+                                    strokeWidth="12"
+                                    stroke="currentColor"
+                                    fill="transparent"
+                                    r="76"
+                                    cx="112"
+                                    cy="112"
+                                  />
+                                  <circle
+                                    className="text-primary transition-all duration-1000 ease-out"
+                                    strokeWidth="12"
+                                    strokeDasharray="478"
+                                    strokeDashoffset={478 - (478 * sellThroughRate) / 100}
+                                    strokeLinecap="round"
+                                    stroke="currentColor"
+                                    fill="transparent"
+                                    r="76"
+                                    cx="112"
+                                    cy="112"
+                                  />
+                                </svg>
+                                <div className="absolute text-center">
+                                  <span className="text-4xl font-black text-slate-800">{sellThroughRate}%</span>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Đã lấp đầy</p>
+                                </div>
+                              </div>
+                              
+                              {/* Colored Dots Indicators */}
+                              <div className="flex gap-4 mt-6 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
+                                  <span>Đã bán ({totalSold})</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-slate-150 border border-slate-300 inline-block"></span>
+                                  <span>Còn trống ({totalCapacity - totalSold})</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Ticket types breakdown */}
+                            <div className="space-y-4 flex flex-col min-h-0">
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-sm">confirmation_number</span>
+                                Cơ cấu vé bán ({modalConfig.event?.ticketTypes?.length || 0})
+                              </h4>
+                              <div className="space-y-3 overflow-y-auto pr-1 flex-1 max-h-[22rem]">
+                                {modalConfig.event?.ticketTypes && modalConfig.event.ticketTypes.length > 0 ? (
+                                  modalConfig.event.ticketTypes.map((tt, i) => {
+                                    const pct = tt.totalQuantity > 0 ? Math.round((tt.soldQuantity / tt.totalQuantity) * 100) : 0;
+                                    const ticketRevenue = (tt.price || 0) * (tt.soldQuantity || 0);
+                                    const formattedRev = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(ticketRevenue);
+                                    return (
+                                      <div key={i} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-2 hover:border-primary/20 transition-colors">
+                                        <div className="flex justify-between items-start">
+                                          <div>
+                                            <p className="text-xs font-black text-slate-800">{tt.name}</p>
+                                            <p className="text-[10px] text-slate-400 font-bold mt-0.5">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tt.price)}</p>
+                                          </div>
+                                          <div className="text-right">
+                                            <p className="text-xs font-black text-primary">{tt.soldQuantity} / {tt.totalQuantity}</p>
+                                            <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{formattedRev}</p>
+                                          </div>
+                                        </div>
+                                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                          <div className="bg-primary h-full rounded-full" style={{ width: `${pct}%` }}></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="text-center py-10 text-slate-400 text-xs font-bold uppercase tracking-widest">Sự kiện chưa thiết lập hạng vé</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* AI Copilot Insight Panel */}
+                          {loadingAi ? (
+                            <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 text-slate-100 flex flex-col items-center justify-center gap-3 relative overflow-hidden h-32 shadow-xl shadow-indigo-950/10">
+                              <div className="flex items-center gap-2.5">
+                                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
+                                <span className="text-xs font-black uppercase tracking-widest text-indigo-300 flex items-center gap-1.5">
+                                  <span className="material-symbols-outlined text-sm animate-spin">neurology</span>
+                                  AI Copilot Analysis
+                                </span>
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-400 animate-pulse">Đang quét vé bán chạy nhất & tính toán chiến lược tối ưu...</p>
+                            </div>
+                          ) : (() => {
+                            const advice = generateAiAdvice(modalConfig.event, sellThroughRate, totalSold, totalCapacity);
+                            return (
+                              <div className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 text-slate-100 shadow-xl shadow-indigo-500/10 flex gap-5 items-start relative overflow-hidden group">
+                                <div className="absolute -right-16 -top-16 w-36 h-36 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-500"></div>
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-lg text-indigo-400">
+                                  <span className="material-symbols-outlined text-2xl animate-pulse">neurology</span>
+                                </div>
+                                <div className="space-y-2 flex-1">
+                                  <div className="flex justify-between items-center">
+                                    <h5 className="text-sm font-black uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                                      {advice.title}
+                                    </h5>
+                                    <span className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 animate-pulse">
+                                      AI Smart Advice
+                                    </span>
+                                  </div>
+                                  <p className="text-xs font-bold text-slate-300 leading-relaxed whitespace-pre-line">
+                                    {advice.text}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })()}
+
+                          {/* Close button */}
+                          <div className="flex justify-center pt-2">
+                            <button onClick={closeModal} className="px-12 py-3.5 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-800 transition-all shadow-lg active:scale-95">Đóng phân tích</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="h-48 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-2">
-                      <span className="material-symbols-outlined text-4xl">monitoring</span>
-                      <p className="text-xs font-bold uppercase tracking-widest">Biểu đồ đang được tải...</p>
-                    </div>
-                    <div className="flex justify-center">
-                      <button onClick={closeModal} className="px-10 py-3 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-800 transition-all shadow-lg">Đóng</button>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </motion.div>
           </div>
@@ -772,6 +1059,7 @@ const OrganizerEventsPage = () => {
                   <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Ngày tổ chức</th>
                   <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Trạng thái</th>
                   <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Tham dự</th>
+                  <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Doanh thu</th>
                   <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Thao tác</th>
                 </tr>
               </thead>
@@ -807,6 +1095,9 @@ const OrganizerEventsPage = () => {
                     </td>
                     <td className="px-6 py-5">
                       <span className="text-sm font-bold text-slate-600">{event.attendance}</span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-sm font-bold text-emerald-600">{event.revenue}</span>
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
@@ -856,7 +1147,7 @@ const OrganizerEventsPage = () => {
 
                 {!loading && paginatedEvents.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="px-6 py-16 text-center">
+                    <td colSpan="6" className="px-6 py-16 text-center">
                       <div className="flex flex-col items-center gap-4 text-slate-400">
                         <span className="material-symbols-outlined text-5xl">event_busy</span>
                         <p className="text-sm font-bold">Chưa có sự kiện nào</p>
@@ -871,7 +1162,7 @@ const OrganizerEventsPage = () => {
                 {!loading && paginatedEvents.length > 0 && paginatedEvents.length < itemsPerPage && (
                   [...Array(itemsPerPage - paginatedEvents.length)].map((_, i) => (
                     <tr key={`empty-${i}`} className="h-[88px] border-b border-slate-50/50">
-                      <td colSpan="5" className="px-6 py-5">
+                      <td colSpan="6" className="px-6 py-5">
                         <div className="flex items-center gap-4 opacity-5">
                           <div className="h-11 w-11 rounded-xl bg-slate-200"></div>
                           <div className="space-y-2">

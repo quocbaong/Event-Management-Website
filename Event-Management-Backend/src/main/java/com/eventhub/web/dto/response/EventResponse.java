@@ -45,6 +45,7 @@ public class EventResponse {
     private Instant publishedAt;
     private Instant createdAt;
     private Instant updatedAt;
+    private BigDecimal revenue;
     private List<TicketTypeInfo> ticketTypes;
 
     @Data

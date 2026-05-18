@@ -2,6 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { dashboardService } from '../services/dashboardService';
 import { eventService } from '../services/eventService';
+import { useAuth } from '../stores/AuthContext';
+
+const getDatesInRange = (fromStr, toStr) => {
+  const dates = [];
+  const current = new Date(fromStr);
+  const end = new Date(toStr);
+  for (let i = 0; i < 31; i++) {
+    if (current > end) break;
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+};
+
+const formatWeekday = (date) => {
+  const day = date.getDay();
+  const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  return `${dayNames[day]} (${dd}/${mm})`;
+};
+
+const formatDateKey = (date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
 
 const OrganizerDashboardPage = () => {
   const [period, setPeriod] = useState('month');
@@ -12,32 +40,90 @@ const OrganizerDashboardPage = () => {
   const [revenueData, setRevenueData] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [overviewRes, revenueRes, eventsRes] = await Promise.all([
+        const apiPeriod = period === 'week' ? 'day' : period;
+        
+        const [overviewRes, revenueRes, eventsRes, eventRevenueRes] = await Promise.all([
           dashboardService.getOverview(),
-          dashboardService.getRevenue(period),
-          eventService.getEvents()
+          dashboardService.getRevenue(apiPeriod),
+          eventService.getEvents(),
+          dashboardService.getRevenue('event')
         ]);
         
-        setOverview(overviewRes.data);
+        let revenueList = revenueRes.data;
+        let calculatedRevenue = 0;
+        let calculatedAttendees = 0;
+        
+        if (period === 'week') {
+          const dates = getDatesInRange(dateRange.from, dateRange.to);
+          const revenueMap = new Map(revenueList.map(item => [item.groupKey, Number(item.revenue)]));
+          const countMap = new Map(revenueList.map(item => [item.groupKey, Number(item.count || 0)]));
+          
+          revenueList = dates.map(date => {
+            const key = formatDateKey(date);
+            const label = formatWeekday(date);
+            const rev = revenueMap.get(key) || 0;
+            const cnt = countMap.get(key) || 0;
+            calculatedRevenue += rev;
+            calculatedAttendees += cnt;
+            return {
+              groupKey: key,
+              groupLabel: label,
+              revenue: rev,
+              count: cnt
+            };
+          });
+        } else if (period === 'month') {
+          const filteredItems = revenueList.filter(item => item.groupKey.startsWith(selectedYear));
+          const revenueMap = new Map(filteredItems.map(item => [item.groupKey, Number(item.revenue)]));
+          const countMap = new Map(filteredItems.map(item => [item.groupKey, Number(item.count || 0)]));
+          
+          const monthsData = Array.from({ length: 12 }, (_, i) => {
+            const m = String(i + 1).padStart(2, '0');
+            const key = `${selectedYear}-${m}`;
+            const rev = revenueMap.get(key) || 0;
+            const cnt = countMap.get(key) || 0;
+            calculatedRevenue += rev;
+            calculatedAttendees += cnt;
+            return {
+              groupKey: key,
+              groupLabel: `Th ${i + 1}`,
+              revenue: rev,
+              count: cnt
+            };
+          });
+          revenueList = monthsData;
+        }
+        
+        setOverview({
+          totalAttendees: calculatedAttendees,
+          totalRevenue: calculatedRevenue,
+          upcomingEvents: overviewRes.data?.upcomingEvents || 0
+        });
         
         const colors = ['from-indigo-500 to-indigo-600', 'from-blue-500 to-indigo-500', 'from-indigo-400 to-indigo-500', 'from-indigo-600 to-indigo-700', 'from-indigo-700 to-indigo-800'];
-        const mappedRevenue = revenueRes.data.map((item, i) => {
-          const maxRev = Math.max(...revenueRes.data.map(r => r.revenue)) || 1;
+        const mappedRevenue = revenueList.map((item, i) => {
+          const maxRev = Math.max(...revenueList.map(r => r.revenue)) || 1;
           const height = Math.max((item.revenue / maxRev) * 100, 5);
           return {
             label: item.groupLabel,
             height: height,
             color: colors[i % colors.length],
-            value: (item.revenue / 1000000).toFixed(1),
+            value: new Intl.NumberFormat('vi-VN').format(item.revenue),
             percent: `${Math.round(height)}%`
           };
         });
         setRevenueData(mappedRevenue);
+
+        const eventRevenues = eventRevenueRes.data.reduce((acc, curr) => {
+          acc[curr.groupKey] = curr.revenue;
+          return acc;
+        }, {});
 
         const sortedEvents = eventsRes.data
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -48,7 +134,7 @@ const OrganizerDashboardPage = () => {
              date: e.startDate ? new Date(e.startDate).toLocaleDateString('vi-VN') : '--',
              status: e.status === 'PUBLISHED' || e.status === 'ON_SALE' ? 'Đang bán vé' : e.status === 'DRAFT' ? 'Sắp diễn ra' : 'Hoàn thành',
              statusColor: e.status === 'PUBLISHED' || e.status === 'ON_SALE' ? 'green' : e.status === 'DRAFT' ? 'amber' : 'slate',
-             income: '—',
+             income: eventRevenues[e.id] ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(eventRevenues[e.id]) : '0 ₫',
              img: e.bannerUrl || 'https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&q=80&w=200'
           }));
         setRecentEvents(sortedEvents);
@@ -60,22 +146,22 @@ const OrganizerDashboardPage = () => {
     };
     
     fetchData();
-  }, [period]);
+  }, [period, dateRange, selectedYear]);
 
   const currentData = revenueData;
 
   return (
     <div className="p-8 min-h-screen bg-[#fcfdff] animate-in fade-in duration-700">
       <section className="mb-8">
-        <h2 className="text-3xl font-black font-headline text-slate-900 mb-1 tracking-tight">Chào buổi sáng, Nam! 👋</h2>
+        <h2 className="text-3xl font-black font-headline text-slate-900 mb-1 tracking-tight">Chào, {user?.fullName || 'Nhà tổ chức'}! 👋</h2>
         <p className="text-slate-500 font-semibold text-base opacity-80">Dưới đây là tóm tắt những gì đang diễn ra với các sự kiện của bạn.</p>
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {[
-          { label: 'Tổng người tham dự', value: loading ? '...' : overview.totalAttendees.toLocaleString(), change: '+12%', icon: 'group', color: 'indigo' },
-          { label: 'Doanh thu tháng này', value: loading ? '...' : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(overview.totalRevenue || 0), change: '+8.4%', icon: 'payments', color: 'purple' },
-          { label: 'Sự kiện sắp tới', value: loading ? '...' : overview.upcomingEvents.toString(), change: 'Ổn định', icon: 'event_available', color: 'orange' },
+          { label: 'Tổng người tham dự', value: loading ? '...' : overview.totalAttendees.toLocaleString('vi-VN'), change: period === 'week' ? 'Trong tuần chọn' : `Năm ${selectedYear}`, icon: 'group', color: 'indigo' },
+          { label: 'Doanh thu tổng', value: loading ? '...' : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(overview.totalRevenue || 0), change: period === 'week' ? 'Trong tuần chọn' : `Năm ${selectedYear}`, icon: 'payments', color: 'purple' },
+          { label: 'Sự kiện sắp tới', value: loading ? '...' : overview.upcomingEvents.toString(), change: 'Chưa diễn ra', icon: 'event_available', color: 'orange' },
         ].map((card, i) => (
           <motion.div
             key={i}
@@ -203,7 +289,7 @@ const OrganizerDashboardPage = () => {
                       {/* Floating Data Label */}
                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-20 flex flex-col items-center pointer-events-none">
                         <span className="bg-slate-900 text-white text-[10px] font-black px-3 py-1.5 rounded-xl shadow-2xl whitespace-nowrap">
-                          {item.value}{period === 'week' ? ' vé' : '.000.000 VND'}
+                          {item.value}{period === 'week' ? ' VND' : ' VND'}
                         </span>
                         <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 shadow-2xl"></div>
                       </div>
