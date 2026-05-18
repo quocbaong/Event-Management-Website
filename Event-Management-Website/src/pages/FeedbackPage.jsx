@@ -214,16 +214,15 @@ const FeedbackPage = () => {
                   const isTech = t.category === 'KỸ THUẬT';
                   return (
                     <div key={idx} className="flex flex-col items-center gap-3 w-full group">
-                       <div className="relative w-16 flex justify-center">
-                          <div 
-                            className={`w-12 rounded-t-2xl transition-all duration-1000 ${
-                              isTech 
-                                ? 'bg-primary shadow-lg shadow-primary/20 hover:bg-primary-hover' 
-                                : 'bg-indigo-100 group-hover:bg-indigo-200'
-                            }`}
-                            style={{ height: `${barHeight}px` }}
-                          ></div>
-                          <span className="absolute -top-6 text-[10px] font-black text-slate-500 scale-0 group-hover:scale-100 transition-all duration-200">
+                       <div 
+                         className={`w-16 rounded-t-2xl transition-all duration-1000 relative ${
+                           isTech 
+                             ? 'bg-primary shadow-lg shadow-primary/20 hover:bg-primary-hover' 
+                             : 'bg-indigo-100 group-hover:bg-indigo-200'
+                         }`}
+                         style={{ height: `${barHeight}px` }}
+                       >
+                          <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-slate-500 scale-0 group-hover:scale-100 transition-all duration-200">
                             {t.count}
                           </span>
                        </div>
