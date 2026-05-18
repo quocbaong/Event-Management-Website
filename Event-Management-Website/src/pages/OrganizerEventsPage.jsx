@@ -1,6 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { eventService } from '../services/eventService';
+
+const STATUS_MAP = {
+  DRAFT: { label: 'Draft', color: 'slate', pulse: false },
+  PUBLISHED: { label: 'Live', color: 'emerald', pulse: true },
+  ON_SALE: { label: 'Live', color: 'emerald', pulse: true },
+  SOLD_OUT: { label: 'Sold Out', color: 'amber', pulse: false },
+  ONGOING: { label: 'Ongoing', color: 'emerald', pulse: true },
+  COMPLETED: { label: 'Completed', color: 'indigo', pulse: false },
+  CANCELLED: { label: 'Cancelled', color: 'rose', pulse: false },
+};
+
+const STATUS_FILTERS = ['All', 'DRAFT', 'PUBLISHED', 'COMPLETED', 'CANCELLED'];
+
+const STATUS_LABELS = {
+  All: 'Tất cả trạng thái',
+  DRAFT: 'Draft',
+  PUBLISHED: 'Live',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
+const mapEventFromApi = (event) => {
+  const statusInfo = STATUS_MAP[event.status] || { label: event.status, color: 'slate', pulse: false };
+  const location = [event.venue, event.address, event.city].filter(Boolean).join(', ');
+  const date = event.startDate ? new Date(event.startDate) : null;
+  const attendance = event.maxAttendees
+    ? `${event.currentAttendees || 0} / ${event.maxAttendees}`
+    : `${event.currentAttendees || 0}`;
+
+  return {
+    id: event.id,
+    name: event.title,
+    slug: event.slug,
+    location,
+    date: date ? `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}` : '--',
+    dateObj: date,
+    status: statusInfo.label,
+    rawStatus: event.status,
+    statusColor: statusInfo.color,
+    statusPulse: statusInfo.pulse,
+    attendance,
+    currentAttendees: event.currentAttendees || 0,
+    maxAttendees: event.maxAttendees,
+    revenue: '—',
+    image: event.bannerUrl || 'https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=400',
+    attendees: [],
+    description: event.description,
+    shortDesc: event.shortDesc,
+    category: event.category,
+    venue: event.venue,
+    address: event.address,
+    city: event.city,
+    latitude: event.latitude,
+    longitude: event.longitude,
+    startDate: event.startDate,
+    endDate: event.endDate,
+    registrationDeadline: event.registrationDeadline,
+    tags: event.tags,
+    thumbnailUrl: event.thumbnailUrl,
+    bannerUrl: event.bannerUrl,
+    ticketTypes: event.ticketTypes,
+    publishedAt: event.publishedAt,
+    createdAt: event.createdAt,
+    updatedAt: event.updatedAt,
+  };
+};
 
 const OrganizerEventsPage = () => {
   const navigate = useNavigate();
@@ -10,39 +77,55 @@ const OrganizerEventsPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
 
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  const fetchEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await eventService.getEvents();
+      setEvents(res.data.map(mapEventFromApi));
+    } catch (err) {
+      showNotification('Không thể tải danh sách sự kiện', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const [events, setEvents] = useState([
-    { id: 1, name: 'Hội thảo Công nghệ 2024', location: 'Sảnh A, Trung tâm Hội nghị Quốc gia', date: '15/10/2024', status: 'Live', statusColor: 'emerald', attendance: '420/500', revenue: '120.000.000', image: 'https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=400', attendees: [1, 2, 3] },
-    { id: 2, name: 'Tiệc cuối năm Công ty', location: 'Khách sạn Daewoo, Hà Nội', date: '22/12/2024', status: 'Draft', statusColor: 'slate', attendance: '--', revenue: '--', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400', attendees: [] },
-    { id: 3, name: 'Đêm nhạc Mùa thu', location: 'Sân vận động Mỹ Đình', date: '05/09/2024', status: 'Completed', statusColor: 'indigo', attendance: '2,150 / 2,150', revenue: '850.000.000', image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400', attendees: [1, 2, 3, 4, 5] },
-    { id: 4, name: 'Workshop Thiết kế UI/UX', location: 'Dreamplex Thái Hà', date: '10/11/2024', status: 'Live', statusColor: 'emerald', attendance: '45/50', revenue: '15.000.000', image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400', attendees: [1, 2] },
-    { id: 5, name: 'Lễ ra mắt sản phẩm mới', location: 'Gem Center, TP.HCM', date: '20/12/2024', status: 'Draft', statusColor: 'slate', attendance: '--', revenue: '--', image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400', attendees: [] },
-    { id: 6, name: 'Giải chạy Marathon 2024', location: 'Hồ Hoàn Kiếm, Hà Nội', date: '25/10/2024', status: 'Completed', statusColor: 'indigo', attendance: '1,200 / 1,500', revenue: '300.000.000', image: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=400', attendees: [1, 2, 3, 4, 5, 6] },
-    { id: 7, name: 'Hội chợ Ẩm thực Quốc tế', location: 'Công viên Thống Nhất', date: '15/11/2024', status: 'Live', statusColor: 'emerald', attendance: '850/1000', revenue: '200.000.000', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400', attendees: [1, 2, 3, 4] },
-    { id: 8, name: 'Hội nghị Khách hàng 2024', location: 'JW Marriott Hanoi', date: '05/12/2024', status: 'Live', statusColor: 'emerald', attendance: '180/200', revenue: '50.000.000', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=400', attendees: [1, 2, 3] },
-    { id: 9, name: 'Triển lãm Nghệ thuật', location: 'VCCA Hà Nội', date: '12/10/2024', status: 'Completed', statusColor: 'indigo', attendance: '500/500', revenue: '40.000.000', image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400', attendees: [1, 2, 3, 4, 5] },
-    { id: 10, name: 'Khóa học Marketing 4.0', location: 'Vp. Công ty ABC', date: '18/11/2024', status: 'Live', statusColor: 'emerald', attendance: '25/30', revenue: '25.000.000', image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400', attendees: [1, 2] }
-  ]);
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const [notification, setNotification] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, event: null });
 
-  // Sync paused event status from attendees page via localStorage
-  useEffect(() => {
-    const pausedId = localStorage.getItem('pausedEventId');
-    if (pausedId) {
-      setEvents(prev => prev.map(ev =>
-        ev.id === parseInt(pausedId) ? { ...ev, status: 'Paused', statusColor: 'amber' } : ev
-      ));
-      localStorage.removeItem('pausedEventId');
-    }
-  }, []);
+  // Create form state
+  const [createForm, setCreateForm] = useState({
+    title: '', description: '', shortDesc: '', venue: '', address: '', city: '',
+    startDate: '', endDate: '', bannerUrl: '', maxAttendees: '',
+  });
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const stats = [
-    { label: 'Sự kiện đang chạy', value: '24', change: '+12%', icon: 'event_available', color: 'indigo', bg: 'bg-indigo-50', text: 'text-primary' },
-    { label: 'Tổng khách mời', value: '1,284', change: '+8%', icon: 'group', color: 'purple', bg: 'bg-purple-50', text: 'text-secondary' },
-    { label: 'Doanh thu dự kiến', value: '450M VNĐ', change: '-3%', icon: 'payments', color: 'amber', bg: 'bg-amber-50', text: 'text-tertiary' }
+    {
+      label: 'Sự kiện đang chạy',
+      value: events.filter(e => e.status === 'Live' || e.status === 'Ongoing').length.toString(),
+      change: '—', icon: 'event_available', color: 'indigo', bg: 'bg-indigo-50', text: 'text-primary',
+    },
+    {
+      label: 'Tổng khách mời',
+      value: events.reduce((sum, e) => sum + e.currentAttendees, 0).toLocaleString(),
+      change: '—', icon: 'group', color: 'purple', bg: 'bg-purple-50', text: 'text-secondary',
+    },
+    {
+      label: 'Doanh thu dự kiến',
+      value: '—',
+      change: '—', icon: 'payments', color: 'amber', bg: 'bg-amber-50', text: 'text-tertiary',
+    },
   ];
 
   const [isDateOpen, setIsDateOpen] = useState(false);
@@ -52,103 +135,195 @@ const OrganizerEventsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
-  // Action Handlers
-  const handleDelete = (event) => {
-    setModalConfig({ isOpen: true, type: 'delete', event });
+  const handleCreate = () => {
+    setCreateForm({
+      title: '', description: '', shortDesc: '', venue: '', address: '', city: '',
+      startDate: '', endDate: '', bannerUrl: '', maxAttendees: '',
+    });
+    setModalConfig({ isOpen: true, type: 'create', event: null });
   };
 
   const handleEdit = (event) => {
     setModalConfig({ isOpen: true, type: 'edit', event });
   };
 
+  const handleDelete = (event) => {
+    setModalConfig({ isOpen: true, type: 'delete', event });
+  };
+
   const handleAnalytics = (event) => {
     setModalConfig({ isOpen: true, type: 'analytics', event });
   };
 
+  const handlePublish = async (event) => {
+    try {
+      const res = await eventService.publishEvent(event.id, {});
+      setEvents(prev => prev.map(ev => ev.id === event.id ? mapEventFromApi(res.data) : ev));
+      showNotification(`Đã xuất bản sự kiện: ${event.name}`, 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể xuất bản sự kiện';
+      showNotification(msg, 'error');
+    }
+  };
+
   const closeModal = () => setModalConfig({ isOpen: false, type: null, event: null });
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     const { event } = modalConfig;
-    setEvents(prev => prev.filter(ev => ev.id !== event.id));
-    showNotification(`Đã xóa sự kiện: ${event.name}`, 'success');
+    try {
+      await eventService.deleteEvent(event.id);
+      setEvents(prev => prev.filter(ev => ev.id !== event.id));
+      showNotification(`Đã xóa sự kiện: ${event.name}`, 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể xóa sự kiện';
+      showNotification(msg, 'error');
+    }
     closeModal();
   };
 
-  const saveEdit = (e) => {
+  const saveEdit = async (e) => {
     e.preventDefault();
-    showNotification('Đã cập nhật thông tin sự kiện!', 'success');
-    closeModal();
+    const form = e.target;
+    const event = modalConfig.event;
+    try {
+      const payload = {};
+      const title = form.title?.value;
+      if (title) payload.title = title;
+      const description = form.description?.value;
+      if (description) payload.description = description;
+      const venue = form.venue?.value;
+      if (venue) payload.venue = venue;
+      const address = form.address?.value;
+      if (address) payload.address = address;
+      const city = form.city?.value;
+      if (city) payload.city = city;
+      if (form.startDate?.value) payload.startDate = new Date(form.startDate.value).toISOString();
+      if (form.endDate?.value) payload.endDate = new Date(form.endDate.value).toISOString();
+      if (form.bannerUrl?.value) payload.bannerUrl = form.bannerUrl.value;
+      if (form.maxAttendees?.value) payload.maxAttendees = parseInt(form.maxAttendees.value);
+
+      const res = await eventService.updateEvent(event.id, payload);
+      setEvents(prev => prev.map(ev => ev.id === event.id ? mapEventFromApi(res.data) : ev));
+      showNotification('Đã cập nhật thông tin sự kiện!', 'success');
+      closeModal();
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể cập nhật sự kiện';
+      showNotification(msg, 'error');
+    }
   };
 
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
+  const saveCreate = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        title: createForm.title,
+        description: createForm.description,
+        shortDesc: createForm.shortDesc || undefined,
+        venue: createForm.venue,
+        address: createForm.address,
+        city: createForm.city,
+        startDate: new Date(createForm.startDate).toISOString(),
+        endDate: new Date(createForm.endDate).toISOString(),
+        bannerUrl: createForm.bannerUrl || undefined,
+        maxAttendees: createForm.maxAttendees ? parseInt(createForm.maxAttendees) : undefined,
+      };
+      const res = await eventService.createEvent(payload);
+      setEvents(prev => [mapEventFromApi(res.data), ...prev]);
+      showNotification('Đã tạo sự kiện thành công!', 'success');
+      closeModal();
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể tạo sự kiện';
+      showNotification(msg, 'error');
+    }
   };
 
-  // Filtering and Sorting Logic
   const filteredEvents = events
     .filter(event => {
-      // 1. Kết hợp bộ lọc Trạng thái
-      if (statusFilter !== 'All' && event.status !== statusFilter) return false;
-
-      // 2. Kết hợp bộ lọc Thời gian
+      if (statusFilter !== 'All' && event.rawStatus !== statusFilter) return false;
       if (dateFilter === 'Tất cả thời gian') return true;
-
-      const eventDate = new Date(event.date.split('/').reverse().join('-'));
-      const now = new Date('2024-12-31'); // Giả định ngày hiện tại để demo
-
+      if (!event.dateObj) return true;
+      const now = new Date();
       if (dateFilter === 'Hôm nay') {
-        return eventDate.getDate() === now.getDate() &&
-          eventDate.getMonth() === now.getMonth() &&
-          eventDate.getFullYear() === now.getFullYear();
+        return event.dateObj.getDate() === now.getDate() &&
+          event.dateObj.getMonth() === now.getMonth() &&
+          event.dateObj.getFullYear() === now.getFullYear();
       }
       if (dateFilter === 'Tháng này') {
-        return eventDate.getMonth() === now.getMonth() &&
-          eventDate.getFullYear() === now.getFullYear();
+        return event.dateObj.getMonth() === now.getMonth() &&
+          event.dateObj.getFullYear() === now.getFullYear();
       }
       if (dateFilter === 'Tùy chọn' && startDate && endDate) {
         const start = new Date(startDate);
         const end = new Date(endDate);
-        eventDate.setHours(0, 0, 0, 0);
+        const d = new Date(event.dateObj);
+        d.setHours(0, 0, 0, 0);
         start.setHours(0, 0, 0, 0);
         end.setHours(0, 0, 0, 0);
-        return eventDate >= start && eventDate <= end;
+        return d >= start && d <= end;
       }
       return true;
     })
     .sort((a, b) => {
-      if (sortOption === 'Mới nhất') return b.id - a.id;
+      if (sortOption === 'Mới nhất') {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      }
       if (sortOption === 'Tên sự kiện (A-Z)') return a.name.localeCompare(b.name);
-      if (sortOption === 'Doanh thu cao nhất') {
-        const revA = parseInt(a.revenue.replace(/[^0-9]/g, '')) || 0;
-        const revB = parseInt(b.revenue.replace(/[^0-9]/g, '')) || 0;
-        return revB - revA;
-      }
-      if (sortOption === 'Lượt tham gia nhiều nhất') {
-        const getAtt = (att) => {
-          if (att === '--') return 0;
-          const parts = att.split('/');
-          return parseInt(parts[0].replace(/[^0-9]/g, '')) || 0;
-        };
-        return getAtt(b.attendance) - getAtt(a.attendance);
-      }
+      if (sortOption === 'Doanh thu cao nhất') return 0;
+      if (sortOption === 'Lượt tham gia nhiều nhất') return b.currentAttendees - a.currentAttendees;
       return 0;
     });
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const paginatedEvents = filteredEvents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-
+  const renderStatusBadge = (event) => {
+    const colors = {
+      slate: 'bg-slate-50 text-slate-600 border border-slate-100',
+      emerald: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+      amber: 'bg-amber-50 text-amber-700 border border-amber-200',
+      indigo: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
+      rose: 'bg-rose-50 text-rose-700 border border-rose-100',
+    };
+    const dots = {
+      slate: 'bg-slate-400',
+      emerald: 'bg-emerald-500 animate-pulse',
+      amber: 'bg-amber-500',
+      indigo: 'bg-indigo-500',
+      rose: 'bg-rose-500',
+    };
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${colors[event.statusColor] || colors.slate}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dots[event.statusColor] || dots.slate}`}></span>
+        {event.status === 'Cancelled' ? 'Đã hủy' : event.status === 'Completed' ? 'Hoàn thành' : event.status}
+      </span>
+    );
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-700">
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -50, scale: 0.95 }}
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 ${
+              notification.type === 'error' ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'
+            }`}
+          >
+            <span className="material-symbols-outlined">
+              {notification.type === 'error' ? 'error' : 'check_circle'}
+            </span>
+            <span className="font-bold text-sm">{notification.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Premium Modal System */}
       <AnimatePresence>
         {modalConfig.isOpen && (
@@ -171,12 +346,17 @@ const OrganizerEventsPage = () => {
               <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
                   <h3 className="text-xl font-black font-headline text-slate-900">
+                    {modalConfig.type === 'create' && 'Tạo sự kiện mới'}
                     {modalConfig.type === 'edit' && 'Chỉnh sửa Sự kiện'}
                     {modalConfig.type === 'delete' && 'Xác nhận xóa'}
                     {modalConfig.type === 'analytics' && 'Phân tích Sự kiện'}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium mt-1">
-                    Sự kiện: <span className="text-primary font-bold">{modalConfig.event?.name}</span>
+                    {modalConfig.event ? (
+                      <>Sự kiện: <span className="text-primary font-bold">{modalConfig.event.name}</span></>
+                    ) : modalConfig.type === 'create' ? (
+                      <span className="text-primary font-bold">Điền thông tin sự kiện mới</span>
+                    ) : null}
                   </p>
                 </div>
                 <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white hover:shadow-md transition-all">
@@ -185,22 +365,141 @@ const OrganizerEventsPage = () => {
               </div>
 
               {/* Modal Body */}
-              <div className="p-8">
+              <div className="p-8 max-h-[60vh] overflow-y-auto">
+                {/* CREATE Modal */}
+                {modalConfig.type === 'create' && (
+                  <form onSubmit={saveCreate} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tên sự kiện *</label>
+                        <input
+                          required
+                          value={createForm.title}
+                          onChange={e => setCreateForm(p => ({ ...p, title: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mô tả *</label>
+                        <textarea
+                          required
+                          rows={3}
+                          value={createForm.description}
+                          onChange={e => setCreateForm(p => ({ ...p, description: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700 resize-none"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa điểm *</label>
+                        <input
+                          required
+                          value={createForm.venue}
+                          onChange={e => setCreateForm(p => ({ ...p, venue: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Thành phố *</label>
+                        <input
+                          required
+                          value={createForm.city}
+                          onChange={e => setCreateForm(p => ({ ...p, city: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa chỉ chi tiết</label>
+                        <input
+                          value={createForm.address}
+                          onChange={e => setCreateForm(p => ({ ...p, address: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày bắt đầu *</label>
+                        <input
+                          required
+                          type="datetime-local"
+                          value={createForm.startDate}
+                          onChange={e => setCreateForm(p => ({ ...p, startDate: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày kết thúc *</label>
+                        <input
+                          required
+                          type="datetime-local"
+                          value={createForm.endDate}
+                          onChange={e => setCreateForm(p => ({ ...p, endDate: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Số lượng tối đa</label>
+                        <input
+                          type="number"
+                          value={createForm.maxAttendees}
+                          onChange={e => setCreateForm(p => ({ ...p, maxAttendees: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">URL Banner</label>
+                        <input
+                          value={createForm.bannerUrl}
+                          onChange={e => setCreateForm(p => ({ ...p, bannerUrl: e.target.value }))}
+                          className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4">
+                      <button type="button" onClick={closeModal} className="px-6 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Hủy</button>
+                      <button type="submit" className="px-10 py-3 rounded-2xl bg-primary text-white font-black shadow-lg shadow-indigo-200 hover:shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all">Tạo sự kiện</button>
+                    </div>
+                  </form>
+                )}
+
+                {/* EDIT Modal */}
                 {modalConfig.type === 'edit' && (
                   <form onSubmit={saveEdit} className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
+                      <div className="space-y-2 col-span-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tên sự kiện</label>
-                        <input type="text" defaultValue={modalConfig.event?.name} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                        <input name="title" defaultValue={modalConfig.event?.name} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mô tả</label>
+                        <textarea name="description" rows={3} defaultValue={modalConfig.event?.description} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700 resize-none" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày tổ chức</label>
-                        <input type="text" defaultValue={modalConfig.event?.date} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa điểm</label>
+                        <input name="venue" defaultValue={modalConfig.event?.venue} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa điểm</label>
-                      <input type="text" defaultValue={modalConfig.event?.location} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Thành phố</label>
+                        <input name="city" defaultValue={modalConfig.event?.city} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Địa chỉ chi tiết</label>
+                        <input name="address" defaultValue={modalConfig.event?.address} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày bắt đầu</label>
+                        <input name="startDate" type="datetime-local" defaultValue={modalConfig.event?.startDate ? new Date(modalConfig.event.startDate).toISOString().slice(0, 16) : ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Ngày kết thúc</label>
+                        <input name="endDate" type="datetime-local" defaultValue={modalConfig.event?.endDate ? new Date(modalConfig.event.endDate).toISOString().slice(0, 16) : ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">URL Banner</label>
+                        <input name="bannerUrl" defaultValue={modalConfig.event?.bannerUrl} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Số lượng tối đa</label>
+                        <input name="maxAttendees" type="number" defaultValue={modalConfig.event?.maxAttendees || ''} className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-700" />
+                      </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                       <button type="button" onClick={closeModal} className="px-6 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Hủy</button>
@@ -209,6 +508,7 @@ const OrganizerEventsPage = () => {
                   </form>
                 )}
 
+                {/* DELETE Modal */}
                 {modalConfig.type === 'delete' && (
                   <div className="text-center space-y-6">
                     <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto">
@@ -216,7 +516,7 @@ const OrganizerEventsPage = () => {
                     </div>
                     <div className="space-y-2">
                       <p className="text-slate-600 font-medium text-lg leading-relaxed px-10">
-                        Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa sự kiện <span className="font-black text-slate-900">"{modalConfig.event?.name}"</span>?
+                        Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa sự kiện <span className="font-black text-slate-900">&ldquo;{modalConfig.event?.name}&rdquo;</span>?
                       </p>
                     </div>
                     <div className="flex justify-center gap-4 pt-4">
@@ -226,6 +526,7 @@ const OrganizerEventsPage = () => {
                   </div>
                 )}
 
+                {/* ANALYTICS Modal */}
                 {modalConfig.type === 'analytics' && (
                   <div className="space-y-8">
                     <div className="grid grid-cols-3 gap-4">
@@ -257,20 +558,22 @@ const OrganizerEventsPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Notification */}
-
       {/* Page Header Section */}
       <div className="flex justify-between items-end mb-10">
         <div className="space-y-1">
           <h2 className="text-3xl font-extrabold tracking-tight text-on-surface font-headline">Danh sách Sự kiện</h2>
           <p className="text-on-surface-variant font-body">Quản lý và theo dõi hiệu suất các sự kiện của bạn.</p>
         </div>
-        <button className="bg-gradient-to-r from-primary to-primary-container text-white px-8 py-3.5 rounded-full font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-indigo-200">
+        <button
+          onClick={handleCreate}
+          className="bg-gradient-to-r from-primary to-primary-container text-white px-8 py-3.5 rounded-full font-semibold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-indigo-200"
+        >
           <span className="material-symbols-outlined">add</span>
           Tạo sự kiện mới
         </button>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {stats.map((stat, i) => (
           <motion.div
@@ -295,7 +598,6 @@ const OrganizerEventsPage = () => {
         ))}
       </div>
 
-
       {/* Filters Area */}
       <div className="bg-slate-50 rounded-2xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 border border-slate-100">
         <div className="flex items-center gap-3">
@@ -303,11 +605,10 @@ const OrganizerEventsPage = () => {
           <div className="relative">
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${statusFilter !== 'All' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${statusFilter !== 'All' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
             >
               <span className="material-symbols-outlined text-sm">filter_list</span>
-              {statusFilter === 'All' ? 'Trạng thái' : statusFilter}
+              {STATUS_LABELS[statusFilter] || statusFilter}
             </button>
 
             <AnimatePresence>
@@ -320,17 +621,16 @@ const OrganizerEventsPage = () => {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="absolute left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-20 overflow-hidden"
                   >
-                    {['All', 'Live', 'Draft', 'Paused', 'Completed'].map((status) => (
+                    {STATUS_FILTERS.map((status) => (
                       <button
                         key={status}
                         onClick={() => {
                           setStatusFilter(status);
                           setIsFilterOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors ${statusFilter === status ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'
-                          }`}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors ${statusFilter === status ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
                       >
-                        {status === 'All' ? 'Tất cả trạng thái' : status === 'Paused' ? 'Tạm ngưng' : status}
+                        {STATUS_LABELS[status] || status}
                       </button>
                     ))}
                   </motion.div>
@@ -343,8 +643,7 @@ const OrganizerEventsPage = () => {
           <div className="relative">
             <button
               onClick={() => setIsDateOpen(!isDateOpen)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${dateFilter !== 'Tất cả thời gian' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${dateFilter !== 'Tất cả thời gian' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}
             >
               <span className="material-symbols-outlined text-sm">calendar_today</span>
               {dateFilter}
@@ -372,9 +671,7 @@ const OrganizerEventsPage = () => {
                               setEndDate('');
                             }
                           }}
-
-                          className={`w-full text-left px-3 py-2 text-sm font-semibold transition-colors rounded-lg ${dateFilter === range ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'
-                            }`}
+                          className={`w-full text-left px-3 py-2 text-sm font-semibold transition-colors rounded-lg ${dateFilter === range ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
                         >
                           {range}
                         </button>
@@ -391,28 +688,16 @@ const OrganizerEventsPage = () => {
                         >
                           <div className="space-y-1">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Từ ngày</label>
-                            <input
-                              type="date"
-                              value={startDate}
-                              onChange={(e) => setStartDate(e.target.value)}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            />
+                            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
                           </div>
                           <div className="space-y-1">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Đến ngày</label>
-                            <input
-                              type="date"
-                              value={endDate}
-                              onChange={(e) => setEndDate(e.target.value)}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            />
+                            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </motion.div>
-
-
                 </>
               )}
             </AnimatePresence>
@@ -432,8 +717,6 @@ const OrganizerEventsPage = () => {
             <span className={`material-symbols-outlined text-slate-400 transition-transform duration-300 ${isSortOpen ? 'rotate-180' : ''}`}>expand_more</span>
           </button>
 
-
-
           <AnimatePresence>
             {isSortOpen && (
               <>
@@ -448,7 +731,7 @@ const OrganizerEventsPage = () => {
                     { label: 'Mới nhất', value: 'newest' },
                     { label: 'Tên sự kiện (A-Z)', value: 'az' },
                     { label: 'Doanh thu cao nhất', value: 'revenue' },
-                    { label: 'Lượt tham gia nhiều nhất', value: 'attendance' }
+                    { label: 'Lượt tham gia nhiều nhất', value: 'attendance' },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -456,8 +739,7 @@ const OrganizerEventsPage = () => {
                         setSortOption(option.label);
                         setIsSortOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-3 text-sm font-semibold transition-colors flex items-center justify-between group/item ${sortOption === option.label ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'
-                        }`}
+                      className={`w-full text-left px-4 py-3 text-sm font-semibold transition-colors flex items-center justify-between group/item ${sortOption === option.label ? 'text-primary bg-indigo-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
                       {option.label}
                       {sortOption === option.label && (
@@ -475,176 +757,177 @@ const OrganizerEventsPage = () => {
       {/* Large Data Table */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 min-h-[715px] flex flex-col">
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Tên Sự kiện</th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Ngày tổ chức</th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Tham dự</th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Doanh thu</th>
-                <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {paginatedEvents.map((event) => (
-                <tr key={event.id} className="hover:bg-slate-50 transition-colors group h-[88px]">
-
-
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="h-11 w-11 rounded-xl overflow-hidden shrink-0 border border-slate-100 shadow-sm">
-                        <img alt={event.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src={event.image} />
-                      </div>
-                      <div className="overflow-hidden">
-                        <p className="font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{event.name}</p>
-                        <div className="flex items-center gap-1 text-xs text-slate-500">
-                          <span className="material-symbols-outlined text-[14px]">location_on</span>
-                          <span className="truncate">{event.location}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-700">{event.date.split('/')[0]}/{event.date.split('/')[1]}</span>
-                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">Năm {event.date.split('/')[2]}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider
-                      ${
-                        event.status === 'Live' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                        event.status === 'Draft' ? 'bg-slate-50 text-slate-600 border border-slate-100' :
-                        event.status === 'Paused' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                        'bg-indigo-50 text-indigo-700 border border-indigo-100'
-                      }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        event.status === 'Live' ? 'bg-emerald-500 animate-pulse' :
-                        event.status === 'Draft' ? 'bg-slate-400' :
-                        event.status === 'Paused' ? 'bg-amber-500' :
-                        'bg-indigo-500'
-                      }`}></span>
-                      {event.status === 'Paused' ? 'Tạm ngưng' : event.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex -space-x-2">
-                        {[...Array(Math.min(event.attendees.length, 3))].map((_, i) => (
-                          <div key={i} className={`w-7 h-7 rounded-full border-2 border-white shadow-sm bg-slate-${200 + i * 100} overflow-hidden`}>
-                            <img src={`https://i.pravatar.cc/100?u=${event.id + i}`} alt="avatar" className="w-full h-full object-cover" />
-                          </div>
-                        ))}
-                        {event.attendees.length > 3 && (
-                          <div className="w-7 h-7 rounded-full border-2 border-white bg-indigo-50 flex items-center justify-center text-[9px] font-black text-indigo-600 shadow-sm">
-                            +{event.attendees.length - 3}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs font-bold text-slate-600 tracking-tight">{event.attendance}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-black text-slate-900">{event.revenue}</span>
-                      <span className="text-[10px] text-emerald-600 font-bold">VNĐ</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => navigate(`/organizer/events/${event.id}/attendees`)}
-                        className="w-9 h-9 flex items-center justify-center bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
-                        title="Quản lý khách mời"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">group</span>
-                      </button>
-                      <button
-                        onClick={() => handleEdit(event)}
-                        className="w-9 h-9 flex items-center justify-center bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
-                        title="Chỉnh sửa"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
-                      </button>
-                      <button
-                        onClick={() => handleAnalytics(event)}
-                        className="w-9 h-9 flex items-center justify-center bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
-                        title="Phân tích"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">analytics</span>
-                      </button>
-                      <button
-                        onClick={() => handleDelete(event)}
-                        className="w-9 h-9 flex items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
-                        title="Xóa"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                      </button>
-                    </div>
-                  </td>
+          {loading ? (
+            <div className="flex items-center justify-center h-[400px]">
+              <div className="flex flex-col items-center gap-4 text-slate-400">
+                <span className="material-symbols-outlined text-5xl animate-spin">progress_activity</span>
+                <p className="text-sm font-bold">Đang tải sự kiện...</p>
+              </div>
+            </div>
+          ) : (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100">
+                  <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Tên Sự kiện</th>
+                  <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Ngày tổ chức</th>
+                  <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Tham dự</th>
+                  <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Thao tác</th>
                 </tr>
-              ))}
-              {paginatedEvents.length < itemsPerPage && (
-                [...Array(itemsPerPage - paginatedEvents.length)].map((_, i) => (
-                  <tr key={`empty-${i}`} className="h-[88px] border-b border-slate-50/50">
-                    <td colSpan="6" className="px-6 py-5">
-                      <div className="flex items-center gap-4 opacity-5">
-                        <div className="h-11 w-11 rounded-xl bg-slate-200"></div>
-                        <div className="space-y-2">
-                          <div className="h-4 w-32 bg-slate-200 rounded"></div>
-                          <div className="h-3 w-20 bg-slate-200 rounded"></div>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {paginatedEvents.map((event) => (
+                  <tr key={event.id} className="hover:bg-slate-50 transition-colors group h-[88px]">
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="h-11 w-11 rounded-xl overflow-hidden shrink-0 border border-slate-100 shadow-sm">
+                          <img alt={event.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src={event.image} />
+                        </div>
+                        <div className="overflow-hidden">
+                          <p className="font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{event.name}</p>
+                          <div className="flex items-center gap-1 text-xs text-slate-500">
+                            <span className="material-symbols-outlined text-[14px]">location_on</span>
+                            <span className="truncate">{event.location}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-700">
+                          {event.date !== '--' ? event.date.split('/').slice(0, 2).join('/') : '--'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">
+                          {event.date !== '--' ? `Năm ${event.date.split('/')[2]}` : ''}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      {renderStatusBadge(event)}
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-sm font-bold text-slate-600">{event.attendance}</span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2">
+                        {event.rawStatus === 'DRAFT' && (
+                          <button
+                            onClick={() => handlePublish(event)}
+                            className="w-9 h-9 flex items-center justify-center bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                            title="Xuất bản"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">publish</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => navigate(`/organizer/events/${event.id}/attendees`)}
+                          className="w-9 h-9 flex items-center justify-center bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                          title="Quản lý khách mời"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">group</span>
+                        </button>
+                        <button
+                          onClick={() => handleEdit(event)}
+                          className="w-9 h-9 flex items-center justify-center bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                          title="Chỉnh sửa"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleAnalytics(event)}
+                          className="w-9 h-9 flex items-center justify-center bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                          title="Phân tích"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">analytics</span>
+                        </button>
+                        {(event.rawStatus === 'DRAFT' || event.rawStatus === 'CANCELLED') && (
+                          <button
+                            onClick={() => handleDelete(event)}
+                            className="w-9 h-9 flex items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                            title="Xóa"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
+                ))}
 
+                {!loading && paginatedEvents.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-16 text-center">
+                      <div className="flex flex-col items-center gap-4 text-slate-400">
+                        <span className="material-symbols-outlined text-5xl">event_busy</span>
+                        <p className="text-sm font-bold">Chưa có sự kiện nào</p>
+                        <button onClick={handleCreate} className="px-6 py-2 rounded-full bg-primary text-white font-bold text-sm hover:brightness-110 transition-all">
+                          Tạo sự kiện đầu tiên
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
 
-          </table>
+                {!loading && paginatedEvents.length > 0 && paginatedEvents.length < itemsPerPage && (
+                  [...Array(itemsPerPage - paginatedEvents.length)].map((_, i) => (
+                    <tr key={`empty-${i}`} className="h-[88px] border-b border-slate-50/50">
+                      <td colSpan="5" className="px-6 py-5">
+                        <div className="flex items-center gap-4 opacity-5">
+                          <div className="h-11 w-11 rounded-xl bg-slate-200"></div>
+                          <div className="space-y-2">
+                            <div className="h-4 w-32 bg-slate-200 rounded"></div>
+                            <div className="h-3 w-20 bg-slate-200 rounded"></div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Pagination Section */}
-        <div className="px-6 py-5 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
-          <p className="text-sm text-slate-500">
-            Hiển thị <span className="font-bold text-slate-900">
-              {Math.min((currentPage - 1) * itemsPerPage + 1, filteredEvents.length)} - {Math.min(currentPage * itemsPerPage, filteredEvents.length)}
-            </span> trong tổng số <span className="font-bold text-slate-900">{filteredEvents.length}</span> sự kiện
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-
-            {[...Array(totalPages)].map((_, i) => (
+        {!loading && filteredEvents.length > 0 && (
+          <div className="px-6 py-5 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+            <p className="text-sm text-slate-500">
+              Hiển thị <span className="font-bold text-slate-900">
+                {Math.min((currentPage - 1) * itemsPerPage + 1, filteredEvents.length)} - {Math.min(currentPage * itemsPerPage, filteredEvents.length)}
+              </span> trong tổng số <span className="font-bold text-slate-900">{filteredEvents.length}</span> sự kiện
+            </p>
+            <div className="flex items-center gap-2">
               <button
-                key={i + 1}
-                onClick={() => handlePageChange(i + 1)}
-                className={`w-10 h-10 rounded-lg font-bold flex items-center justify-center transition-all ${currentPage === i + 1
-                  ? 'bg-primary text-white shadow-md shadow-indigo-100 scale-105'
-                  : 'hover:bg-white text-sm font-medium text-slate-600'
-                  }`}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
-                {i + 1}
+                <span className="material-symbols-outlined">chevron_left</span>
               </button>
-            ))}
 
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`w-10 h-10 rounded-lg font-bold flex items-center justify-center transition-all ${currentPage === i + 1
+                    ? 'bg-primary text-white shadow-md shadow-indigo-100 scale-105'
+                    : 'hover:bg-white text-sm font-medium text-slate-600'
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
           </div>
-        </div>
-
+        )}
       </div>
 
       {/* Promotion / Tips Card */}
