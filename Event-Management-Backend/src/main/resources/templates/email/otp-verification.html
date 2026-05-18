@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Mã xác thực OTP</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:'Segoe UI',Arial,sans-serif">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+        style="background-color:#f4f7fa;padding:40px 0">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="560" cellspacing="0" cellpadding="0"
+                    style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.05)">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background:linear-gradient(135deg,#6366f1,#4f46e5);padding:32px 40px;text-align:center">
+                            <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:700;letter-spacing:-0.5px">Prestige Planner</h1>
+                            <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:14px;text-transform:uppercase;letter-spacing:1px" th:text="${title}">Xác thực tài khoản</p>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:40px">
+                            <p style="margin:0 0 16px;font-size:16px;color:#1f2937">Xin chào,</p>
+                            <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.6" th:text="${message}">
+                                Cảm ơn bạn đã đồng hành cùng Prestige Planner. Vui lòng sử dụng mã OTP dưới đây để hoàn tất thủ tục của bạn.
+                            </p>
+                            
+                            <!-- OTP Box -->
+                            <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;margin:32px 0">
+                                <span style="font-family:'Courier New',Courier,monospace,sans-serif;font-size:36px;font-weight:800;color:#4f46e5;letter-spacing:8px;display:inline-block;padding:4px 0 4px 8px" th:text="${otp}">123456</span>
+                            </div>
+
+                            <p style="margin:0 0 8px;font-size:13px;color:#94a3b8;text-align:center">
+                                Mã OTP này có hiệu lực trong <strong style="color:#4f46e5" th:text="${expiryMinutes}">5</strong> phút.
+                            </p>
+                            
+                            <hr style="border:none;border-top:1px solid #f1f5f9;margin:32px 0">
+                            
+                            <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.5">
+                                Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ hỗ trợ nếu nghi ngờ có sự xâm nhập.
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #f1f5f9">
+                            <p style="margin:0;font-size:12px;color:#94a3b8">&copy; 2026 Prestige Planner. Nền tảng quản lý sự kiện hàng đầu Việt Nam.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

@@ -87,8 +87,8 @@ springdoc:
     operations-sorter: alpha
   default-produces-media-type: application/json
   info:
-    title: EventHub API
-    description: Event Management Website Backend API
+    title: Prestige Planner API
+    description: Prestige Planner Event Management Website Backend API
     version: 1.0.0
 
 server:
