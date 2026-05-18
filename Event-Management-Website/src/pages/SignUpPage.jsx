@@ -37,7 +37,8 @@ const SignUpPage = () => {
       setRegisteredEmail(email);
       setShowOtpModal(true);
     } catch (err) {
-      setError(err || 'Đăng ký thất bại. Vui lòng thử lại sau.');
+      const msg = err && typeof err === 'object' ? (err.error || err.message) : err;
+      setError(msg || 'Đăng ký thất bại. Vui lòng thử lại sau.');
     } finally {
       setIsSubmitting(false);
     }
