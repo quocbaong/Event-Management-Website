@@ -76,5 +76,17 @@ public class AdminController {
         adminService.bulkSuspend(ids);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/broadcast")
+    public ResponseEntity<com.eventhub.web.dto.admin.BroadcastPageResponse> getBroadcastData() {
+        return ResponseEntity.ok(adminService.getBroadcastData());
+    }
+
+    @PostMapping("/broadcast")
+    public ResponseEntity<Void> sendBroadcast(@RequestBody com.eventhub.web.dto.admin.BroadcastRequest request) {
+        adminService.sendBroadcast(request);
+        return ResponseEntity.ok().build();
+    }
 }
+
 

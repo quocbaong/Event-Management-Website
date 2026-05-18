@@ -2,6 +2,8 @@ package com.eventhub.service;
 
 import com.eventhub.web.dto.admin.DashboardResponse;
 import com.eventhub.web.dto.admin.GlobalEventsResponse;
+import com.eventhub.web.dto.admin.BroadcastPageResponse;
+import com.eventhub.web.dto.admin.BroadcastRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,5 +15,8 @@ public interface AdminService {
     void suspendEvent(UUID id);
     void bulkApprove(List<UUID> ids);
     void bulkSuspend(List<UUID> ids);
+    BroadcastPageResponse getBroadcastData();
+    void sendBroadcast(BroadcastRequest request);
 }
+
 
