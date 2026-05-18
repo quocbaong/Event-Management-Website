@@ -46,6 +46,7 @@
   --font-headline: "Plus Jakarta Sans";
   --font-body: "Inter";
   --font-label: "Inter";
+  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   
   --radius-default: 1rem;
   --radius-lg: 2rem;
@@ -120,12 +121,25 @@
   html,
   body,
   #root,
-  .App {
+  .App,
+  button,
+  input,
+  select,
+  textarea,
+  table,
+  th,
+  td {
     margin: 0;
     padding: 0;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif !important;
+  }
+
+  html,
+  body,
+  #root,
+  .App {
     width: 100%;
     min-height: 100vh;
-    font-family: var(--font-body);
     color: var(--text-primary);
     background-color: var(--bg-default);
     line-height: 1.5;
