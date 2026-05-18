@@ -65,6 +65,13 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
 
+    @Column(precision = 19, scale = 2)
+    @Builder.Default
+    private BigDecimal fee = BigDecimal.ZERO;
+
+    @Column(name = "payment_method", length = 50)
+    private String paymentMethod;
+
     @Column(nullable = false, length = 3)
     @Builder.Default
     private String currency = "VND";
