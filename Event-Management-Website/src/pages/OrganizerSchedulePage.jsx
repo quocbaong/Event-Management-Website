@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { eventService } from '../services/eventService';
 
 const OrganizerSchedulePage = () => {
   const [viewMode, setViewMode] = useState('month');
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 28)); // April 28, 2026
+  const [currentDate, setCurrentDate] = useState(new Date()); // Ngày hiện tại thực tế
   const [selectedDay, setSelectedDay] = useState(null); // for modal
+  const [realEvents, setRealEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await eventService.getEvents();
+        setRealEvents(res.data || []);
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách sự kiện:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const generateDays = (month, year) => {
     const firstDay = new Date(year, month, 1);
@@ -17,9 +34,12 @@ const OrganizerSchedulePage = () => {
 
     const days = [];
     const tempDate = new Date(startDay);
+    const actualToday = new Date();
 
     for (let i = 0; i < 35; i++) {
-      const isToday = tempDate.getDate() === 28 && tempDate.getMonth() === 3 && tempDate.getFullYear() === 2026;
+      const isToday = tempDate.getDate() === actualToday.getDate() && 
+                      tempDate.getMonth() === actualToday.getMonth() && 
+                      tempDate.getFullYear() === actualToday.getFullYear();
       const isPrevMonth = tempDate.getMonth() < month && tempDate.getFullYear() <= year;
       const isNextMonth = tempDate.getMonth() > month || tempDate.getFullYear() > year;
 
@@ -32,21 +52,36 @@ const OrganizerSchedulePage = () => {
         events: []
       };
 
-      if (tempDate.getDate() === 4 && tempDate.getMonth() === month) {
+      const dayEvents = realEvents.filter(ev => {
+        if (!ev.startDate) return false;
+        const evDate = new Date(ev.startDate);
+        return evDate.getDate() === tempDate.getDate() &&
+               evDate.getMonth() === tempDate.getMonth() &&
+               evDate.getFullYear() === tempDate.getFullYear();
+      });
+
+      if (dayEvents.length > 0) {
         dayObj.hasDot = true;
-        dayObj.events = [
-          { title: `Gala Dinner ${year}`, location: 'GEM Center', style: 'bg-primary text-white shadow-md shadow-indigo-200', icon: 'location_on' },
-          { title: 'Kiểm duyệt âm thanh', style: 'bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100' }
-        ];
-      }
-      if (tempDate.getDate() === 10 && tempDate.getMonth() === month) {
-        dayObj.events = [{ title: 'Họp chiến lược', time: '09:00 - 10:30', style: 'bg-indigo-50 text-indigo-700 border border-indigo-100' }];
-      }
-      if (tempDate.getDate() === 28 && tempDate.getMonth() === month) {
-        dayObj.events = [{ title: 'Workshop Design', avatars: true, style: 'bg-white border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.04)] text-slate-800' }];
-      }
-      if (tempDate.getDate() === 27 && tempDate.getMonth() === month) {
-        dayObj.events = [{ title: `Tech Conf ${year}`, subtitle: 'Sự kiện kéo dài 3 ngày', style: 'bg-white border border-indigo-100 text-indigo-700 shadow-sm' }];
+        dayObj.events = dayEvents.map((ev, idx) => {
+          const styles = [
+            'bg-primary text-white shadow-md shadow-indigo-200',
+            'bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100',
+            'bg-indigo-50 text-indigo-700 border border-indigo-100',
+            'bg-emerald-50 text-emerald-700 border border-emerald-100'
+          ];
+          const style = styles[idx % styles.length];
+          const timeStr = ev.startDate ? new Date(ev.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
+          return {
+            id: ev.id,
+            title: ev.title || 'Sự kiện',
+            location: ev.venue || ev.city || 'Online',
+            time: timeStr ? `${timeStr} - ${ev.endDate ? new Date(ev.endDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '17:00'}` : '09:00 - 17:00',
+            style,
+            icon: 'location_on',
+            subtitle: ev.shortDesc || ev.category || 'Sự kiện nổi bật',
+            avatars: idx % 2 === 0
+          };
+        });
       }
 
       days.push(dayObj);
@@ -74,14 +109,14 @@ const OrganizerSchedulePage = () => {
   };
 
   const handleToday = () => {
-    setCurrentDate(new Date(2026, 3, 28));
+    setCurrentDate(new Date());
   };
 
   const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
   const dayNames = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 
   const getButtonLabel = () => {
-    const today = new Date(2026, 3, 28);
+    const today = new Date();
 
     if (viewMode === 'month') {
       if (currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
@@ -119,6 +154,12 @@ const OrganizerSchedulePage = () => {
     return "Hôm nay";
   };
 
+  const currentMonthEventsCount = realEvents.filter(ev => {
+    if (!ev.startDate) return false;
+    const evDate = new Date(ev.startDate);
+    return evDate.getMonth() === currentDate.getMonth() && evDate.getFullYear() === currentDate.getFullYear();
+  }).length;
+
   return (
     <div className="p-4 lg:p-6 max-w-[1600px] mx-auto animate-in fade-in duration-700 bg-[#f8fafc] min-h-screen">
       {/* Header */}
@@ -129,7 +170,7 @@ const OrganizerSchedulePage = () => {
           </h2>
           <div className="flex items-center gap-2 text-slate-600 font-medium text-sm">
             <span className="w-2 h-2 rounded-full bg-primary shadow-sm"></span>
-            Bạn có 12 sự kiện trong tháng này
+            Bạn có {currentMonthEventsCount} sự kiện trong tháng này
           </div>
         </div>
 
@@ -322,34 +363,57 @@ const OrganizerSchedulePage = () => {
                 </div>
               </div>
 
-              {/* Simulated Timeline Grid */}
+              {/* Dynamic Timeline Grid */}
               <div className="absolute top-[120px] left-6 right-6 bottom-6 flex flex-col">
-                {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(time => (
-                  <div key={time} className="h-20 border-t border-slate-100 w-full relative">
-                    {time === '09:00' && (
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="absolute top-3 left-0 right-10 p-5 rounded-2xl bg-white border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.05)] text-slate-800 z-10 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-black text-lg mb-1 font-headline group-hover:text-primary transition-colors">Workshop Design</div>
-                            <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[14px]">schedule</span>
-                              09:00 - 11:30
-                            </div>
-                          </div>
-                          <div className="flex -space-x-2">
-                            <img src="https://i.pravatar.cc/100?u=1" className="w-8 h-8 rounded-full border-2 border-white shadow-sm" alt="avatar" />
-                            <img src="https://i.pravatar.cc/100?u=2" className="w-8 h-8 rounded-full border-2 border-white shadow-sm" alt="avatar" />
-                            <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-indigo-50 flex items-center justify-center font-bold text-xs text-primary">+2</div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                ))}
+                {(() => {
+                  const dayEvents = realEvents.filter(ev => {
+                    if (!ev.startDate) return false;
+                    const evDate = new Date(ev.startDate);
+                    return evDate.getDate() === currentDate.getDate() &&
+                           evDate.getMonth() === currentDate.getMonth() &&
+                           evDate.getFullYear() === currentDate.getFullYear();
+                  });
+
+                  return ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(timeSlot => {
+                    const slotHour = parseInt(timeSlot.split(':')[0]);
+                    const matchingEvents = dayEvents.filter(ev => {
+                      const evHour = new Date(ev.startDate).getHours();
+                      return evHour === slotHour || (slotHour === 9 && (evHour < 8 || evHour > 17));
+                    });
+
+                    return (
+                      <div key={timeSlot} className="h-20 border-t border-slate-100 w-full relative">
+                        {matchingEvents.map((ev, idx) => {
+                          const startTimeStr = new Date(ev.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                          const endTimeStr = ev.endDate ? new Date(ev.endDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : `${slotHour + 2}:30`;
+                          return (
+                            <motion.div
+                              key={ev.id || idx}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="absolute top-3 left-0 right-10 p-5 rounded-2xl bg-white border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.05)] text-slate-800 z-10 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="font-black text-lg mb-1 font-headline group-hover:text-primary transition-colors">{ev.title}</div>
+                                  <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-[14px]">schedule</span>
+                                    {startTimeStr} - {endTimeStr} • {ev.venue || ev.city || 'Online'}
+                                  </div>
+                                </div>
+                                <div className="flex -space-x-2">
+                                  <img src="https://i.pravatar.cc/100?u=1" className="w-8 h-8 rounded-full border-2 border-white shadow-sm" alt="avatar" />
+                                  <img src="https://i.pravatar.cc/100?u=2" className="w-8 h-8 rounded-full border-2 border-white shadow-sm" alt="avatar" />
+                                  <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm bg-indigo-50 flex items-center justify-center font-bold text-xs text-primary">+2</div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </div>
@@ -358,62 +422,72 @@ const OrganizerSchedulePage = () => {
 
       {/* Bottom Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Highlight Card */}
-        <div className="lg:col-span-2 bg-[#f8fafc] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row relative shadow-sm border border-slate-100 group">
-          <div className="p-8 md:p-10 flex-1 z-10 bg-white md:bg-transparent">
-            <span className="inline-block bg-[#5c46e5] text-white text-[10px] font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-widest shadow-sm">Điểm nhấn tuần tới</span>
-            <h3 className="text-3xl font-black text-slate-900 mb-4 font-headline tracking-tight leading-tight">Đại nhạc hội Indigo Summer 2026</h3>
-            <p className="text-slate-600 font-medium mb-8 max-w-md leading-relaxed">Sự kiện âm nhạc lớn nhất năm với sự góp mặt của hơn 20 nghệ sĩ nổi tiếng toàn quốc.</p>
+        {(() => {
+          const upcomingEvent = realEvents.find(e => new Date(e.startDate) >= new Date()) || realEvents[0];
+          const completedCount = realEvents.filter(e => e.status === 'COMPLETED').length;
+          const pendingCount = realEvents.filter(e => e.status === 'PUBLISHED' || e.status === 'DRAFT').length;
 
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-sm">
-                <span className="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
-                15 - 17 Tháng 4
+          return (
+            <>
+              {/* Highlight Card */}
+              <div className="lg:col-span-2 bg-[#f8fafc] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row relative shadow-sm border border-slate-100 group">
+                <div className="p-8 md:p-10 flex-1 z-10 bg-white md:bg-transparent">
+                  <span className="inline-block bg-[#5c46e5] text-white text-[10px] font-black px-4 py-1.5 rounded-full mb-6 uppercase tracking-widest shadow-sm">Điểm nhấn sắp tới</span>
+                  <h3 className="text-3xl font-black text-slate-900 mb-4 font-headline tracking-tight leading-tight">{upcomingEvent ? upcomingEvent.title : 'Đại nhạc hội Indigo Summer 2026'}</h3>
+                  <p className="text-slate-600 font-medium mb-8 max-w-md leading-relaxed">{upcomingEvent ? upcomingEvent.shortDesc || upcomingEvent.description : 'Sự kiện âm nhạc lớn nhất năm với sự góp mặt của hơn 20 nghệ sĩ nổi tiếng toàn quốc.'}</p>
+
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-sm">
+                      <span className="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
+                      {upcomingEvent && upcomingEvent.startDate ? new Date(upcomingEvent.startDate).toLocaleDateString('vi-VN') : '15 - 17 Tháng 4'}
+                    </div>
+                    <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-sm">
+                      <span className="material-symbols-outlined text-primary text-[18px]">group</span>
+                      {upcomingEvent ? `${upcomingEvent.maxAttendees || 500} Khách` : '2,500 Khách'}
+                    </div>
+                  </div>
+                </div>
+                {/* Image Background for right side */}
+                <div className="md:w-2/5 md:absolute right-0 top-0 bottom-0 overflow-hidden relative min-h-[250px]">
+                  {/* Gradient fade to blend image with left side */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-10 hidden md:block"></div>
+                  <img src={upcomingEvent && upcomingEvent.bannerUrl ? upcomingEvent.bannerUrl : "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=800"} alt="Concert" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+                </div>
               </div>
-              <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-700 text-sm">
-                <span className="material-symbols-outlined text-primary text-[18px]">group</span>
-                2,500 Khách
+
+              {/* Stats Card */}
+              <div className="bg-[#5c46e5] rounded-[2.5rem] p-8 md:p-10 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group cursor-pointer flex flex-col justify-between">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-white/20 transition-all duration-500"></div>
+
+                <div>
+                  <p className="text-[10px] font-black opacity-80 uppercase tracking-widest mb-2">Thống kê nhanh</p>
+                  <h3 className="text-2xl font-black mb-8 font-headline">Dự án hoạt động</h3>
+
+                  <div className="grid grid-cols-2 gap-6 mb-8">
+                    <div>
+                      <p className="text-4xl font-black mb-1">{realEvents.length}</p>
+                      <p className="text-xs font-medium opacity-80">Tổng sự kiện</p>
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold mb-1 pt-3">{completedCount}</p>
+                      <p className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Đã hoàn thành</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-white/20 pt-6">
+                  <div>
+                    <p className="text-3xl font-black mb-1">{pendingCount}</p>
+                    <p className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Đang chờ</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md group-hover:bg-white group-hover:text-primary transition-all duration-300 shadow-inner">
+                    <span className="material-symbols-outlined">trending_up</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          {/* Image Background for right side */}
-          <div className="md:w-2/5 md:absolute right-0 top-0 bottom-0 overflow-hidden relative min-h-[250px]">
-            {/* Gradient fade to blend image with left side */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-10 hidden md:block"></div>
-            <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=800" alt="Concert" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
-          </div>
-        </div>
-
-        {/* Stats Card */}
-        <div className="bg-[#5c46e5] rounded-[2.5rem] p-8 md:p-10 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group cursor-pointer flex flex-col justify-between">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-white/20 transition-all duration-500"></div>
-
-          <div>
-            <p className="text-[10px] font-black opacity-80 uppercase tracking-widest mb-2">Thống kê nhanh</p>
-            <h3 className="text-2xl font-black mb-8 font-headline">Dự án hoạt động</h3>
-
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              <div>
-                <p className="text-4xl font-black mb-1">24</p>
-                <p className="text-xs font-medium opacity-80">Tổng sự kiện</p>
-              </div>
-              <div>
-                <p className="text-xl font-bold mb-1 pt-3">12</p>
-                <p className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Đã hoàn thành</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-white/20 pt-6">
-            <div>
-              <p className="text-3xl font-black mb-1">08</p>
-              <p className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Đang chờ</p>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md group-hover:bg-white group-hover:text-primary transition-all duration-300 shadow-inner">
-              <span className="material-symbols-outlined">trending_up</span>
-            </div>
-          </div>
-        </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Day Events Modal */}

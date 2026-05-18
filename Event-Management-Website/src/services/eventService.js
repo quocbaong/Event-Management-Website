@@ -12,4 +12,6 @@ export const eventService = {
   deleteEvent: (id) => api.delete(`/organizer/events/${id}`),
 
   publishEvent: (id, data) => api.patch(`/organizer/events/${id}/publish`, data),
+
+  getTimelines: (eventId) => api.get(`/organizer/events/${eventId}/timelines`),
 };
