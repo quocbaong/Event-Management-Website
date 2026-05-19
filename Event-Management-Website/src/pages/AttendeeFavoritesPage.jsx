@@ -1,4 +1,4 @@
-git commit -m "feat(explore): add interactive favorite heart buttons on event cards"import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Calendar, MapPin, Search, ArrowRight, Sparkles, Smile } from 'lucide-react';
 
