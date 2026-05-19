@@ -141,7 +141,7 @@ const AttendeeTicketsPage = () => {
             Vé của tôi
           </span>
           <h1 className="text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight pt-1">
-            Quản lý Vé & Đăng ký
+            Quản lý Vé
           </h1>
           <p className="text-sm font-medium text-slate-400 leading-relaxed max-w-[620px]">
             Toàn bộ vé điện tử và lịch sử giao dịch của bạn được lưu trữ tại đây. Vui lòng xuất trình mã QR tương ứng để Check-in tại quầy đón tiếp.
