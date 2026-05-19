@@ -71,7 +71,7 @@ const AttendeeSidebar = () => {
         />
         <SidebarItem
           icon={Ticket}
-          label="Vé & Đăng ký"
+          label="Vé"
           active={isActive('/attendee/tickets')}
           onClick={() => navigate('/attendee/tickets')}
         />
