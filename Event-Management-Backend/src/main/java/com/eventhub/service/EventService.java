@@ -48,7 +48,11 @@ public class EventService {
 
     public Page<EventSummaryResponse> getEvents(EventFilterRequest filter, Pageable pageable) {
         Page<Event> events = eventRepository.findAll(EventSpecification.filterPublicEvents(filter), pageable);
-        return events.map(eventMapper::toSummaryResponse);
+        return events.map(event -> {
+            EventSummaryResponse response = eventMapper.toSummaryResponse(event);
+            response.setCurrentAttendees(calculateCurrentAttendees(event));
+            return response;
+        });
     }
 
     @Cacheable(value = "featuredEvents", key = "'featured'")
@@ -56,7 +60,11 @@ public class EventService {
         Pageable limit = PageRequest.of(0, 10);
         return eventRepository.findByIsFeaturedTrueAndStatusOrderByCreatedAtDesc(EventStatus.PUBLISHED, limit)
                 .stream()
-                .map(eventMapper::toSummaryResponse)
+                .map(event -> {
+                    EventSummaryResponse response = eventMapper.toSummaryResponse(event);
+                    response.setCurrentAttendees(calculateCurrentAttendees(event));
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -65,7 +73,11 @@ public class EventService {
         Pageable limit = PageRequest.of(0, 10);
         return eventRepository.findByStatusOrderByStartDateAsc(EventStatus.PUBLISHED, limit)
                 .stream()
-                .map(eventMapper::toSummaryResponse)
+                .map(event -> {
+                    EventSummaryResponse response = eventMapper.toSummaryResponse(event);
+                    response.setCurrentAttendees(calculateCurrentAttendees(event));
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -73,7 +85,9 @@ public class EventService {
     public EventDetailResponse getEventBySlug(String slug) {
         Event event = eventRepository.findBySlugAndStatus(slug, EventStatus.PUBLISHED)
                 .orElseThrow(() -> new RuntimeException("Event not found with slug: " + slug));
-        return eventMapper.toDetailResponse(event);
+        EventDetailResponse response = eventMapper.toDetailResponse(event);
+        response.setCurrentAttendees(calculateCurrentAttendees(event));
+        return response;
     }
 
     @Cacheable(value = "eventSchedules", key = "#eventId")
@@ -250,23 +264,30 @@ public class EventService {
         return slug;
     }
 
+    private int calculateCurrentAttendees(Event event) {
+        List<TicketType> ticketTypes = ticketTypeRepository.findByEventIdOrderByCreatedAtAsc(event.getId());
+        int ticketAttendees = ticketTypes != null
+                ? ticketTypes.stream()
+                        .filter(tt -> tt.getSoldQuantity() != null)
+                        .mapToInt(TicketType::getSoldQuantity)
+                        .sum()
+                : 0;
+        int inviteAttendees = invitationRepository.countByEventIdAndStatus(
+                event.getId(), com.eventhub.domain.enums.InviteStatus.ACCEPTED);
+        return ticketAttendees + inviteAttendees;
+    }
+
     private EventResponse toEventResponse(Event event) {
         User organizer = event.getOrganizer();
         String organizerName = organizer.getOrganizerProfile() != null
                 ? organizer.getOrganizerProfile().getCompanyName()
                 : organizer.getEmail();
 
-        int ticketAttendees = event.getTicketTypes() != null
-                ? event.getTicketTypes().stream()
-                        .filter(tt -> tt.getSoldQuantity() != null)
-                        .mapToInt(TicketType::getSoldQuantity)
-                        .sum()
-                : 0;
-        int inviteAttendees = invitationRepository.countByEventIdAndStatus(event.getId(), com.eventhub.domain.enums.InviteStatus.ACCEPTED);
-        int currentAttendees = ticketAttendees + inviteAttendees;
+        List<TicketType> ticketTypes = ticketTypeRepository.findByEventIdOrderByCreatedAtAsc(event.getId());
+        int currentAttendees = calculateCurrentAttendees(event);
 
-        java.math.BigDecimal revenue = event.getTicketTypes() != null
-                ? event.getTicketTypes().stream()
+        java.math.BigDecimal revenue = ticketTypes != null
+                ? ticketTypes.stream()
                         .filter(tt -> tt.getSoldQuantity() != null && tt.getPrice() != null)
                         .map(tt -> tt.getPrice().multiply(java.math.BigDecimal.valueOf(tt.getSoldQuantity())))
                         .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
@@ -305,8 +326,8 @@ public class EventService {
                 .updatedAt(event.getUpdatedAt())
                 .build();
 
-        if (event.getTicketTypes() != null) {
-            response.setTicketTypes(event.getTicketTypes().stream()
+        if (ticketTypes != null) {
+            response.setTicketTypes(ticketTypes.stream()
                     .map(tt -> EventResponse.TicketTypeInfo.builder()
                             .id(tt.getId())
                             .name(tt.getName())
@@ -324,21 +345,15 @@ public class EventService {
     }
 
     private EventSummaryResponse toEventSummaryResponse(Event event) {
-        java.math.BigDecimal revenue = event.getTicketTypes() != null
-                ? event.getTicketTypes().stream()
+        List<TicketType> ticketTypes = ticketTypeRepository.findByEventIdOrderByCreatedAtAsc(event.getId());
+        java.math.BigDecimal revenue = ticketTypes != null
+                ? ticketTypes.stream()
                         .filter(tt -> tt.getSoldQuantity() != null && tt.getPrice() != null)
                         .map(tt -> tt.getPrice().multiply(java.math.BigDecimal.valueOf(tt.getSoldQuantity())))
                         .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
                 : java.math.BigDecimal.ZERO;
 
-        int ticketAttendees = event.getTicketTypes() != null
-                ? event.getTicketTypes().stream()
-                        .filter(tt -> tt.getSoldQuantity() != null)
-                        .mapToInt(TicketType::getSoldQuantity)
-                        .sum()
-                : 0;
-        int inviteAttendees = invitationRepository.countByEventIdAndStatus(event.getId(), com.eventhub.domain.enums.InviteStatus.ACCEPTED);
-        int currentAttendees = ticketAttendees + inviteAttendees;
+        int currentAttendees = calculateCurrentAttendees(event);
 
         return EventSummaryResponse.builder()
                 .id(event.getId())
