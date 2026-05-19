@@ -30,7 +30,7 @@ public class PublicEventController {
     @GetMapping
     public ResponseEntity<Page<EventSummaryResponse>> getEvents(
             @ModelAttribute EventFilterRequest filter,
-            @PageableDefault(size = 12) Pageable pageable) {
+            @PageableDefault(size = 12, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(eventService.getEvents(filter, pageable));
     }
 

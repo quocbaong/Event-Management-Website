@@ -14,4 +14,12 @@ export const eventService = {
   publishEvent: (id, data) => api.patch(`/organizer/events/${id}/publish`, data),
 
   getTimelines: (eventId) => api.get(`/organizer/events/${eventId}/timelines`),
+
+  // Public Endpoints for Attendees
+  getPublicEvents: (params) => api.get('/events', { params }),
+  getPublicFeaturedEvents: () => api.get('/events/featured'),
+  getPublicUpcomingEvents: () => api.get('/events/upcoming'),
+  getPublicEventDetail: (slug) => api.get(`/events/${slug}`),
+  getPublicEventSchedules: (id) => api.get(`/events/${id}/schedules`),
+  getPublicEventTimeline: (id) => api.get(`/events/${id}/timeline`),
 };
