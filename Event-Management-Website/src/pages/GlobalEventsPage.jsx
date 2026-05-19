@@ -63,10 +63,10 @@ const GlobalEventsPage = () => {
   });
 
   const [categories, setCategories] = useState([
-    { name: "HỘI THẢO", percent: 0, color: "bg-primary" },
-    { name: "ÂM NHẠC", percent: 0, color: "bg-purple-500" },
-    { name: "THỂ THAO", percent: 0, color: "bg-orange-500" },
-    { name: "KHÁC", percent: 0, color: "bg-gray-300" }
+    { name: "Hội thảo", percent: 0, color: "bg-primary" },
+    { name: "Âm nhạc", percent: 0, color: "bg-purple-500" },
+    { name: "Thể thao", percent: 0, color: "bg-orange-500" },
+    { name: "Khác", percent: 0, color: "bg-gray-300" }
   ]);
 
   const [pagination, setPagination] = useState({
@@ -115,9 +115,13 @@ const GlobalEventsPage = () => {
       if (fetchedCategories) {
         const colorMap = {
           "HỘI THẢO": "bg-primary",
+          "Hội thảo": "bg-primary",
           "ÂM NHẠC": "bg-purple-500",
+          "Âm nhạc": "bg-purple-500",
           "THỂ THAO": "bg-orange-500",
-          "KHÁC": "bg-gray-300"
+          "Thể thao": "bg-orange-500",
+          "KHÁC": "bg-gray-300",
+          "Khác": "bg-gray-300"
         };
         setCategories(fetchedCategories.map(cat => ({
           name: cat.name,
@@ -294,7 +298,7 @@ const GlobalEventsPage = () => {
           label="Lọc theo hạng mục" 
           value={selectedCategory} 
           onChange={setSelectedCategory}
-          options={["Tất cả hạng mục", "HỘI THẢO", "ÂM NHẠC", "THỂ THAO", "KHÁC"]} 
+          options={["Tất cả hạng mục", "Hội thảo", "Âm nhạc", "Thể thao", "Khác"]} 
         />
         <FilterDropdown 
           label="Hạng người tổ chức" 
