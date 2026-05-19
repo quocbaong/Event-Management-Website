@@ -100,6 +100,7 @@ const AppRouter = () => {
           <Route path="explore" element={<AttendeeExplorePage />} />
           <Route path="qr" element={<AttendeeQRPage />} />
           <Route path="reviews" element={<AttendeeReviewPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="help" element={<SupportPage />} />
           <Route path="notifications" element={<NotificationPage />} />
         </Route>
