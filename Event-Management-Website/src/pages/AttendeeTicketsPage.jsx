@@ -132,10 +132,10 @@ const AttendeeTicketsPage = () => {
   const catInfo = categoryMap[activeReg.eventCategory] || categoryMap.OTHER;
 
   return (
-    <div className="pt-4 lg:pt-5 pb-8 px-6 lg:px-8 space-y-6 lg:space-y-8 animate-in fade-in duration-500 bg-[#fbfcff] min-h-screen">
+    <div className="pt-4 lg:pt-5 pb-6 px-6 lg:px-8 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-[#fbfcff]">
       
       {/* 1. Futuristic / Novelty Wallet Card Header */}
-      <div className="relative p-6 lg:p-7 rounded-[32px] bg-white border border-slate-100/80 shadow-[0_15px_40px_rgba(92,70,229,0.03)] overflow-hidden">
+      <div className="relative p-6 lg:p-7 rounded-[32px] bg-white border border-slate-100/80 shadow-[0_15px_40px_rgba(92,70,229,0.03)] overflow-hidden flex-shrink-0">
         {/* Background gradient blur blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-transparent rounded-full blur-3xl -z-10" />
         <div className="absolute -left-12 -top-12 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl -z-10" />
@@ -184,11 +184,11 @@ const AttendeeTicketsPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 flex-1 min-h-0 mt-6 lg:mt-8">
         
         {/* Left Column: Orders list with Search */}
-        <div className="xl:col-span-4 space-y-6">
-          <div className="space-y-3">
+        <div className="xl:col-span-4 flex flex-col h-full min-h-0 space-y-4">
+          <div className="space-y-3 flex-shrink-0">
             <h3 className="text-lg font-black text-slate-800 tracking-tight">Hóa đơn của bạn</h3>
             
             {/* Search Input */}
@@ -204,7 +204,7 @@ const AttendeeTicketsPage = () => {
             </div>
           </div>
 
-          <div className="space-y-3 max-h-[640px] overflow-y-auto pr-2 no-scrollbar">
+          <div className="space-y-3 flex-1 min-h-0 overflow-y-auto pr-2 no-scrollbar">
             {filteredRegistrations.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-slate-100 p-6">
                 <p className="text-slate-400 text-xs font-bold">Không tìm thấy hóa đơn nào</p>
@@ -269,8 +269,8 @@ const AttendeeTicketsPage = () => {
         </div>
 
         {/* Middle Column: Active Ticket designed as a premium Physical Ticket Card */}
-        <div className="xl:col-span-5 space-y-6">
-          <div className="bg-white rounded-[40px] overflow-hidden shadow-xl shadow-slate-100 border border-slate-100 flex flex-col relative">
+        <div className="xl:col-span-5 flex flex-col h-full min-h-0 space-y-4">
+          <div className="bg-white rounded-[40px] overflow-hidden shadow-xl shadow-slate-100 border border-slate-100 flex flex-col h-full min-h-0 relative">
             
             {/* 1. Banner Image Header */}
             <div className="relative w-full h-[220px] overflow-hidden shrink-0 bg-slate-950 flex flex-col justify-end p-8">
@@ -309,7 +309,7 @@ const AttendeeTicketsPage = () => {
             </div>
 
             {/* 3. QR Codes / Tickets Listing inside */}
-            <div className="p-8 pt-4 flex-1 flex flex-col justify-center gap-6 bg-white">
+            <div className="p-8 pt-4 flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col gap-6 bg-white">
               
               {activeReg.status !== 'CONFIRMED' && (
                 <div className="p-6 bg-amber-50/75 border border-amber-100 rounded-3xl flex items-start gap-4">
@@ -366,7 +366,7 @@ const AttendeeTicketsPage = () => {
             </div>
 
             {/* Ticket Footer details */}
-            <div className="px-8 pb-8 bg-white flex justify-between items-center text-[11px] font-bold text-slate-400 border-t border-slate-50 pt-6">
+            <div className="px-8 pb-8 bg-white flex justify-between items-center text-[11px] font-bold text-slate-400 border-t border-slate-50 pt-6 flex-shrink-0">
               <span>Hệ thống Prestige Planner</span>
               <span>Hỗ trợ check-in 24/7</span>
             </div>
@@ -374,10 +374,10 @@ const AttendeeTicketsPage = () => {
         </div>
 
         {/* Right Column: Schedule Details & Smart Wallets */}
-        <div className="xl:col-span-3 space-y-6">
+        <div className="xl:col-span-3 flex flex-col h-full min-h-0 overflow-y-auto no-scrollbar gap-6">
           
           {/* Detailed Schedule info */}
-          <div className="bg-white p-8 rounded-[36px] shadow-sm border border-slate-100 space-y-6">
+          <div className="bg-white p-8 rounded-[36px] shadow-sm border border-slate-100 space-y-6 flex-shrink-0">
             <h3 className="text-lg font-black text-slate-800 tracking-tight">Chi tiết lịch trình</h3>
             
             <div className="space-y-6">
@@ -411,7 +411,7 @@ const AttendeeTicketsPage = () => {
           </div>
 
           {/* Premium Smart Wallet Integrations */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-2 flex-shrink-0">
             <button className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 py-4.5 rounded-2xl flex items-center justify-center gap-3 font-bold transition-all active:scale-95 shadow-sm text-xs">
               <Smartphone className="w-5 h-5 text-indigo-600" />
               <span>Thêm vào Google Wallet</span>
