@@ -45,6 +45,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/admin/settings").hasAnyRole("ADMIN", "ORGANIZER")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/organizer/**").permitAll()
                         .requestMatchers("/api/v1/events/**", "/api/v1/invitations/**").permitAll()

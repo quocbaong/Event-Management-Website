@@ -29,6 +29,40 @@ const BroadcastPage = () => {
   const [target, setTarget] = useState('Tất cả người dùng');
   const [body, setBody] = useState('');
   const [schedule, setSchedule] = useState('now');
+
+  // Slideshow States
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  const defaultSlides = [
+    {
+      title: "Hệ thống bảo trì",
+      type: "Bảo trì hệ thống",
+      body: "Hệ thống EventArchitect sẽ tiến hành bảo trì nâng cấp định kỳ vào lúc 02:00 AM ngày 20/10/2023. Một số dịch vụ có thể bị gián đoạn tạm thời trong khoảng 30 phút."
+    },
+    {
+      title: "Ưu đãi cực khủng tháng 12",
+      type: "Khuyến mãi",
+      body: "Giảm giá lên đến 50% cho tất cả các vé sự kiện công nghệ. Đăng ký ngay hôm nay để nhận ưu đãi hấp dẫn từ nhà tổ chức."
+    },
+    {
+      title: "Sự kiện âm nhạc EDM hoành tráng",
+      type: "Tin tức mới",
+      body: "Chào mừng các bạn đến với sự kiện đại nhạc hội EDM lớn nhất mùa hè này. Nhanh tay săn vé ngay!"
+    }
+  ];
+
+  const getSlides = () => {
+    if (history && history.length > 0) {
+      return history.map(h => ({
+        title: h.title,
+        type: h.type === 'Bảo trì' ? 'Bảo trì hệ thống' : 
+              h.type === 'Khuyến mãi' ? 'Khuyến mãi' : 'Tin tức mới',
+        body: h.body || 'Nội dung thông báo hệ thống...'
+      }));
+    }
+    return defaultSlides;
+  };
+
   
   // Custom Date Time Picker State
   const [showDateTimePicker, setShowDateTimePicker] = useState(false);
@@ -78,6 +112,39 @@ const BroadcastPage = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Auto-slideshow effect
+  useEffect(() => {
+    const slides = getSlides();
+    if (slides.length <= 1) return;
+    
+    // Only slide if user is NOT actively typing
+    if (title.trim() !== '' || body.trim() !== '') {
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setCurrentSlideIndex(prev => (prev + 1) % slides.length);
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [history, title, body]);
+
+  // Compute active slide
+  const getActiveSlide = () => {
+    if (title.trim() !== '' || body.trim() !== '') {
+      return {
+        title: title || 'Hệ thống bảo trì',
+        type: type,
+        body: body || 'Hệ thống EventArchitect sẽ tiến hành bảo trì nâng cấp định kỳ...'
+      };
+    }
+    const slides = getSlides();
+    return slides[currentSlideIndex % slides.length] || defaultSlides[0];
+  };
+
+  const activeSlide = getActiveSlide();
+
 
   // Format string for API (YYYY-MM-DDTHH:mm)
   const apiFormattedTime = `${selectedDateObj.getFullYear()}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${String(selectedDateObj.getDate()).padStart(2, '0')}T${selectedHour}:${selectedMinute}`;
@@ -235,8 +302,8 @@ const BroadcastPage = () => {
                         className="w-full bg-slate-100 border-none rounded-2xl p-4 text-slate-700 focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none cursor-pointer font-bold pr-10"
                       >
                         <option>Tất cả người dùng</option>
-                        <option>Chỉ ban tổ chức</option>
-                        <option>Người dùng mới</option>
+                        <option>Chỉ nhà tổ chức</option>
+                        <option>Chỉ người tham gia</option>
                       </select>
                       <ChevronRight className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
                     </div>
@@ -512,47 +579,64 @@ const BroadcastPage = () => {
                   <span className="text-xs font-bold uppercase tracking-widest">Bản xem trước trực tiếp</span>
                </div>
 
-               {/* Mobile Notification Card */}
-               <div className="w-full bg-white rounded-[32px] overflow-hidden shadow-2xl transition-all duration-300">
-                  <div className={`p-6 py-8 flex flex-col items-center text-center text-white relative transition-colors duration-500 ${
-                    type === 'Bảo trì hệ thống' ? 'bg-primary' :
-                    type === 'Khuyến mãi' ? 'bg-emerald-600' : 'bg-orange-500'
-                  }`}>
-                     <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
-                        {type === 'Bảo trì hệ thống' ? (
-                          <AlertCircle className="w-6 h-6 text-white" />
-                        ) : type === 'Khuyến mãi' ? (
-                          <Sparkles className="w-6 h-6 text-white" />
-                        ) : (
-                          <Bell className="w-6 h-6 text-white" />
-                        )}
-                     </div>
-                     <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">
-                       {type === 'Bảo trì hệ thống' ? 'Thông báo hệ thống' :
-                        type === 'Khuyến mãi' ? 'Ưu đãi đặc biệt' : 'Tin tức cập nhật'}
-                     </p>
-                     <h4 className="text-xl font-bold line-clamp-1">{title || 'Hệ thống bảo trì'}</h4>
-                  </div>
-                  <div className="p-6 space-y-4">
-                     <div>
-                        <h5 className="font-bold text-slate-800 mb-2">Chào quản trị viên,</h5>
-                        <p className="text-sm text-slate-500 leading-relaxed min-h-[100px] max-h-[140px] overflow-y-auto">
-                           {body || 'Hệ thống EventArchitect sẽ tiến hành bảo trì nâng cấp định kỳ vào lúc 02:00 AM ngày 20/10/2023. Một số dịch vụ có thể bị gián đoạn tạm thời trong khoảng 30 phút.'}
-                        </p>
-                     </div>
-                     <div className="flex items-center justify-between pt-2">
-                        <button className="text-[11px] font-bold text-slate-400 flex items-center gap-1 hover:text-slate-600 transition-colors">
-                           Xem chi tiết <ChevronRight className="w-3 h-3" />
-                        </button>
-                        <button className={`text-white text-[11px] font-black px-6 py-2 rounded-xl transition-colors duration-500 ${
-                          type === 'Bảo trì hệ thống' ? 'bg-primary' :
-                          type === 'Khuyến mãi' ? 'bg-emerald-600' : 'bg-orange-500'
-                        }`}>
-                           ĐÃ HIỂU
-                        </button>
-                     </div>
-                  </div>
-               </div>
+                {/* Mobile Notification Card */}
+                <div 
+                   key={activeSlide.title + activeSlide.type} 
+                   className="w-full bg-white rounded-[32px] overflow-hidden shadow-2xl transition-all duration-500 transform hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-6 duration-500"
+                >
+                   <div className={`p-6 py-8 flex flex-col items-center text-center text-white relative transition-colors duration-500 ${
+                     activeSlide.type === 'Bảo trì hệ thống' ? 'bg-primary' :
+                     activeSlide.type === 'Khuyến mãi' ? 'bg-emerald-600' : 'bg-orange-500'
+                   }`}>
+                      <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
+                         {activeSlide.type === 'Bảo trì hệ thống' ? (
+                           <AlertCircle className="w-6 h-6 text-white" />
+                         ) : activeSlide.type === 'Khuyến mãi' ? (
+                           <Sparkles className="w-6 h-6 text-white" />
+                         ) : (
+                           <Bell className="w-6 h-6 text-white" />
+                         )}
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">
+                        {activeSlide.type === 'Bảo trì hệ thống' ? 'Thông báo hệ thống' :
+                         activeSlide.type === 'Khuyến mãi' ? 'Ưu đãi đặc biệt' : 'Tin tức cập nhật'}
+                      </p>
+                      <h4 className="text-xl font-bold line-clamp-1">{activeSlide.title}</h4>
+                   </div>
+                   <div className="p-6 space-y-4">
+                      <div>
+                         <h5 className="font-bold text-slate-800 mb-2">Chào quản trị viên,</h5>
+                         <p className="text-sm text-slate-500 leading-relaxed min-h-[100px] max-h-[140px] overflow-y-auto">
+                            {activeSlide.body}
+                         </p>
+                      </div>
+                      <div className="flex items-center justify-between pt-2">
+                         <button className="text-[11px] font-bold text-slate-400 flex items-center gap-1 hover:text-slate-600 transition-colors">
+                            Xem chi tiết <ChevronRight className="w-3 h-3" />
+                         </button>
+                         <button className={`text-white text-[11px] font-black px-6 py-2 rounded-xl transition-colors duration-500 ${
+                           activeSlide.type === 'Bảo trì hệ thống' ? 'bg-primary' :
+                           activeSlide.type === 'Khuyến mãi' ? 'bg-emerald-600' : 'bg-orange-500'
+                         }`}>
+                            ĐÃ HIỂU
+                         </button>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Slideshow pagination dots */}
+                {!(title.trim() !== '' || body.trim() !== '') && (
+                   <div className="flex gap-1.5 mt-4 z-10">
+                      {getSlides().map((_, idx) => (
+                         <div 
+                            key={idx}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              idx === (currentSlideIndex % getSlides().length) ? 'w-6 bg-indigo-400' : 'w-1.5 bg-indigo-950/60'
+                            }`}
+                         ></div>
+                      ))}
+                   </div>
+                )}
 
                <div className="absolute bottom-6 w-full text-center">
                   <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Giao diện di động mô phỏng</p>

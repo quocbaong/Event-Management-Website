@@ -369,7 +369,7 @@ public class AdminServiceImpl implements AdminService {
     public com.eventhub.web.dto.admin.BroadcastPageResponse getBroadcastData() {
         List<Object[]> rows = entityManager.createNativeQuery(
                 "SELECT type, title, MIN(created_at) as sent_at, COUNT(*) as reach, " +
-                "COUNT(read_at) as read_count " +
+                "COUNT(read_at) as read_count, MAX(body) as body " +
                 "FROM notifications " +
                 "WHERE type IN ('SYSTEM', 'BROADCAST') " +
                 "GROUP BY type, title " +
@@ -404,6 +404,7 @@ public class AdminServiceImpl implements AdminService {
             
             long clicks = (long) (reach * (0.6 + (reach % 25) / 100.0));
             String bounce = String.format("%.1f%%", 1.0 + (reach % 3));
+            String body = r[5] != null ? r[5].toString() : "";
 
             String uiType = "SYSTEM".equalsIgnoreCase(type) ? "Bảo trì" : "Tin tức";
 
@@ -415,6 +416,7 @@ public class AdminServiceImpl implements AdminService {
                     .reach(reach)
                     .clicks(clicks)
                     .bounce(bounce)
+                    .body(body)
                     .build());
         }
 
@@ -427,6 +429,7 @@ public class AdminServiceImpl implements AdminService {
                     .reach(12450)
                     .clicks(8920)
                     .bounce("1.2%")
+                    .body("Hệ thống EventArchitect sẽ tiến hành bảo trì nâng cấp định kỳ vào lúc 02:00 AM ngày 20/10/2023. Một số dịch vụ có thể bị gián đoạn tạm thời trong khoảng 30 phút.")
                     .build());
             history.add(com.eventhub.web.dto.admin.BroadcastHistoryDTO.builder()
                     .type("Tin tức")
@@ -436,6 +439,7 @@ public class AdminServiceImpl implements AdminService {
                     .reach(45100)
                     .clicks(32540)
                     .bounce("2.8%")
+                    .body("Trải nghiệm ngay giao diện báo cáo thông minh trực quan với Bản Đồ Nhiệt thời gian thực, giúp quản lý đám đông sự kiện chuyên nghiệp hơn.")
                     .build());
         }
 
@@ -461,10 +465,19 @@ public class AdminServiceImpl implements AdminService {
         String notifType = "Bảo trì hệ thống".equalsIgnoreCase(request.getType()) ? "SYSTEM" : "BROADCAST";
         
         String roleFilter = "";
-        if ("Chỉ ban tổ chức".equalsIgnoreCase(request.getTarget())) {
-            roleFilter = " WHERE role = 'ORGANIZER'";
-        } else if ("Người dùng mới".equalsIgnoreCase(request.getTarget())) {
-            roleFilter = " WHERE role = 'ATTENDEE'";
+        String target = request.getTarget();
+        if (target != null) {
+            target = target.trim();
+            if ("Chỉ ban tổ chức".equalsIgnoreCase(target) || 
+                "Ban tổ chức".equalsIgnoreCase(target) || 
+                "Nhà tổ chức".equalsIgnoreCase(target) || 
+                "Chỉ nhà tổ chức".equalsIgnoreCase(target)) {
+                roleFilter = " WHERE role = 'ORGANIZER'";
+            } else if ("Người dùng mới".equalsIgnoreCase(target) || 
+                       "Người tham gia".equalsIgnoreCase(target) || 
+                       "Chỉ người tham gia".equalsIgnoreCase(target)) {
+                roleFilter = " WHERE role = 'ATTENDEE'";
+            }
         }
 
         entityManager.createNativeQuery(

@@ -36,6 +36,7 @@ import OrganizerEventFinancePage from '../pages/OrganizerEventFinancePage';
 import CreateEventPage from '../pages/CreateEventPage';
 import InvitationAcceptPage from '../pages/InvitationAcceptPage';
 import NotificationPage from '../pages/NotificationPage';
+import SupportPage from '../pages/SupportPage';
 import { useAuth } from '../stores/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -86,6 +87,7 @@ const AppRouter = () => {
           <Route path="guests" element={<GuestsPage />} />
           <Route path="reports" element={<AdminReportsPage />} />
           <Route path="finance" element={<AdminFinancePage />} />
+          <Route path="help" element={<SupportPage />} />
           <Route path="notifications" element={<NotificationPage />} />
         </Route>
 
@@ -98,6 +100,7 @@ const AppRouter = () => {
           <Route path="explore" element={<AttendeeExplorePage />} />
           <Route path="qr" element={<AttendeeQRPage />} />
           <Route path="reviews" element={<AttendeeReviewPage />} />
+          <Route path="help" element={<SupportPage />} />
           <Route path="notifications" element={<NotificationPage />} />
         </Route>
 
@@ -116,6 +119,8 @@ const AppRouter = () => {
           <Route path="reports/templates" element={<OrganizerReportTemplatesPage />} />
           <Route path="finance" element={<OrganizerFinancePage />} />
           <Route path="finance/:id" element={<OrganizerEventFinancePage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="help" element={<SupportPage />} />
           <Route path="notifications" element={<NotificationPage />} />
         </Route>
 

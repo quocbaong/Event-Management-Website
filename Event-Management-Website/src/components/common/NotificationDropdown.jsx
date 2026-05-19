@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from '../../lib/axios';
 import { 
   Bell, 
   MapPin, 
@@ -14,12 +15,32 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedNotif, setSelectedNotif] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/notifications');
+      setNotifications(response.data || []);
+    } catch (error) {
+      console.error('Lỗi khi tải thông báo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const notifications = [
+  const mockNotifications = [
     {
-      id: 1,
+      id: 'mock-1',
       type: 'location',
       title: 'Thay đổi địa điểm',
       subtitle: 'Hội thảo AI 2024 đã chuyển sang Park Hyatt.',
@@ -28,9 +49,10 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       isNew: true,
       actionLabel: 'XEM BẢN ĐỒ',
       location: 'Quận 1, TP. HCM',
+      unread: true
     },
     {
-      id: 2,
+      id: 'mock-2',
       type: 'reminder',
       title: 'Nhắc nhở lịch trình',
       subtitle: 'Lễ ra mắt sản phẩm X sẽ bắt đầu trong 2 giờ tới.',
@@ -38,9 +60,10 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       time: '2 giờ trước',
       isNew: true,
       actionLabel: 'XEM MÃ QR',
+      unread: true
     },
     {
-      id: 3,
+      id: 'mock-3',
       type: 'approval',
       title: 'Xác nhận đăng ký',
       subtitle: 'Vé của bạn đã được phê duyệt thành công.',
@@ -48,17 +71,38 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       time: '5 giờ trước',
       isNew: false,
       actionLabel: 'CHI TIẾT VÉ',
+      unread: false
     },
     {
-      id: 4,
+      id: 'mock-4',
       type: 'update',
       title: 'Cập nhật phiên thảo luận',
       subtitle: 'Phiên thảo luận sẽ bắt đầu muộn hơn 15 phút.',
       description: 'Phiên thảo luận "Tương lai của thiết kế" sẽ bắt đầu muộn hơn 15 phút so với dự kiến ban đầu. Rất xin lỗi vì sự bất tiện này.',
       time: '8 giờ trước',
       isNew: false,
+      unread: false
     }
   ];
+
+  const getNotificationsList = () => {
+    if (notifications && notifications.length > 0) {
+      return notifications;
+    }
+    return mockNotifications;
+  };
+
+  const handleSelectNotif = async (notif) => {
+    setSelectedNotif(notif);
+    if (notif.unread && !String(notif.id).startsWith('mock-')) {
+      try {
+        await axios.post(`/notifications/${notif.id}/read`);
+        setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, unread: false, isNew: false } : n));
+      } catch (error) {
+        console.error('Lỗi khi đánh dấu đã đọc:', error);
+      }
+    }
+  };
 
   const getIcon = (type) => {
     switch(type) {
@@ -103,7 +147,9 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-2">
              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Thông báo</h3>
-             <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full">3 MỚI</span>
+             <span className="bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+               {getNotificationsList().filter(n => n.unread).length} MỚI
+             </span>
           </div>
           <button className="text-slate-400 hover:text-primary transition-colors">
              <Settings className="w-4 h-4" />
@@ -112,10 +158,10 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
 
         {/* Notifications List */}
         <div className="max-h-[480px] overflow-y-auto no-scrollbar">
-          {notifications.map((notif) => (
+          {getNotificationsList().map((notif) => (
             <div 
               key={notif.id}
-              onClick={() => setSelectedNotif(notif)}
+              onClick={() => handleSelectNotif(notif)}
               className="p-6 border-b border-slate-50 hover:bg-slate-50 transition-all cursor-pointer group relative flex items-start gap-4"
             >
               {notif.isNew && (
@@ -132,7 +178,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                   <span className="text-[10px] text-slate-400 font-bold">{notif.time}</span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed line-clamp-2">
-                  {notif.subtitle}
+                  {notif.description || notif.subtitle}
                 </p>
               </div>
             </div>

@@ -53,7 +53,10 @@ const Sidebar = () => {
   return (
     <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-border-color flex flex-col pt-4 pb-6">
       {/* Logo */}
-      <div className="px-6 mb-8">
+      <div 
+        onClick={() => navigate('/admin/dashboard')}
+        className="px-6 mb-8 cursor-pointer hover:opacity-85 transition-opacity"
+      >
         <img src={logo} alt="EventArchitect" className="h-14 w-auto object-contain" />
       </div>
 
@@ -82,7 +85,12 @@ const Sidebar = () => {
         </button>
 
         <div className="pt-4 space-y-1 border-t border-border-color">
-          <SidebarItem icon={HelpCircle} label="Hỗ trợ" />
+          <SidebarItem 
+            icon={HelpCircle} 
+            label="Hỗ trợ" 
+            active={location.pathname === '/admin/help'} 
+            onClick={() => navigate('/admin/help')} 
+          />
           <SidebarItem icon={LogOut} label="Đăng xuất" onClick={handleLogout} />
         </div>
       </div>

@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../stores/AuthContext';
 import UserProfileModal from '../../modals/UserProfileModal';
+import NotificationDropdown from '../../common/NotificationDropdown';
+import axios from '../../../lib/axios';
 
 const OrganizerHeader = ({ onToggleSidebar }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
+  const [notifications, setNotifications] = useState([]);
+  
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await axios.get('/notifications');
+      setNotifications(response.data || []);
+    } catch (error) {
+      console.error('Lỗi khi tải thông báo:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    // Refresh every 30 seconds for dynamic feel
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   const getTitle = () => {
     const path = location.pathname;
@@ -102,16 +124,25 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
               />
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 relative">
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                 className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all relative"
               >
                 <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                )}
               </button>
-              <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
-                <span className="material-symbols-outlined">language</span>
+              
+              <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+              
+              <button 
+                onClick={() => navigate('/organizer/settings')}
+                className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
+                title="Cài đặt hệ thống"
+              >
+                <span className="material-symbols-outlined">settings</span>
               </button>
             </div>
             
