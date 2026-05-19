@@ -221,5 +221,3 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
 };
 
 export default NotificationDropdown;
-
-export default NotificationDropdown;
