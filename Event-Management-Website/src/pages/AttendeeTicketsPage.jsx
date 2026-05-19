@@ -157,7 +157,7 @@ const AttendeeTicketsPage = () => {
               <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none">
                 Vé của tôi
               </h1>
-              <p className="text-xs font-semibold text-slate-450 leading-relaxed max-w-[520px]">
+              <p className="text-xs font-semibold text-slate-450 leading-relaxed max-w-none">
                 Nơi quản lý vé thông minh của bạn. Hãy chọn một sự kiện bất kỳ để xem nhanh thông tin chi tiết và xuất trình mã QR Check-in.
               </p>
             </div>
