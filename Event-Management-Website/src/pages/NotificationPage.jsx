@@ -15,6 +15,7 @@ import {
 
 const NotificationPage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [selectedNotif, setSelectedNotif] = useState(null);
 
   const filters = [
     { id: 'all', label: 'Tất cả' },
@@ -70,9 +71,9 @@ const NotificationPage = () => {
     switch(type) {
       case 'location': return <MapPin className="w-6 h-6 text-indigo-600" />;
       case 'reminder': return <Clock className="w-6 h-6 text-purple-600" />;
-      case 'approval': return <CheckCircle2 className="w-6 h-6 text-amber-700" />;
+      case 'approval': return <CheckCircle2 className="w-6 h-6 text-indigo-600" />;
       case 'update': return <RefreshCcw className="w-6 h-6 text-slate-500" />;
-      default: return <Bell className="w-6 h-6 text-primary" />;
+      default: return <Bell className="w-6 h-6 text-indigo-600" />;
     }
   };
 
@@ -80,9 +81,9 @@ const NotificationPage = () => {
     switch(type) {
       case 'location': return 'bg-indigo-50';
       case 'reminder': return 'bg-purple-50';
-      case 'approval': return 'bg-amber-50';
+      case 'approval': return 'bg-indigo-50/50';
       case 'update': return 'bg-slate-100';
-      default: return 'bg-primary/5';
+      default: return 'bg-indigo-50/20';
     }
   };
 
@@ -118,7 +119,8 @@ const NotificationPage = () => {
           {notifications.map((notif) => (
             <div 
               key={notif.id}
-              className={`relative group bg-white rounded-[32px] p-8 border-2 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex items-start gap-6 ${
+              onClick={() => setSelectedNotif(notif)}
+              className={`relative group bg-white rounded-[32px] p-8 border-2 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex items-start gap-6 cursor-pointer ${
                 notif.unread ? 'border-indigo-600/30' : 'border-white'
               }`}
             >
@@ -194,6 +196,72 @@ const NotificationPage = () => {
       <button className="fixed bottom-10 right-10 w-16 h-16 bg-indigo-600 text-white rounded-2xl shadow-2xl shadow-indigo-300 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
          <Filter className="w-6 h-6" />
       </button>
+
+      {/* Detail Modal Overlay */}
+      {selectedNotif && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-lg rounded-[32px] p-8 border border-slate-100 shadow-[0_30px_60px_rgba(0,0,0,0.15)] flex flex-col gap-6 animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+            
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div className={`w-14 h-14 ${getBgColor(selectedNotif.type)} rounded-[20px] flex items-center justify-center shadow-inner`}>
+                {getIcon(selectedNotif.type)}
+              </div>
+              <button 
+                onClick={() => setSelectedNotif(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                  selectedNotif.unread ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {selectedNotif.unread ? 'Mới' : 'Đã xem'}
+                </span>
+                <span className="text-[11px] font-bold text-slate-400">{selectedNotif.time || selectedNotif.date}</span>
+              </div>
+              
+              <h3 className="text-xl font-black text-slate-800 leading-tight">
+                {selectedNotif.title}
+              </h3>
+              
+              <p className="text-slate-500 text-sm leading-relaxed font-medium pt-2">
+                {selectedNotif.description}
+              </p>
+              
+              {selectedNotif.location && (
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-50 p-3.5 rounded-xl mt-4">
+                  <MapPin className="w-4 h-4 text-indigo-500" />
+                  <span>Địa điểm: {selectedNotif.location}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-3 mt-4">
+              {selectedNotif.actionLabel && (
+                <button className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-indigo-100 transition-all active:scale-95">
+                  {selectedNotif.actionLabel}
+                </button>
+              )}
+              <button 
+                onClick={() => setSelectedNotif(null)}
+                className={`py-4 font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95 ${
+                  selectedNotif.actionLabel ? 'flex-1 bg-slate-50 hover:bg-slate-100 text-slate-500' : 'w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-100'
+                }`}
+              >
+                Đóng
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
