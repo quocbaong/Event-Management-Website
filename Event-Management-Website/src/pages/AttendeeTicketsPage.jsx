@@ -204,47 +204,60 @@ const AttendeeTicketsPage = () => {
             </div>
           </div>
 
-          <div className="space-y-4 max-h-[640px] overflow-y-auto pr-2 no-scrollbar">
+          <div className="space-y-3 max-h-[640px] overflow-y-auto pr-2 no-scrollbar">
             {filteredRegistrations.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 p-6">
-                <p className="text-slate-400 text-xs font-bold">Không tìm thấy sự kiện nào khớp</p>
+              <div className="text-center py-12 bg-white rounded-2xl border border-slate-100 p-6">
+                <p className="text-slate-400 text-xs font-bold">Không tìm thấy hóa đơn nào</p>
               </div>
             ) : (
               filteredRegistrations.map((reg) => {
                 const isActive = activeReg.id === reg.id;
                 const dateStr = reg.confirmedAt || reg.createdAt;
+                const regCat = categoryMap[reg.eventCategory] || categoryMap.OTHER;
                 return (
                   <div
                     key={reg.id}
                     onClick={() => setSelectedReg(reg)}
-                    className={`p-6 rounded-[28px] border transition-all duration-300 relative group cursor-pointer ${
+                    className={`p-5 rounded-2xl border transition-all duration-300 relative group cursor-pointer ${
                       isActive 
-                        ? 'bg-gradient-to-tr from-indigo-50/50 to-purple-50/20 border-indigo-600 shadow-md'
-                        : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-indigo-50/40 via-white to-indigo-50/10 border-indigo-600 shadow-md shadow-indigo-100/40 border-l-4 border-l-indigo-600'
+                        : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-sm border-l-4 border-l-transparent'
                     }`}
                   >
-                    <div className="flex justify-between items-start gap-2 mb-3">
-                      <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${
-                        reg.status === 'CONFIRMED'
-                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                          : 'bg-amber-50 text-amber-600 border border-amber-100'
-                      }`}>
-                        {reg.status === 'CONFIRMED' ? 'Đã xác thực' : 'Đang xử lý'}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-bold">
+                    <div className="flex justify-between items-center gap-2 mb-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                          reg.status === 'CONFIRMED'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100/60'
+                            : 'bg-amber-50 text-amber-600 border border-amber-100/60'
+                        }`}>
+                          {reg.status === 'CONFIRMED' ? 'Đã xác thực' : 'Đang xử lý'}
+                        </span>
+                        
+                        <div className="flex items-center gap-1">
+                          <span className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${regCat.color}`} />
+                          <span className="text-[9px] text-slate-400 font-extrabold tracking-wide uppercase">
+                            {regCat.label}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <span className="text-[10px] text-slate-405 font-bold">
                         {formatDate(dateStr).split(',')[1]}
                       </span>
                     </div>
 
-                    <h4 className="font-black text-slate-800 text-[14px] line-clamp-2 leading-snug group-hover:text-indigo-600 transition-colors">
+                    <h4 className="font-bold text-slate-800 text-[13.5px] line-clamp-2 leading-snug group-hover:text-indigo-600 transition-colors">
                       {reg.eventTitle || 'Sự kiện'}
                     </h4>
 
-                    <div className="flex justify-between items-center pt-4 mt-4 border-t border-slate-50">
-                      <span className="text-slate-400 text-xs font-bold">
-                        {reg.tickets?.length || 0} vé
-                      </span>
-                      <span className="text-slate-900 font-extrabold text-xs">
+                    <div className="flex justify-between items-center pt-3.5 mt-3.5 border-t border-slate-100/70">
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <span className="material-symbols-outlined text-[16px]">confirmation_number</span>
+                        <span className="text-xs font-semibold">{reg.tickets?.length || 0} vé</span>
+                      </div>
+                      
+                      <span className="text-slate-900 font-black text-xs tracking-tight">
                         {formatPrice(reg.finalAmount)}
                       </span>
                     </div>
