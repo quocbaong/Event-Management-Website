@@ -1,4 +1,5 @@
 services:
+  # BACKEND API Service (Chạy trực tiếp bằng Docker)
   api:
     build: .
     container_name: eventhub-api
@@ -32,6 +33,7 @@ services:
     networks:
       - eventhub-net
 
+  # Cổng DB Postgres
   postgres:
     image: postgres:16-alpine
     container_name: eventhub-postgres
@@ -51,6 +53,7 @@ services:
     networks:
       - eventhub-net
 
+  # Cổng Redis
   redis:
     image: redis:7-alpine
     container_name: eventhub-redis
@@ -62,6 +65,7 @@ services:
     networks:
       - eventhub-net
 
+  # Cổng Quản lý DB
   pgadmin:
     image: dpage/pgadmin4
     container_name: eventhub-pgadmin
@@ -70,6 +74,23 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
+    networks:
+      - eventhub-net
+
+  # ngrok trong Docker trỏ trực tiếp về service api của Docker
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: eventhub-ngrok
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command:
+      - "http"
+      - "--domain=yoyo-upstage-applied.ngrok-free.dev"
+      - "api:8080" # Trỏ về container api chạy trong Docker
+    depends_on:
+      - api
     networks:
       - eventhub-net
 

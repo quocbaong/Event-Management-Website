@@ -80,4 +80,14 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     Object[] getAttendeeStats(
             @Param("organizerId") UUID organizerId,
             @Param("status") String status);
+
+    @Query("""
+            SELECT r FROM Registration r
+            JOIN FETCH r.event e
+            LEFT JOIN FETCH r.attendee a
+            LEFT JOIN FETCH a.attendeeProfile
+            LEFT JOIN FETCH r.tickets t
+            WHERE e.organizer.id = :organizerId
+            """)
+    List<Registration> findAllAnalyticsByOrganizer(@Param("organizerId") UUID organizerId);
 }

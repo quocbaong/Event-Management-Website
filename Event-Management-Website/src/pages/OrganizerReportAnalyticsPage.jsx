@@ -5,6 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Cell, AreaChart, Area, PieChart, Pie, Sector
 } from 'recharts';
+import { dashboardService } from '../services/dashboardService';
 
 // ─── API Config (thay URL khi có backend) ─────────────────────────────────────
 // const API_BASE = 'http://localhost:8080/api/organizer';
@@ -21,84 +22,26 @@ const buildDateParams = (period, customRange) => {
   return `from=${fmt(from)}&to=${fmt(to)}&period=${period}`;
 };
 
+const formatRevenue = (value) => {
+  if (value === null || value === undefined) return '0 ₫';
+  const val = Number(value);
+  if (val >= 1_000_000_000) {
+    return (val / 1_000_000_000).toFixed(1).replace('.0', '') + 'B ₫';
+  }
+  if (val >= 1_000_000) {
+    return (val / 1_000_000).toFixed(1).replace('.0', '') + 'M ₫';
+  }
+  if (val >= 1000) {
+    return (val / 1000).toFixed(1).replace('.0', '') + 'K ₫';
+  }
+  return val.toLocaleString() + ' ₫';
+};
+
 // ─── Skeleton loader ──────────────────────────────────────────────────────────
 const Skeleton = ({ className = '' }) => (
   <div className={`animate-pulse bg-slate-100 rounded-xl ${className}`} />
 );
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-// ─── Base Data (for scaling) ──────────────────────────────────────────────────
-const baseKpiData = [
-  { icon: 'confirmation_number', label: 'Tổng vé đã bán', value: 819.4, trend: '+12%', up: true, color: 'indigo', unit: '' },
-  { icon: 'payments', label: 'Doanh thu dự kiến', value: 42.6, trend: '+8.4%', up: true, color: 'violet', unit: ' triệu ₫' },
-  { icon: 'how_to_reg', label: 'Tỷ lệ tham dự', value: 86.4, trend: '-2%', up: false, color: 'blue', unit: '%' },
-  { icon: 'star', label: 'Điểm hài lòng', value: 4.8, trend: '+15%', up: true, color: 'amber', unit: '/5.0' },
-];
-
-const attendanceData = [
-  { day: 'T2', week1: 45, week2: 78, week3: 30, week4: 90 },
-  { day: 'T3', week1: 60, week2: 55, week3: 85, week4: 40 },
-  { day: 'T4', week1: 80, week2: 90, week3: 60, week4: 70 },
-  { day: 'T5', week1: 95, week2: 40, week3: 75, week4: 85 },
-  { day: 'T6', week1: 70, week2: 65, week3: 95, week4: 55 },
-  { day: 'T7', week1: 55, week2: 80, week3: 50, week4: 100 },
-  { day: 'CN', week1: 35, week2: 45, week3: 40, week4: 60 },
-];
-
-const densityData = [
-  { time: '08:00', value: 120 }, { time: '10:00', value: 450 }, { time: '12:00', value: 800 },
-  { time: '14:00', value: 650 }, { time: '16:00', value: 1100 }, { time: '18:00', value: 1600 },
-  { time: '20:00', value: 2100 }, { time: '22:00', value: 900 }, { time: '00:00', value: 150 },
-];
-
-const barChartData = [
-  { name: 'T1', value: 820 }, { name: 'T2', value: 1200 }, { name: 'T3', value: 950 },
-  { name: 'T4', value: 1580 }, { name: 'T5', value: 1100 }, { name: 'T6', value: 1750 },
-  { name: 'T7', value: 2100 }, { name: 'T8', value: 1420 }, { name: 'T9', value: 1890 },
-  { name: 'T10', value: 980 }, { name: 'T11', value: 2250 }, { name: 'T12', value: 1650 },
-];
-
-const audienceSegments = [
-  { label: 'Độ tuổi 18 – 25', pct: 32, color: '#6366f1' },
-  { label: 'Độ tuổi 26 – 35', pct: 45, color: '#8b5cf6' },
-  { label: 'Độ tuổi 36 – 50', pct: 18, color: '#3b82f6' },
-  { label: 'Khác', pct: 5, color: '#94a3b8' },
-];
-
-const funnelSteps = [
-  { label: 'Tiếp cận', sub: 'Lượt xem trang', value: '152K', color: 'from-indigo-500 to-indigo-600', width: '100%' },
-  { label: 'Quan tâm', sub: 'Nhấn vào vé', value: '48K', color: 'from-violet-500 to-violet-600', width: '80%' },
-  { label: 'Giỏ hàng', sub: 'Thanh toán', value: '12.5K', color: 'from-purple-500 to-purple-700', width: '58%' },
-  { label: 'Hoàn tất', sub: 'Vé đã bán', value: '8.2K', color: 'from-indigo-800 to-slate-900', width: '40%' },
-];
-
-const events = [
-  { name: 'Tech Summit 2024', type: 'Hội thảo', tickets: '1,200', checkin: 92, revenue: '420.5M', status: 'done' },
-  { name: 'Gala Dinner FinTech', type: 'Tiệc tối', tickets: '350', checkin: 88, revenue: '180.2M', status: 'done' },
-  { name: 'Music Fest – Summer Heat', type: 'Âm nhạc', tickets: '5,000', checkin: 65, revenue: '1.2B', status: 'live' },
-  { name: 'Startup Pitching Day', type: 'Cuộc thi', tickets: '800', checkin: 42, revenue: '95M', status: 'live' },
-  { name: 'Food & Wine Festival', type: 'Ẩm thực', tickets: '2,100', checkin: 78, revenue: '340M', status: 'done' },
-];
-
-const thuLineData = [
-  { label: 'T.2', w1: 35, w2: 70, w3: 25, w4: 85 },
-  { label: 'T.3', w1: 50, w2: 50, w3: 80, w4: 35 },
-  { label: 'T.4', w1: 65, w2: 85, w3: 55, w4: 65 },
-  { label: 'T.5', w1: 80, w2: 35, w3: 70, w4: 80 },
-  { label: 'T.6', w1: 60, w2: 60, w3: 90, w4: 50 },
-  { label: 'T.7', w1: 45, w2: 75, w3: 45, w4: 95 },
-  { label: 'CN',  w1: 30, w2: 40, w3: 35, w4: 55 },
-];
-
-const gioLineData = [
-  { label: '8h',  w1: 20, w2: 30, w3: 15, w4: 25 },
-  { label: '10h', w1: 45, w2: 50, w3: 40, w4: 55 },
-  { label: '12h', w1: 70, w2: 65, w3: 80, w4: 75 },
-  { label: '14h', w1: 55, w2: 60, w3: 50, w4: 65 },
-  { label: '16h', w1: 80, w2: 75, w3: 70, w4: 85 },
-  { label: '18h', w1: 90, w2: 95, w3: 88, w4: 78 },
-  { label: '20h', w1: 75, w2: 85, w3: 92, w4: 80 },
-];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 const colorMap = {
@@ -125,7 +68,7 @@ const KpiCard = ({ card, index }) => {
           </div>
           <p className="text-xs font-bold text-slate-500 leading-tight uppercase tracking-wide">{card.label}</p>
         </div>
-        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${card.up ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${card.up ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-50'}`}>
           {card.trend}
         </span>
       </div>
@@ -181,31 +124,79 @@ const OrganizerReportAnalyticsPage = () => {
   const [isLoadingEvents,    setIsLoadingEvents]    = useState(false);
 
   // ─── Dynamic chart data (sẽ được cập nhật từ API) ─────────────────────────
+  const [apiKpiData,        setApiKpiData]        = useState([]);
   const [apiLineDataThu,    setApiLineDataThu]    = useState(null);
   const [apiLineDataGio,    setApiLineDataGio]    = useState(null);
   const [apiAudienceSegs,   setApiAudienceSegs]   = useState(null);
   const [apiFunnelSteps,    setApiFunnelSteps]    = useState(null);
   const [apiEvents,         setApiEvents]         = useState(null);
+  const [cartConversionRate, setCartConversionRate] = useState(5.4);
+  const [cartAbandonmentRate, setCartAbandonmentRate] = useState(34.2);
+  const [averageOrderValue, setAverageOrderValue] = useState(450000);
+
+  // ─── Fetch KPI summary ────────────────────────────────────────────────────
+  useEffect(() => {
+    const params = buildDateParams(period, customRange);
+    setIsLoadingKpi(true);
+    dashboardService.getKpiSummary(params)
+      .then(r => {
+        if (r.data) {
+          const data = r.data;
+          const formattedKpi = [
+            {
+              label: 'Tổng sự kiện',
+              displayValue: data.totalEvents || 0,
+              icon: 'event',
+              color: 'indigo',
+              trend: 'Sự kiện',
+              up: true
+            },
+            {
+              label: 'Tổng doanh thu',
+              displayValue: formatRevenue(data.totalRevenue),
+              icon: 'payments',
+              color: 'violet',
+              trend: 'Đã nhận',
+              up: true
+            },
+            {
+              label: 'Tổng lượt đăng ký',
+              displayValue: (data.totalAttendees || 0).toLocaleString(),
+              icon: 'group',
+              color: 'blue',
+              trend: 'Người dùng',
+              up: true
+            },
+            {
+              label: 'Sắp diễn ra',
+              displayValue: data.upcomingEvents || 0,
+              icon: 'schedule',
+              color: 'amber',
+              trend: 'Sắp tới',
+              up: true
+            }
+          ];
+          setApiKpiData(formattedKpi);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingKpi(false));
+  }, [period, customRange]);
 
   // ─── Fetch density chart (Mật độ tham dự) ────────────────────────────────
   useEffect(() => {
     const params = buildDateParams(period, customRange);
     setIsLoadingDensity(true);
 
-    // TODO: Thay đoạn setTimeout bằng fetch thật khi có BE:
-    // fetch(`${API_BASE}/checkin-density?${params}`)
-    //   .then(r => r.json())
-    //   .then(data => { setApiLineDataThu(data.thu); setApiLineDataGio(data.gio); })
-    //   .catch(console.error)
-    //   .finally(() => setIsLoadingDensity(false));
-
-    // Mock: giữ nguyên data tĩnh, chỉ simulate loading
-    const t = setTimeout(() => {
-      setApiLineDataThu(null); // null = dùng thuLineData mặc định
-      setApiLineDataGio(null);
-      setIsLoadingDensity(false);
-    }, 300);
-    return () => clearTimeout(t);
+    dashboardService.getCheckinDensity(params)
+      .then(r => {
+        if (r.data) {
+          setApiLineDataThu(r.data.thu);
+          setApiLineDataGio(r.data.gio);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingDensity(false));
   }, [period, customRange]);
 
   // ─── Fetch audience segments (Phân khúc đối tượng) ────────────────────────
@@ -213,16 +204,12 @@ const OrganizerReportAnalyticsPage = () => {
     const params = buildDateParams(period, customRange);
     setIsLoadingAudience(true);
 
-    // TODO:
-    // fetch(`${API_BASE}/audience-segments?${params}`)
-    //   .then(r => r.json()).then(setApiAudienceSegs)
-    //   .catch(console.error).finally(() => setIsLoadingAudience(false));
-
-    const t = setTimeout(() => {
-      setApiAudienceSegs(null); // null = dùng audienceSegments mặc định
-      setIsLoadingAudience(false);
-    }, 300);
-    return () => clearTimeout(t);
+    dashboardService.getAudienceSegments(params)
+      .then(r => {
+        if (r.data) setApiAudienceSegs(r.data);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingAudience(false));
   }, [period, customRange]);
 
   // ─── Fetch conversion funnel (Phễu chuyển đổi) ───────────────────────────
@@ -230,16 +217,17 @@ const OrganizerReportAnalyticsPage = () => {
     const params = buildDateParams(period, customRange);
     setIsLoadingFunnel(true);
 
-    // TODO:
-    // fetch(`${API_BASE}/conversion-funnel?${params}`)
-    //   .then(r => r.json()).then(setApiFunnelSteps)
-    //   .catch(console.error).finally(() => setIsLoadingFunnel(false));
-
-    const t = setTimeout(() => {
-      setApiFunnelSteps(null); // null = dùng funnelSteps mặc định
-      setIsLoadingFunnel(false);
-    }, 300);
-    return () => clearTimeout(t);
+    dashboardService.getConversionFunnel(params)
+      .then(r => {
+        if (r.data) {
+          setApiFunnelSteps(r.data.stages);
+          if (r.data.cartConversionRate !== undefined) setCartConversionRate(r.data.cartConversionRate);
+          if (r.data.cartAbandonmentRate !== undefined) setCartAbandonmentRate(r.data.cartAbandonmentRate);
+          if (r.data.averageOrderValue !== undefined) setAverageOrderValue(r.data.averageOrderValue);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingFunnel(false));
   }, [period, customRange]);
 
   // ─── Fetch events table (Bảng sự kiện) ───────────────────────────────────
@@ -247,55 +235,23 @@ const OrganizerReportAnalyticsPage = () => {
     const params = buildDateParams(period, customRange);
     setIsLoadingEvents(true);
 
-    // TODO:
-    // fetch(`${API_BASE}/events?${params}`)
-    //   .then(r => r.json()).then(setApiEvents)
-    //   .catch(console.error).finally(() => setIsLoadingEvents(false));
-
-    const t = setTimeout(() => {
-      setApiEvents(null); // null = dùng events mặc định
-      setIsLoadingEvents(false);
-    }, 300);
-    return () => clearTimeout(t);
+    dashboardService.getEvents(params)
+      .then(r => {
+        if (r.data) setApiEvents(r.data);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingEvents(false));
   }, [period, customRange]);
-
-  // Tính toán dữ liệu động dựa trên thời gian
-  const dynamicKpiData = React.useMemo(() => {
-    let multiplier = 1;
-    if (period === 7) multiplier = 0.25;
-    if (period === 30) multiplier = 1;
-    if (period === 90) multiplier = 2.8;
-    if (period === 'custom') multiplier = 1.5; // Giả lập cho custom
-
-    return baseKpiData.map(item => {
-      let finalValue = item.value;
-      
-      // Chỉ nhân các giá trị số lượng và doanh thu, giữ nguyên tỷ lệ và điểm số
-      if (item.icon === 'confirmation_number' || item.icon === 'payments') {
-        finalValue = (item.value * multiplier).toFixed(1);
-        if (item.icon === 'payments' && finalValue > 1000) {
-          finalValue = (finalValue / 1000).toFixed(2) + ' tỷ';
-          return { ...item, displayValue: finalValue + ' ₫' };
-        }
-      }
-
-      if (item.icon === 'confirmation_number') {
-        return { ...item, displayValue: Math.floor(finalValue * 10).toLocaleString() };
-      }
-      
-      return { ...item, displayValue: item.value + item.unit };
-    });
-  }, [period]);
 
   const [viewMode, setViewMode] = useState('thu');
   const [hoveredWeek, setHoveredWeek] = useState(null);
 
-  // Dữ liệu hiển thị: ưu tiên data từ API, fallback về mock data
-  const activeLineDataThu = apiLineDataThu ?? thuLineData;
-  const activeLineDataGio = apiLineDataGio ?? gioLineData;
-  const activeAudienceSegs = apiAudienceSegs ?? audienceSegments;
-  const activeFunnelSteps = apiFunnelSteps ?? funnelSteps;
-  const activeEvents = apiEvents ?? events;
+  // Dữ liệu hiển thị trực tiếp từ API (không fallback mock)
+  const activeLineDataThu = apiLineDataThu || [];
+  const activeLineDataGio = apiLineDataGio || [];
+  const activeAudienceSegs = apiAudienceSegs || [];
+  const activeFunnelSteps = apiFunnelSteps || [];
+  const activeEvents = apiEvents || [];
 
   const weekColors = ['#6366f1', '#f43f5e', '#10b981', '#f59e0b'];
   const weekLabels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
@@ -303,23 +259,125 @@ const OrganizerReportAnalyticsPage = () => {
 
   const lineData = viewMode === 'thu' ? activeLineDataThu : activeLineDataGio;
 
-  // Logic AI phân tích dữ liệu thật để tìm đỉnh (Peak)
-  const dynamicAiTip = React.useMemo(() => {
-    if (!lineData || lineData.length === 0) return '';
-    
-    // Tìm entry có tổng giá trị w1+w2+w3+w4 cao nhất
-    const peakEntry = [...lineData].sort((a, b) => {
-      const totalA = (a.w1 || 0) + (a.w2 || 0) + (a.w3 || 0) + (a.w4 || 0);
-      const totalB = (b.w1 || 0) + (b.w2 || 0) + (b.w3 || 0) + (b.w4 || 0);
-      return totalB - totalA;
-    })[0];
+  // AI Phân tích chuyên sâu cho Mật độ tham dự
+  const attendanceAiAnalysis = React.useMemo(() => {
+    if (!lineData || lineData.length === 0) return null;
+
+    const entriesWithTotal = lineData.map(item => {
+      const total = (item.w1 || 0) + (item.w2 || 0) + (item.w3 || 0) + (item.w4 || 0);
+      const avg = Math.round(total / 4);
+      return { ...item, total, avg };
+    });
+
+    const sorted = [...entriesWithTotal].sort((a, b) => b.total - a.total);
+    const peak = sorted[0];
+    const lowest = sorted[sorted.length - 1];
+
+    const w1 = peak.w1 || 0;
+    const w4 = peak.w4 || 0;
+    const trendStr = w4 > w1 ? `tăng mạnh (+${w4 - w1}%) vào các tuần cuối` : w4 < w1 ? `giảm nhẹ (-${w1 - w4}%) vào cuối đợt` : `duy trì ổn định qua các tuần`;
 
     if (viewMode === 'thu') {
-      return `Dựa trên dữ liệu, ${peakEntry.label} thường là thời điểm có lưu lượng khách check-in đông nhất. Bạn nên tăng cường nhân sự vào ngày này.`;
+      return {
+        summary: `Thứ cao điểm nhất là ${peak.label} với lưu lượng trung bình đạt ${peak.avg}% (xu hướng ${trendStr}). Ngược lại, ${lowest.label} có lượng check-in thấp nhất (${lowest.avg}%).`,
+        insights: [
+          {
+            title: 'Tối ưu hóa nhân sự soát vé',
+            desc: `Tăng cường 30-50% nhân sự và mở 100% cổng check-in vào ngày ${peak.label} để tránh ùn ứ. Giảm bớt quầy trực vào ngày ${lowest.label} để tiết kiệm chi phí vận hành.`
+          },
+          {
+            title: 'Chiến lược điều phối lưu lượng',
+            desc: `Áp dụng chương trình "Early Bird Check-in" (tặng voucher nước uống/quà tặng đính kèm) cho khách đến vào ngày ${lowest.label} nhằm giãn mật độ khỏi ngày cao điểm.`
+          },
+          {
+            title: 'Dự phòng rủi ro kỹ thuật',
+            desc: `Vào các khung giờ cao điểm của ngày ${peak.label}, cần bố trí nhân viên IT trực hệ thống máy quét mã QR và đường truyền Internet băng thông cao.`
+          }
+        ]
+      };
     } else {
-      return `Cao điểm check-in thường rơi vào khoảng ${peakEntry.label}. Hãy đảm bảo các cổng soát vé sẵn sàng trước khung giờ này.`;
+      return {
+        summary: `Khung giờ vàng check-in tập trung mạnh nhất vào lúc ${peak.label} (trung bình ${peak.avg}%, ${trendStr}). Sau khung giờ này, lưu lượng bắt đầu phân tán.`,
+        insights: [
+          {
+            title: 'Mở quầy thủ tục sớm (Pre-checkin)',
+            desc: `Khuyến khích khách hàng đến nhận vòng tay/thẻ đeo trước ${peak.label} từ 1-2 tiếng bằng cách gửi email/SMS thông báo kèm sơ đồ di chuyển.`
+          },
+          {
+            title: 'Phân luồng giao thông & Bãi xe',
+            desc: `Làm việc với bộ phận an ninh bãi xe để mở rộng luồng vào trước thời điểm ${peak.label}, tránh tình trạng tắc nghẽn từ cổng gửi xe ảnh hưởng đến giờ vào cửa.`
+          },
+          {
+            title: 'Bố trí quầy Hỗ trợ nhanh (Helpdesk)',
+            desc: `Đặt quầy giải quyết sự cố (lỗi vé, mất vé, sai thông tin) tách biệt hoàn toàn khỏi luồng check-in chính để luồng di chuyển lúc ${peak.label} không bị gián đoạn.`
+          }
+        ]
+      };
     }
   }, [lineData, viewMode]);
+
+  // AI Phân tích chuyên sâu cho Phân khúc đối tượng
+  const audienceAiAnalysis = React.useMemo(() => {
+    if (!activeAudienceSegs || activeAudienceSegs.length === 0) return null;
+
+    const sorted = [...activeAudienceSegs].sort((a, b) => b.pct - a.pct);
+    const top1 = sorted[0];
+    const top2 = sorted[1] || sorted[0];
+
+    let strategy = [];
+    if (top1.label.includes('18 – 25')) {
+      strategy = [
+        {
+          title: 'Đẩy mạnh Kênh truyền thông Gen Z',
+          desc: 'Tập trung 70% ngân sách quảng cáo vào TikTok, Instagram Reels và các chiến dịch Viral Video. Sử dụng các KOLs/Influencers trẻ có sức ảnh hưởng lớn.'
+        },
+        {
+          title: 'Thiết kế trải nghiệm tương tác (Gamification)',
+          desc: 'Tạo các khu vực Photobooth 360 độ, góc check-in AR/VR và các minigame trên điện thoại để kích thích nhóm khách hàng trẻ chia sẻ lên mạng xã hội.'
+        },
+        {
+          title: 'Chính sách giá & Combo linh hoạt',
+          desc: 'Phát hành các gói vé Nhóm (Group Pass từ 4 người) hoặc vé kèm quà tặng độc quyền (Merchandise) để tối ưu hóa quyết định mua của học sinh, sinh viên.'
+        }
+      ];
+    } else if (top1.label.includes('26 – 35')) {
+      strategy = [
+        {
+          title: 'Nội dung chuyên sâu & Đa kênh chuyên nghiệp',
+          desc: 'Tối ưu hóa chiến dịch Facebook Ads, LinkedIn và Email Marketing với thông điệp nhấn mạnh vào giá trị kết nối mạng lưới (Networking) và trải nghiệm cao cấp.'
+        },
+        {
+          title: 'Gói dịch vụ Doanh nghiệp & Nhóm công ty',
+          desc: 'Thiết kế các gói vé B2B mua chung cho doanh nghiệp kèm hóa đơn VAT, ưu đãi khu vực ngồi riêng hoặc thẻ VIP Lounge có phục vụ F&B chất lượng cao.'
+        },
+        {
+          title: 'Tối ưu quy trình thanh toán nhanh',
+          desc: 'Nhóm khách hàng văn phòng ưu tiên sự tiện lợi. Đảm bảo cổng thanh toán hỗ trợ đa dạng (Apple Pay, Google Pay, thẻ tín dụng, QR chuyển khoản 24/7).'
+        }
+      ];
+    } else {
+      strategy = [
+        {
+          title: 'Trải nghiệm Cao cấp & Tiện ích Tối đa',
+          desc: 'Nhóm khách hàng trung niên/khác thường có yêu cầu cao về dịch vụ. Bố trí khu vực đỗ xe VIP gần cổng, lối đi riêng không xếp hàng và khu vực ngồi chờ sang trọng.'
+        },
+        {
+          title: 'Kênh tiếp cận Truyền thống & Uy tín',
+          desc: 'Sử dụng các báo điện tử uy tín, đối tác tài trợ hoặc tin nhắn SMS định danh (Brandname) để gửi thông tin sự kiện một cách trang trọng, lịch sự.'
+        },
+        {
+          title: 'Hỗ trợ Chăm sóc khách hàng Trực tiếp',
+          desc: 'Cung cấp số Hotline hỗ trợ đặt vé trực tiếp qua điện thoại dành riêng cho những khách hàng không quen thao tác trực tuyến trên nền tảng web.'
+        }
+      ];
+    }
+
+    return {
+      summary: `Phân khúc chiếm ưu thế tuyệt đối là "${top1.label}" (${top1.pct}%), tiếp theo là "${top2.label}" (${top2.pct}%). Sự phân bổ này cho thấy tính chất sự kiện rất phù hợp với tệp khách hàng này.`,
+      insights: strategy
+    };
+  }, [activeAudienceSegs]);
+
 
   // Custom Tooltip: chỉ hiện tuần đang được focus (hoặc tất cả nếu không hover)
   const renderLineTooltip = ({ active, payload, label }) => {
@@ -452,7 +510,10 @@ const OrganizerReportAnalyticsPage = () => {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        {dynamicKpiData.map((card, i) => <KpiCard key={i} card={card} index={i} />)}
+                {isLoadingKpi
+          ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)
+          : apiKpiData.map((card, i) => <KpiCard key={i} card={card} index={i} />)
+        }
       </div>
 
       {/* ── Heatmap + Audience Segment ── */}
@@ -522,7 +583,7 @@ const OrganizerReportAnalyticsPage = () => {
 
           {/* Multi-line Chart */}
           <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <LineChart data={lineData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   {weekColors.map((color, i) => (
@@ -573,10 +634,24 @@ const OrganizerReportAnalyticsPage = () => {
           </div>
 
           {/* AI Insight */}
-          <div className="mt-3 flex items-center gap-2 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-xl px-3 py-2.5 border border-indigo-100">
-            <span className="material-symbols-outlined text-indigo-500 text-[16px]">auto_awesome</span>
-            <p className="text-[11px] text-indigo-600 font-semibold">{dynamicAiTip}</p>
-          </div>
+          {attendanceAiAnalysis && (
+            <div className="mt-4 bg-indigo-50/60 rounded-2xl p-4 px-5 border border-indigo-100">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-indigo-600 text-[18px]">auto_awesome</span>
+                <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">Gợi ý AI</span>
+              </div>
+              <p className="text-xs text-indigo-950 font-bold mb-2.5">
+                {attendanceAiAnalysis.summary}
+              </p>
+              <ul className="space-y-1.5 text-[11px] text-indigo-900/80 font-medium list-disc list-inside">
+                {attendanceAiAnalysis.insights.map((item, idx) => (
+                  <li key={idx}>
+                    <strong className="text-indigo-950">{item.title}:</strong> {item.desc}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </motion.div>
 
         {/* Audience Segment — Donut Chart */}
@@ -591,33 +666,26 @@ const OrganizerReportAnalyticsPage = () => {
           {/* Donut + Legend layout */}
           {(() => {
             const [hoveredSeg, setHoveredSeg] = React.useState(null);
-            const activeSeg = hoveredSeg !== null ? audienceSegments[hoveredSeg] : [...audienceSegments].sort((a, b) => b.pct - a.pct)[0];
 
-            const renderActiveShape = (props) => {
-              const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+            // Chưa có data từ API → hiển thị placeholder
+            if (!activeAudienceSegs || activeAudienceSegs.length === 0) {
               return (
-                <g>
-                  <sector
-                    cx={cx} cy={cy}
-                    innerRadius={innerRadius}
-                    outerRadius={outerRadius + 8}
-                    startAngle={startAngle}
-                    endAngle={endAngle}
-                    fill={fill}
-                    opacity={1}
-                  />
-                </g>
+                <div className="flex flex-1 items-center justify-center text-slate-400 text-xs font-semibold py-10">
+                  {isLoadingAudience ? 'Đang tải dữ liệu...' : 'Chưa có dữ liệu phân khúc'}
+                </div>
               );
-            };
+            }
+
+            const activeSeg = hoveredSeg !== null ? activeAudienceSegs[hoveredSeg] : [...activeAudienceSegs].sort((a, b) => b.pct - a.pct)[0];
 
             return (
               <div className="flex items-center gap-4 flex-1">
                 {/* Donut Chart */}
                 <div className="relative shrink-0" style={{ width: 180, height: 180 }}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <PieChart>
                       <Pie
-                        data={audienceSegments.map(s => ({ name: s.label, value: s.pct }))}
+                        data={activeAudienceSegs.map(s => ({ name: s.label, value: s.pct }))}
                         cx="50%"
                         cy="50%"
                         innerRadius={58}
@@ -652,7 +720,7 @@ const OrganizerReportAnalyticsPage = () => {
                         onMouseEnter={(_, index) => setHoveredSeg(index)}
                         onMouseLeave={() => setHoveredSeg(null)}
                       >
-                        {audienceSegments.map((seg, i) => (
+                        {activeAudienceSegs.map((seg, i) => (
                           <Cell
                             key={i}
                             fill={seg.color}
@@ -679,7 +747,7 @@ const OrganizerReportAnalyticsPage = () => {
 
                 {/* Legend */}
                 <div className="flex-1 space-y-2.5">
-                  {audienceSegments.map((seg, i) => (
+                  {activeAudienceSegs.map((seg, i) => (
                     <div
                       key={i}
                       className={`flex items-center gap-2 rounded-lg px-2 py-1 transition-all duration-150 cursor-default ${
@@ -706,21 +774,25 @@ const OrganizerReportAnalyticsPage = () => {
             );
           })()}
 
-          {/* AI insight — tự động tìm nhóm chiếm tỷ lệ cao nhất */}
-          {(() => {
-            const top = [...audienceSegments].sort((a, b) => b.pct - a.pct)[0];
-            return (
-              <div className="mt-5 bg-[#F6F4FE] rounded-[28px] p-5 px-6">
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className="material-symbols-outlined text-[#7C3AED] text-[18px]">auto_awesome</span>
-                  <span className="text-xs font-black text-[#7C3AED] uppercase tracking-widest">Gợi ý AI</span>
-                </div>
-                <p className="text-[13px] text-[#7C3AED] font-semibold leading-relaxed">
-                  Nhóm {top.label} chiếm tỷ trọng cao nhất ({top.pct}%). Hãy ưu tiên nhắm mục tiêu quảng cáo vào phân khúc này.
-                </p>
+          {/* AI insight */}
+          {audienceAiAnalysis && (
+            <div className="mt-5 bg-[#F6F4FE] rounded-[24px] p-5 px-6 border border-violet-100">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-[#7C3AED] text-[18px]">auto_awesome</span>
+                <span className="text-xs font-black text-[#7C3AED] uppercase tracking-widest">Gợi ý AI</span>
               </div>
-            );
-          })()}
+              <p className="text-xs text-violet-950 font-bold mb-2.5">
+                {audienceAiAnalysis.summary}
+              </p>
+              <ul className="space-y-1.5 text-[11px] text-violet-900/80 font-medium list-disc list-inside">
+                {audienceAiAnalysis.insights.map((item, idx) => (
+                  <li key={idx}>
+                    <strong className="text-violet-950">{item.title}:</strong> {item.desc}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </motion.div>
 
       </div>
@@ -788,9 +860,9 @@ const OrganizerReportAnalyticsPage = () => {
         {/* Funnel sub-metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
           {[
-            { label: 'Tỷ lệ chuyển đổi giỏ', value: '5.4%', icon: 'show_chart', color: 'text-indigo-600', bg: 'bg-indigo-50', ring: 'ring-indigo-100' },
-            { label: 'Bỏ giỏ (Cart Abandonment)', value: '34.2%', icon: 'remove_shopping_cart', color: 'text-rose-500', bg: 'bg-rose-50', ring: 'ring-rose-100' },
-            { label: 'Giá trị đơn trung bình', value: '450K ₫', icon: 'payments', color: 'text-emerald-600', bg: 'bg-emerald-50', ring: 'ring-emerald-100' },
+            { label: 'Tỷ lệ chuyển đổi giỏ', value: `${cartConversionRate}%`, icon: 'show_chart', color: 'text-indigo-600', bg: 'bg-indigo-50', ring: 'ring-indigo-100' },
+            { label: 'Bỏ giỏ (Cart Abandonment)', value: `${cartAbandonmentRate}%`, icon: 'remove_shopping_cart', color: 'text-rose-500', bg: 'bg-rose-50', ring: 'ring-rose-100' },
+            { label: 'Giá trị đơn trung bình', value: formatRevenue(averageOrderValue), icon: 'payments', color: 'text-emerald-600', bg: 'bg-emerald-50', ring: 'ring-emerald-100' },
           ].map((m, i) => (
             <div key={i} className={`flex items-center gap-4 p-4 rounded-2xl ${m.bg} ring-1 ${m.ring} transition-all hover:shadow-md cursor-default`}>
               <div className={`w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0`}>
@@ -831,7 +903,7 @@ const OrganizerReportAnalyticsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {events.map((ev, i) => (
+              {activeEvents.map((ev, i) => (
                 <motion.tr
                   key={i}
                   initial={{ opacity: 0 }}

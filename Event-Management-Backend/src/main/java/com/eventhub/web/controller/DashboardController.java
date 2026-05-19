@@ -1,10 +1,16 @@
 package com.eventhub.web.controller;
 
 import com.eventhub.domain.entity.User;
+import com.eventhub.domain.enums.UserRole;
 import com.eventhub.repository.UserRepository;
 import com.eventhub.service.DashboardService;
+import com.eventhub.web.dto.response.AudienceSegmentResponse;
+import com.eventhub.web.dto.response.CheckinDensityResponse;
+import com.eventhub.web.dto.response.ConversionFunnelData;
+import com.eventhub.web.dto.response.ConversionFunnelResponse;
 import com.eventhub.web.dto.response.DashboardAttendeesResponse;
 import com.eventhub.web.dto.response.DashboardOverviewResponse;
+import com.eventhub.web.dto.response.EventPerformanceResponse;
 import com.eventhub.web.dto.response.RevenueEntry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
-
-import com.eventhub.domain.enums.UserRole;
 
 @RestController
 @RequestMapping("/api/v1/organizer/dashboard")
@@ -68,5 +72,45 @@ public class DashboardController {
             @AuthenticationPrincipal UserDetails userDetails) {
         User currentUser = getCurrentUser(userDetails);
         return ResponseEntity.ok(dashboardService.getAttendees(currentUser));
+    }
+
+    @GetMapping("/checkin-density")
+    public ResponseEntity<CheckinDensityResponse> getCheckinDensity(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String period) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(dashboardService.getCheckinDensity(currentUser, from, to, period));
+    }
+
+    @GetMapping("/audience-segments")
+    public ResponseEntity<List<AudienceSegmentResponse>> getAudienceSegments(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String period) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(dashboardService.getAudienceSegments(currentUser, from, to, period));
+    }
+
+    @GetMapping("/conversion-funnel")
+    public ResponseEntity<ConversionFunnelData> getConversionFunnel(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String period) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(dashboardService.getConversionFunnel(currentUser, from, to, period));
+    }
+
+    @GetMapping("/events")
+    public ResponseEntity<List<EventPerformanceResponse>> getEventsPerformance(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String period) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(dashboardService.getEventsPerformance(currentUser, from, to, period));
     }
 }
