@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventDetailResponse {
+public class EventDetailResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private UUID id;
     private String title;
     private String slug;
@@ -49,7 +52,9 @@ public class EventDetailResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class OrganizerInfo {
+    public static class OrganizerInfo implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
         private UUID id;
         private String email;
         private String fullName;

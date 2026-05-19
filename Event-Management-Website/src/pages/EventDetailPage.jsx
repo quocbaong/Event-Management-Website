@@ -1,45 +1,228 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../stores/AuthContext';
+import { eventService } from '../services/eventService';
+import { registrationService } from '../services/registrationService';
 import LandingNavbar from '../components/common/LandingNavbar';
 import LandingFooter from '../components/common/LandingFooter';
 
-const EventDetailPage = () => {
-  const schedule = [
-    { time: '08:00 - 09:00', event: 'Đón khách & Check-in kỹ thuật số', description: 'Trải nghiệm quy trình nhận diện khuôn mặt và nhận bộ kit sự kiện điện tử.', icon: 'person_check' },
-    { time: '09:00 - 10:30', event: 'Khai mạc & Keynote: Tương lai của AI tại VN', description: 'Phần trình bày đặc biệt từ các đại diện bộ ngành và tập đoàn công nghệ lớn.', icon: 'star' },
-    { time: '10:30 - 10:45', event: 'Giải lao & Tea-break', description: 'Giao lưu tự do và thưởng thức trà chiều.', icon: 'coffee' },
-    { time: '10:45 - 12:00', event: 'Tọa đàm: Chuyển đổi số trong Doanh nghiệp', description: 'Chiến lược thực thi và những bài học từ thực tế.', icon: 'groups' },
-  ];
+const categoryMap = {
+  MUSIC: { label: 'ÂM NHẠC', icon: 'music_note' },
+  TECH: { label: 'CÔNG NGHỆ', icon: 'lan' },
+  FOOD: { label: 'ẨM THỰC', icon: 'restaurant' },
+  ART: { label: 'NGHỆ THUẬT', icon: 'palette' },
+  BUSINESS: { label: 'DOANH NGHIỆP', icon: 'rocket_launch' },
+  SPORTS: { label: 'THỂ THAO', icon: 'sports_soccer' },
+  EDUCATION: { label: 'GIÁO DỤC', icon: 'school' },
+  ENTERTAINMENT: { label: 'GIẢI TRÍ', icon: 'celebration' },
+  OTHER: { label: 'KHÁC', icon: 'event' }
+};
 
-  const speakers = [
-    {
-      name: 'Nguyễn Phi Vân',
-      role: 'Chủ tịch Hiệp hội Angel Investors',
-      desc: 'Chuyên gia hàng đầu về nhượng quyền và đổi mới sáng tạo toàn cầu.',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200'
-    },
-    {
-      name: 'Lê Diệp Kiều Trang',
-      role: 'Co-founder Harrison.ai',
-      desc: 'Người dẫn dắt các startup công nghệ đột phá tại thị trường quốc tế.',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200'
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+const formatTime = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const formatPrice = (price) => {
+  if (price === undefined || price === null || price === 0) return 'Miễn phí';
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+};
+
+const EventDetailPage = () => {
+  const { id: slug } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const isAttendeeSpace = location.pathname.startsWith('/attendee');
+
+  const [event, setEvent] = useState(null);
+  const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Registration selection state
+  const [selectedQuantities, setSelectedQuantities] = useState({});
+  const [notes, setNotes] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  
+  // Registration Flow Status: 'selection' | 'registering' | 'payment_pending' | 'confirming' | 'success'
+  const [flowState, setFlowState] = useState('selection');
+  const [activeRegistration, setActiveRegistration] = useState(null);
+  const [regError, setRegError] = useState('');
+
+  useEffect(() => {
+    const fetchEventData = async () => {
+      try {
+        setLoading(true);
+        const eventRes = await eventService.getPublicEventDetail(slug);
+        const eventData = eventRes.data;
+        setEvent(eventData);
+
+        // Fetch schedules
+        const scheduleRes = await eventService.getPublicEventSchedules(eventData.id);
+        setSchedules(scheduleRes.data || []);
+      } catch (err) {
+        console.error('Error loading event detail:', err);
+        setError('Không tìm thấy thông tin sự kiện này.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEventData();
+  }, [slug]);
+
+  const handleQuantityChange = (ticketTypeId, amount, maxQuantity) => {
+    setSelectedQuantities(prev => {
+      const current = prev[ticketTypeId] || 0;
+      const next = Math.max(0, Math.min(maxQuantity, current + amount));
+      return { ...prev, [ticketTypeId]: next };
+    });
+  };
+
+  const getMinPrice = () => {
+    if (!event || !event.ticketTypes || event.ticketTypes.length === 0) return 'Miễn phí';
+    const prices = event.ticketTypes.map(tt => tt.price);
+    const minPrice = Math.min(...prices);
+    return formatPrice(minPrice);
+  };
+
+  const getTotalAmount = () => {
+    if (!event || !event.ticketTypes) return 0;
+    return event.ticketTypes.reduce((total, tt) => {
+      const qty = selectedQuantities[tt.id] || 0;
+      return total + (qty * tt.price);
+    }, 0);
+  };
+
+  const handleRegister = async () => {
+    if (!user) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
     }
-  ];
+
+    const selectedTickets = Object.entries(selectedQuantities)
+      .filter(([_, qty]) => qty > 0)
+      .map(([id, qty]) => ({ ticketTypeId: id, quantity: qty }));
+
+    if (selectedTickets.length === 0) {
+      setRegError('Vui lòng chọn ít nhất 1 vé.');
+      return;
+    }
+
+    try {
+      setFlowState('registering');
+      setRegError('');
+      const payload = {
+        tickets: selectedTickets,
+        couponCode: couponCode || undefined,
+        notes: notes || undefined
+      };
+      const response = await registrationService.register(event.id, payload);
+      const regDetail = response.data;
+      setActiveRegistration(regDetail);
+
+      // If registration status is already confirmed or amount is 0, we can complete
+      if (regDetail.status === 'CONFIRMED' || regDetail.finalAmount === 0) {
+        setFlowState('success');
+      } else {
+        setFlowState('payment_pending');
+      }
+    } catch (err) {
+      console.error('Registration failed:', err);
+      setRegError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng ký vé.');
+      setFlowState('selection');
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!activeRegistration) return;
+    try {
+      setFlowState('confirming');
+      const response = await registrationService.confirmRegistration(event.id, activeRegistration.id);
+      setActiveRegistration(response.data);
+      setFlowState('success');
+    } catch (err) {
+      console.error('Payment confirmation failed:', err);
+      setRegError(err.response?.data?.message || 'Không thể xác nhận thanh toán.');
+      setFlowState('payment_pending');
+    }
+  };
+
+  const handleCancelRegistration = () => {
+    setFlowState('selection');
+    setActiveRegistration(null);
+  };
+
+  if (loading) {
+    return (
+      <div className={isAttendeeSpace ? "flex items-center justify-center py-32 w-full" : "min-h-screen bg-[#fafafc] font-sans flex flex-col"}>
+        {!isAttendeeSpace && <LandingNavbar />}
+        <div className={isAttendeeSpace ? "" : "flex-1 flex items-center justify-center pt-32"}>
+          <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+        </div>
+        {!isAttendeeSpace && <LandingFooter />}
+      </div>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <div className={isAttendeeSpace ? "p-8 flex flex-col items-center justify-center gap-4" : "min-h-screen bg-[#fafafc] font-sans flex flex-col"}>
+        {!isAttendeeSpace && <LandingNavbar />}
+        <div className={isAttendeeSpace ? "flex flex-col items-center gap-4" : "flex-1 flex flex-col items-center justify-center pt-32 gap-4"}>
+          <span className="material-symbols-outlined text-6xl text-slate-300">error</span>
+          <p className="text-slate-600 font-bold text-lg">{error || 'Không tìm thấy sự kiện'}</p>
+          <button onClick={() => navigate(isAttendeeSpace ? '/attendee/explore' : '/events')} className="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-bold">
+            Quay lại sự kiện
+          </button>
+        </div>
+        {!isAttendeeSpace && <LandingFooter />}
+      </div>
+    );
+  }
+
+  const catInfo = categoryMap[event.category] || categoryMap.OTHER;
 
   return (
-    <div className="min-h-screen bg-[#fafafc] font-sans selection:bg-[#5c46e5]/20 flex flex-col">
-      <LandingNavbar />
+    <div className={isAttendeeSpace ? "p-8 max-w-[1600px] mx-auto bg-[#fafafc] rounded-[40px] shadow-sm border border-indigo-50/50 my-6" : "min-h-screen bg-[#fafafc] font-sans selection:bg-[#5c46e5]/20 flex flex-col"}>
+      {!isAttendeeSpace && <LandingNavbar />}
       
-      <main className="pt-24 lg:pt-[100px] flex-1">
+      <main className={isAttendeeSpace ? "" : "pt-24 lg:pt-[100px] flex-1"}>
+        {/* Back Button */}
+        <div className={isAttendeeSpace ? "mb-6" : "max-w-[1400px] mx-auto px-6 mb-6"}>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-black text-sm transition-colors group"
+          >
+            <span className="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
+            Quay lại
+          </button>
+        </div>
+
         {/* Hero Section */}
-        <div className="max-w-[1400px] mx-auto px-6 mb-12">
+        <div className={isAttendeeSpace ? "mb-12" : "max-w-[1400px] mx-auto px-6 mb-12"}>
           <div className="relative rounded-[40px] overflow-hidden h-[400px] lg:h-[500px] shadow-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1600" 
-              alt="Hội nghị" 
+              src={event.bannerUrl || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1600"} 
+              alt={event.title} 
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8 lg:p-16">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-8 lg:p-16">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -47,10 +230,10 @@ const EventDetailPage = () => {
                 className="max-w-4xl"
               >
                 <span className="bg-[#5c46e5] text-white text-[11px] lg:text-[13px] font-bold px-4 py-1.5 rounded-full w-fit mb-6 tracking-widest uppercase inline-block">
-                  CÔNG NGHỆ & SÁNG TẠO
+                  {catInfo.label}
                 </span>
-                <h1 className="text-4xl lg:text-6xl font-black text-white mb-4 leading-tight">
-                  Hội nghị Kiến tạo Tương lai Kỹ thuật số 2024
+                <h1 className="text-4xl lg:text-5xl font-black text-white mb-4 leading-tight">
+                  {event.title}
                 </h1>
               </motion.div>
             </div>
@@ -66,8 +249,10 @@ const EventDetailPage = () => {
               </div>
               <div>
                 <p className="text-slate-500 text-sm font-medium mb-1">Thời gian</p>
-                <h3 className="font-bold text-slate-900 text-lg">15 Tháng 12, 2024</h3>
-                <p className="text-slate-500 text-sm">08:00 - 17:30</p>
+                <h3 className="font-bold text-slate-900 text-lg">{formatDate(event.startDate)}</h3>
+                <p className="text-slate-500 text-sm">
+                  {formatTime(event.startDate)} - {formatTime(event.endDate)}
+                </p>
               </div>
             </div>
 
@@ -77,8 +262,8 @@ const EventDetailPage = () => {
               </div>
               <div>
                 <p className="text-slate-500 text-sm font-medium mb-1">Địa điểm</p>
-                <h3 className="font-bold text-slate-900 text-lg">Vinpearl Convention Center</h3>
-                <p className="text-slate-500 text-sm">Phú Quốc, Việt Nam</p>
+                <h3 className="font-bold text-slate-900 text-lg">{event.venue}</h3>
+                <p className="text-slate-500 text-sm">{event.address}, {event.city}</p>
               </div>
             </div>
 
@@ -88,8 +273,8 @@ const EventDetailPage = () => {
               </div>
               <div>
                 <p className="text-slate-500 text-sm font-medium mb-1">Giá vé</p>
-                <h3 className="font-bold text-slate-900 text-lg">Từ 2.500.000 VNĐ</h3>
-                <p className="text-slate-500 text-sm">Bao gồm teabreak & tài liệu</p>
+                <h3 className="font-bold text-slate-900 text-lg">Từ {getMinPrice()}</h3>
+                <p className="text-slate-500 text-sm">Xem chi tiết ở phần đăng ký</p>
               </div>
             </div>
           </div>
@@ -103,55 +288,46 @@ const EventDetailPage = () => {
               {/* Introduction */}
               <section>
                 <h2 className="text-2xl font-black text-slate-900 mb-6 font-headline">Giới thiệu sự kiện</h2>
-                <div className="space-y-4 text-slate-600 leading-relaxed text-[17px]">
-                  <p>
-                    Hội nghị Kiến tạo Tương lai Kỹ thuật số là diễn đàn hàng đầu quy tụ các chuyên gia, nhà lãnh đạo tư tưởng và những người tiên phong trong lĩnh vực công nghệ tại Việt Nam. Trong bối cảnh kỷ nguyên số đang thay đổi đối chóng mặt, chúng tôi mang đến những góc nhìn đa chiều về Trí tuệ nhân tạo (AI), Chuyển đổi số và Kinh tế bền vững.
-                  </p>
-                  <p>
-                    Sự kiện không chỉ là nơi chia sẻ kiến thức mà còn là cầu nối networking, mở ra cơ hội hợp tác chiến lược cho các doanh nghiệp và cá nhân đam mê đổi mới sáng tạo.
-                  </p>
-                </div>
-              </section>
-
-              {/* Speakers */}
-              <section>
-                <h2 className="text-2xl font-black text-slate-900 mb-8 font-headline">Diễn giả nổi bật</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {speakers.map((speaker, idx) => (
-                    <div key={idx} className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-6">
-                        <img src={speaker.image} alt={speaker.name} className="w-20 h-20 rounded-full object-cover border-4 border-indigo-50" />
-                        <div>
-                          <h4 className="font-black text-slate-900 text-lg">{speaker.name}</h4>
-                          <p className="text-indigo-600 font-bold text-sm mb-1">{speaker.role}</p>
-                        </div>
-                      </div>
-                      <p className="mt-4 text-slate-500 text-sm leading-relaxed">{speaker.desc}</p>
-                    </div>
-                  ))}
+                <div className="space-y-4 text-slate-600 leading-relaxed text-[17px] whitespace-pre-line">
+                  {event.description || "Chưa có giới thiệu chi tiết cho sự kiện này."}
                 </div>
               </section>
 
               {/* Schedule */}
               <section>
-                <h2 className="text-2xl font-black text-slate-900 mb-8 font-headline">Lịch trình sự kiện</h2>
-                <div className="space-y-4">
-                  {schedule.map((item, idx) => (
-                    <div key={idx} className="flex gap-6 group">
-                      <div className="flex flex-col items-center">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white shadow-lg ${idx === 1 ? 'bg-indigo-600 scale-110' : 'bg-slate-200'}`}>
-                          <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                <h2 className="text-2xl font-black text-slate-900 mb-8 font-headline">Lịch trình chương trình</h2>
+                {schedules.length > 0 ? (
+                  <div className="space-y-4">
+                    {schedules.map((item, idx) => (
+                      <div key={item.id} className="flex gap-6 group">
+                        <div className="flex flex-col items-center">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white shadow-lg bg-indigo-600`}>
+                            <span className="material-symbols-outlined text-[20px]">{item.icon || 'star'}</span>
+                          </div>
+                          {idx !== schedules.length - 1 && <div className="w-[2px] flex-1 bg-slate-100 my-2"></div>}
                         </div>
-                        {idx !== schedule.length - 1 && <div className="w-[2px] flex-1 bg-slate-100 my-2"></div>}
+                        <div className="flex-1 pb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                          <span className="text-slate-400 text-sm font-black mb-1 block uppercase tracking-wider">
+                            {formatTime(item.startTime)} - {formatTime(item.endTime)} {item.location ? `• ${item.location}` : ''}
+                          </span>
+                          <h4 className="font-black text-slate-900 text-lg mb-2">{item.title}</h4>
+                          {item.description && <p className="text-slate-500 text-[15px] mb-3">{item.description}</p>}
+                          {item.speaker && (
+                            <div className="flex items-center gap-2 text-indigo-600 text-sm font-bold">
+                              <span className="material-symbols-outlined text-lg">person</span>
+                              Diễn giả: {item.speaker}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className={`flex-1 pb-8 ${idx === 1 ? 'bg-white p-6 rounded-3xl shadow-sm border border-slate-100' : 'pt-2'}`}>
-                        <span className="text-slate-400 text-sm font-black mb-1 block uppercase tracking-wider">{item.time}</span>
-                        <h4 className="font-black text-slate-900 text-lg mb-2">{item.event}</h4>
-                        <p className="text-slate-500 text-[15px]">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 bg-slate-50 border border-dashed rounded-[32px] text-slate-400">
+                    <span className="material-symbols-outlined text-4xl mb-2">calendar_today</span>
+                    <p className="text-sm">Chưa có lịch trình chính thức.</p>
+                  </div>
+                )}
               </section>
             </div>
 
@@ -161,35 +337,224 @@ const EventDetailPage = () => {
                 className="lg:sticky lg:top-[120px] space-y-8 z-40"
                 style={{ alignSelf: 'flex-start', height: 'fit-content' }}
               >
-
-
-
-                {/* Registration Card */}
+                {/* Interactive Registration Card */}
                 <div className="bg-white p-8 rounded-[40px] shadow-xl border border-slate-100">
-                  <h3 className="text-xl font-black text-slate-900 mb-6">Đăng ký tham gia</h3>
-                  
-                  <div className="space-y-4 mb-8">
-                    <div className="flex justify-between items-center p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                      <span className="text-slate-600 font-medium">Vé Tiêu chuẩn</span>
-                      <span className="text-slate-900 font-bold">2.500.000đ</span>
-                    </div>
-                    <div className="flex justify-between items-center p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                      <span className="text-slate-600 font-medium">Vé VIP</span>
-                      <span className="text-slate-900 font-bold">5.000.000đ</span>
-                    </div>
-                  </div>
+                  <AnimatePresence mode="wait">
+                    {flowState === 'selection' && (
+                      <motion.div
+                        key="selection"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                      >
+                        <h3 className="text-xl font-black text-slate-900 mb-6">Đăng ký vé</h3>
+                        
+                        <div className="space-y-4 mb-6">
+                          {event.ticketTypes && event.ticketTypes.length > 0 ? (
+                            event.ticketTypes.map((tt) => {
+                              const selectedQty = selectedQuantities[tt.id] || 0;
+                              const available = tt.totalQuantity - (tt.soldQuantity || 0);
+                              return (
+                                <div key={tt.id} className="p-5 rounded-3xl bg-slate-50 border border-slate-100 flex flex-col gap-3">
+                                  <div className="flex justify-between items-start gap-4">
+                                    <div>
+                                      <h4 className="font-bold text-slate-900 text-base">{tt.name}</h4>
+                                      <p className="text-slate-400 text-xs mt-0.5">{tt.description || 'Hạng vé tham dự'}</p>
+                                    </div>
+                                    <span className="text-indigo-600 font-extrabold text-base">{formatPrice(tt.price)}</span>
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-200/50">
+                                    <span className="text-xs font-medium text-slate-400">
+                                      {available <= 10 ? `Chỉ còn ${available} vé` : `Còn trống: ${available} vé`}
+                                    </span>
+                                    
+                                    <div className="flex items-center gap-3">
+                                      <button 
+                                        onClick={() => handleQuantityChange(tt.id, -1, available)}
+                                        className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                      >
+                                        -
+                                      </button>
+                                      <span className="font-black text-slate-800 text-sm w-4 text-center">{selectedQty}</span>
+                                      <button 
+                                        onClick={() => handleQuantityChange(tt.id, 1, available)}
+                                        className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p className="text-slate-400 text-sm">Hết vé hoặc không có loại vé nào khả dụng.</p>
+                          )}
+                        </div>
 
-                  <div className="flex items-center justify-between mb-8">
-                    <span className="text-slate-500 font-medium">Còn trống</span>
-                    <span className="text-red-500 font-black">Chỉ còn 15 chỗ</span>
-                  </div>
+                        {/* Notes / Coupon (Optional) */}
+                        {event.ticketTypes && event.ticketTypes.length > 0 && (
+                          <div className="space-y-3 mb-6">
+                            <input
+                              type="text"
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value)}
+                              placeholder="Mã giảm giá (nếu có)"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            />
+                          </div>
+                        )}
 
-                  <button className="w-full bg-[#5c46e5] text-white py-4 rounded-2xl font-black text-lg hover:bg-[#4d38da] transition shadow-lg shadow-indigo-200 active:scale-[0.98]">
-                    Đăng nhập để đăng ký
-                  </button>
-                  <p className="text-center mt-4 text-xs text-slate-400">
-                    Bạn chưa có tài khoản? <span className="text-indigo-600 font-bold cursor-pointer hover:underline">Đăng ký ngay</span>
-                  </p>
+                        {regError && <div className="text-red-500 text-xs font-bold mb-4">{regError}</div>}
+
+                        <div className="flex items-center justify-between mb-6 pt-4 border-t border-slate-100">
+                          <span className="text-slate-500 font-bold">Tổng cộng:</span>
+                          <span className="text-2xl font-black text-slate-900">{formatPrice(getTotalAmount())}</span>
+                        </div>
+
+                        {user ? (
+                          <button
+                            onClick={handleRegister}
+                            disabled={getTotalAmount() === 0}
+                            className="w-full bg-[#5c46e5] text-white py-4 rounded-2xl font-black text-lg hover:bg-[#4d38da] transition shadow-lg shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Đăng ký ngay
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => navigate('/login', { state: { from: location.pathname } })}
+                            className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-slate-800 transition"
+                          >
+                            Đăng nhập để đăng ký
+                          </button>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {flowState === 'registering' && (
+                      <motion.div
+                        key="registering"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="py-12 flex flex-col items-center justify-center text-center gap-4"
+                      >
+                        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                        <div>
+                          <h4 className="font-bold text-slate-800">Đang khởi tạo đơn hàng</h4>
+                          <p className="text-slate-400 text-xs mt-1">Vui lòng chờ trong giây lát...</p>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {flowState === 'payment_pending' && activeRegistration && (
+                      <motion.div
+                        key="payment"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-6"
+                      >
+                        <div className="text-center pb-4 border-b border-slate-100">
+                          <span className="inline-flex p-3 bg-amber-50 rounded-2xl text-amber-500 mb-3">
+                            <span className="material-symbols-outlined text-3xl">payment</span>
+                          </span>
+                          <h3 className="text-xl font-black text-slate-900">Thanh toán</h3>
+                          <p className="text-slate-400 text-xs mt-1">Giao dịch mua vé thử nghiệm (Mock payment)</p>
+                        </div>
+
+                        <div className="space-y-4 bg-slate-50 p-6 rounded-3xl border border-slate-100 text-sm font-bold text-slate-600">
+                          <div className="flex justify-between">
+                            <span>Sự kiện:</span>
+                            <span className="text-slate-900 text-right font-black max-w-[200px] truncate">{activeRegistration.eventTitle}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Mã đăng ký:</span>
+                            <span className="text-indigo-600 font-black">#{activeRegistration.id.toString().substring(0, 8).toUpperCase()}</span>
+                          </div>
+                          <div className="flex justify-between pt-3 border-t border-slate-200/50">
+                            <span>Thành tiền:</span>
+                            <span className="text-slate-900 font-extrabold text-base">{formatPrice(activeRegistration.finalAmount)}</span>
+                          </div>
+                        </div>
+
+                        {regError && <div className="text-red-500 text-xs font-bold">{regError}</div>}
+
+                        <div className="flex flex-col gap-3">
+                          <button
+                            onClick={handleConfirmPayment}
+                            className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-emerald-700 transition shadow-lg shadow-emerald-100"
+                          >
+                            Xác nhận thanh toán (Mock Success)
+                          </button>
+                          <button
+                            onClick={handleCancelRegistration}
+                            className="w-full bg-slate-100 text-slate-600 py-3 rounded-2xl font-black text-sm hover:bg-slate-200 transition"
+                          >
+                            Quay lại
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {flowState === 'confirming' && (
+                      <motion.div
+                        key="confirming"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="py-12 flex flex-col items-center justify-center text-center gap-4"
+                      >
+                        <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                        <div>
+                          <h4 className="font-bold text-slate-800">Đang xác thực giao dịch</h4>
+                          <p className="text-slate-400 text-xs mt-1">Hệ thống đang lập hóa đơn và vé điện tử...</p>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {flowState === 'success' && activeRegistration && (
+                      <motion.div
+                        key="success"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center space-y-6"
+                      >
+                        <div className="flex flex-col items-center">
+                          <span className="inline-flex p-3 bg-emerald-50 text-emerald-500 rounded-full mb-4 animate-bounce">
+                            <span className="material-symbols-outlined text-4xl">check_circle</span>
+                          </span>
+                          <h3 className="text-2xl font-black text-slate-900">Đăng ký thành công!</h3>
+                          <p className="text-slate-400 text-xs mt-1">Vé điện tử của bạn đã được xuất.</p>
+                        </div>
+
+                        {activeRegistration.tickets && activeRegistration.tickets.map((t, idx) => (
+                          <div key={t.id || idx} className="border-t border-dashed border-slate-200 pt-6 mt-6">
+                            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex flex-col items-center">
+                              <img 
+                                src={t.qrImageUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${t.qrCodeToken || t.ticketCode}`} 
+                                alt="Vé QR" 
+                                className="w-40 h-40 bg-white p-2 rounded-2xl shadow-sm mb-4"
+                              />
+                              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Mã vé</p>
+                              <p className="text-indigo-600 font-extrabold text-lg mt-0.5">#{t.ticketCode}</p>
+                              <span className="mt-3 px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-black rounded-lg uppercase">
+                                {t.ticketTypeName}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+
+                        <button
+                          onClick={() => navigate('/attendee/tickets')}
+                          className="w-full bg-[#5c46e5] text-white py-4 rounded-2xl font-black text-base hover:bg-[#4d38da] transition mt-6"
+                        >
+                          Đi đến Vé của tôi
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 {/* Location Card */}
@@ -201,15 +566,20 @@ const EventDetailPage = () => {
                       className="w-full h-full object-cover opacity-80"
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <button className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-slate-900 font-bold text-sm shadow-xl flex items-center gap-2">
+                      <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue} ${event.address} ${event.city}`)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-slate-900 font-bold text-sm shadow-xl flex items-center gap-2 hover:bg-white transition"
+                      >
                         <span className="material-symbols-outlined text-[18px]">map</span>
                         Mở trong Google Maps
-                      </button>
+                      </a>
                     </div>
                   </div>
                   <div className="p-6">
-                    <h4 className="font-black text-slate-900 mb-2">Vinpearl Convention Center</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed">Bãi Dài, Gành Dầu, Phú Quốc, Kiên Giang, Việt Nam</p>
+                    <h4 className="font-black text-slate-900 mb-2">{event.venue}</h4>
+                    <p className="text-slate-500 text-sm leading-relaxed">{event.address}, {event.city}</p>
                   </div>
                 </div>
 
@@ -228,10 +598,9 @@ const EventDetailPage = () => {
         </div>
       </main>
 
-      <LandingFooter />
+      {!isAttendeeSpace && <LandingFooter />}
     </div>
   );
 };
 
 export default EventDetailPage;
-

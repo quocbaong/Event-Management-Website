@@ -18,6 +18,11 @@ public class RegistrationDetailResponse {
     private UUID id;
     private UUID eventId;
     private String eventTitle;
+    private Instant eventStartDate;
+    private Instant eventEndDate;
+    private String eventVenue;
+    private String eventCategory;
+    private String eventBannerUrl;
     private UUID attendeeId;
     private String attendeeName;
     private String attendeeEmail;

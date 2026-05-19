@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { useAuth } from '../../stores/AuthContext';
 
 const LandingNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+
+  const handleDashboardRedirect = () => {
+    if (!user) return;
+    if (user.role === 'ATTENDEE') {
+      navigate('/attendee/dashboard');
+    } else if (user.role === 'ORGANIZER') {
+      navigate('/organizer/dashboard');
+    } else if (user.role === 'ADMIN') {
+      navigate('/admin/dashboard');
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -155,18 +168,30 @@ const LandingNavbar = () => {
 
         {/* Action Buttons - Reverted to Professional Style */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/login')}
-            className="text-[15px] font-body font-bold text-slate-700 hover:text-[#e4322a] transition-all duration-300 px-4 py-2 hover:bg-slate-50 rounded-lg"
-          >
-            Đăng nhập
-          </button>
-          <button
-            onClick={() => navigate('/signup')}
-            className="bg-[#e4322a] hover:bg-[#cc2d26] text-white px-7 py-2.5 rounded-lg text-[15px] font-headline font-bold transition-all duration-300 shadow-sm active:scale-95"
-          >
-            Bắt đầu
-          </button>
+          {user ? (
+            <button
+              onClick={handleDashboardRedirect}
+              className="bg-[#e4322a] hover:bg-[#cc2d26] text-white px-6 py-2.5 rounded-lg text-[15px] font-headline font-bold transition-all duration-300 shadow-sm active:scale-95 flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              Trang tổng quan
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                className="text-[15px] font-body font-bold text-slate-700 hover:text-[#e4322a] transition-all duration-300 px-4 py-2 hover:bg-slate-50 rounded-lg"
+              >
+                Đăng nhập
+              </button>
+              <button
+                onClick={() => navigate('/signup')}
+                className="bg-[#e4322a] hover:bg-[#cc2d26] text-white px-7 py-2.5 rounded-lg text-[15px] font-headline font-bold transition-all duration-300 shadow-sm active:scale-95"
+              >
+                Bắt đầu
+              </button>
+            </>
+          )}
         </div>
 
       </div>

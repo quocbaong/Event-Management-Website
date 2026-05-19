@@ -265,6 +265,11 @@ public class RegistrationService {
                 .id(reg.getId())
                 .eventId(reg.getEvent().getId())
                 .eventTitle(reg.getEvent().getTitle())
+                .eventStartDate(reg.getEvent().getStartDate())
+                .eventEndDate(reg.getEvent().getEndDate())
+                .eventVenue(reg.getEvent().getVenue())
+                .eventCategory(reg.getEvent().getCategory() != null ? reg.getEvent().getCategory().name() : null)
+                .eventBannerUrl(reg.getEvent().getBannerUrl())
                 .attendeeId(reg.getAttendee().getId())
                 .attendeeName(reg.getAttendee().getAttendeeProfile() != null
                         ? reg.getAttendee().getAttendeeProfile().getDisplayName() : reg.getAttendee().getEmail())
@@ -280,5 +285,13 @@ public class RegistrationService {
                 .createdAt(reg.getCreatedAt())
                 .tickets(ticketItems)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RegistrationDetailResponse> getAttendeeRegistrations(User attendee) {
+        List<Registration> regs = registrationRepository.findByAttendeeIdOrderByCreatedAtDesc(attendee.getId());
+        return regs.stream()
+                .map(r -> toDetailResponse(r, r.getTickets()))
+                .toList();
     }
 }

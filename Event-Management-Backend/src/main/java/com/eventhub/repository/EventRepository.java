@@ -21,7 +21,7 @@ public interface EventRepository extends JpaRepository<Event, UUID>, JpaSpecific
 
     Optional<Event> findBySlugAndStatus(String slug, EventStatus status);
 
-    Page<Event> findByIsFeaturedTrueAndStatus(EventStatus status, Pageable pageable);
+    Page<Event> findByIsFeaturedTrueAndStatusOrderByCreatedAtDesc(EventStatus status, Pageable pageable);
 
     Page<Event> findByStatusOrderByStartDateAsc(EventStatus status, Pageable pageable);
 }
