@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Heart } from 'lucide-react';
 import { useAuth } from '../stores/AuthContext';
 import { eventService } from '../services/eventService';
 import { registrationService } from '../services/registrationService';
@@ -54,6 +55,41 @@ const EventDetailPage = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    if (!event) return;
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    setIsFavorite(favs.some(f => f.id === event.id));
+  }, [event]);
+
+  const toggleFavorite = () => {
+    if (!event) return;
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let newFavs;
+    if (isFavorite) {
+      newFavs = favs.filter(f => f.id !== event.id);
+      setIsFavorite(false);
+    } else {
+      newFavs = [...favs, {
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
+        shortDesc: event.shortDesc || event.description,
+        description: event.description,
+        startDate: event.startDate,
+        venue: event.venue,
+        city: event.city,
+        category: event.category,
+        bannerUrl: event.bannerUrl,
+        thumbnailUrl: event.thumbnailUrl
+      }];
+      setIsFavorite(true);
+    }
+    localStorage.setItem('favorites', JSON.stringify(newFavs));
+    window.dispatchEvent(new Event('storage'));
+  };
 
   // Registration selection state
   const [selectedTicketTypeId, setSelectedTicketTypeId] = useState('');
@@ -453,22 +489,36 @@ const EventDetailPage = () => {
                           <span className="text-2xl font-black text-slate-900">{formatPrice(getTotalAmount())}</span>
                         </div>
 
-                        {user ? (
+                        <div className="flex gap-3">
+                          {user ? (
+                            <button
+                              onClick={handleRegister}
+                              disabled={getTotalAmount() === 0}
+                              className="flex-1 bg-[#5c46e5] text-white py-4 rounded-2xl font-black text-sm hover:bg-[#4d38da] transition shadow-lg shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              Đăng ký ngay
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => navigate('/login', { state: { from: location.pathname } })}
+                              className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-sm hover:bg-slate-800 transition"
+                            >
+                              Đăng nhập để đăng ký
+                            </button>
+                          )}
+                          
                           <button
-                            onClick={handleRegister}
-                            disabled={getTotalAmount() === 0}
-                            className="w-full bg-[#5c46e5] text-white py-4 rounded-2xl font-black text-lg hover:bg-[#4d38da] transition shadow-lg shadow-indigo-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={toggleFavorite}
+                            className={`w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0 transition-all active:scale-90 ${
+                              isFavorite 
+                                ? 'bg-rose-50 border-rose-200 text-rose-500 shadow-sm shadow-rose-100/50' 
+                                : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
+                            }`}
+                            title={isFavorite ? "Bỏ yêu thích" : "Yêu thích sự kiện"}
                           >
-                            Đăng ký ngay
+                            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
                           </button>
-                        ) : (
-                          <button 
-                            onClick={() => navigate('/login', { state: { from: location.pathname } })}
-                            className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-slate-800 transition"
-                          >
-                            Đăng nhập để đăng ký
-                          </button>
-                        )}
+                        </div>
                       </motion.div>
                     )}
 
