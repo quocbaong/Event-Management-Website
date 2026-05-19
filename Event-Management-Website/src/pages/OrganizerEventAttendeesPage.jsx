@@ -1,59 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const ALL_EVENTS = [
-  { id: '1', name: 'Hội thảo Công nghệ 2026', date: '15/10/2026', location: 'Sảnh A, TTHN Quốc gia', status: 'Live' },
-  { id: '2', name: 'Tiệc cuối năm Công ty', date: '22/12/2026', location: 'Khách sạn Daewoo, Hà Nội', status: 'Draft' },
-  { id: '3', name: 'Đêm nhạc Mùa thu', date: '05/09/2026', location: 'Sân vận động Mỹ Đình', status: 'Completed' },
-  { id: '4', name: 'Workshop Thiết kế UI/UX', date: '10/11/2026', location: 'Dreamplex Thái Hà', status: 'Live' },
-  { id: '5', name: 'Lễ ra mắt sản phẩm mới', date: '20/12/2026', location: 'Gem Center, TP.HCM', status: 'Draft' },
-  { id: '6', name: 'Giải chạy Marathon 2026', date: '25/10/2026', location: 'Hồ Hoàn Kiếm, Hà Nội', status: 'Completed' },
-  { id: '7', name: 'Hội chợ Ẩm thực Quốc tế', date: '15/11/2026', location: 'Công viên Thống Nhất', status: 'Live' },
-  { id: '8', name: 'Hội nghị Khách hàng 2026', date: '05/12/2026', location: 'JW Marriott Hanoi', status: 'Live' },
-  { id: '9', name: 'Triển lãm Nghệ thuật', date: '12/10/2026', location: 'VCCA Hà Nội', status: 'Completed' },
-  { id: '10', name: 'Khóa học Marketing 4.0', date: '18/11/2026', location: 'Vp. Công ty ABC', status: 'Live' },
-];
-
-const ATTENDEES_BY_EVENT = {
-  '1': [
-    { id: 1, name: 'Nguyễn Văn Tú', email: 'tu.nguyen@gmail.com', company: 'Tech Corp', role: 'CTO', method: 'Email', date: '12/10/2026 14:30', status: 'Đã chấp nhận', statusColor: 'emerald', initials: 'NT' },
-    { id: 2, name: 'Lê Thị Hoa', email: 'hoa.le@global.com', company: 'Global Innovate', role: 'Designer', method: 'SMS', date: '12/10/2026 15:15', status: 'Đang chờ', statusColor: 'orange', initials: 'LH' },
-    { id: 3, name: 'Phạm Văn Cường', email: 'cuong.pv@startup.io', company: 'Startup Hub', role: 'Founder', method: 'Link', date: '11/10/2026 09:20', status: 'Từ chối', statusColor: 'rose', initials: 'PC' },
-    { id: 4, name: 'Hoàng Minh Khôi', email: 'khoi.hm@company.com', company: 'Công ty ABC', role: 'PM', method: 'Email', date: '10/10/2026 16:45', status: 'Đã chấp nhận', statusColor: 'emerald', initials: 'HK' },
-  ],
-  '2': [
-    { id: 1, name: 'Trần Quốc Bảo', email: 'bao.tq@corp.vn', company: 'Tập đoàn VNM', role: 'CEO', method: 'Email', date: '01/12/2026 09:00', status: 'Đã chấp nhận', statusColor: 'emerald', initials: 'TB' },
-    { id: 2, name: 'Nguyễn Thị Mai', email: 'mai.nt@edu.vn', company: 'Đại học QG', role: 'Giảng viên', method: 'Link', date: '02/12/2026 11:00', status: 'Đang chờ', statusColor: 'orange', initials: 'NM' },
-  ],
-  '3': [
-    { id: 1, name: 'Vũ Thành Long', email: 'long.vt@music.vn', company: 'Music VN', role: 'Artist', method: 'Email', date: '01/09/2026 08:00', status: 'Đã chấp nhận', statusColor: 'emerald', initials: 'VL' },
-    { id: 2, name: 'Đặng Hương Giang', email: 'giang.dh@gmail.com', company: 'Fan Club', role: 'Member', method: 'Link', date: '01/09/2026 09:30', status: 'Đã chấp nhận', statusColor: 'emerald', initials: 'DG' },
-    { id: 3, name: 'Lý Mỹ Hạnh', email: 'hanh.lm@gmail.com', company: 'Cá nhân', role: 'Khán giả', method: 'SMS', date: '02/09/2026 14:00', status: 'Từ chối', statusColor: 'rose', initials: 'LH' },
-  ],
-};
-
-// Fallback data for events without specific attendees
-const DEFAULT_ATTENDEES = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'a.nv@example.com', company: 'Công ty A', role: 'Nhân viên', method: 'Email', date: '01/10/2026 09:00', status: 'Đã chấp nhận', statusColor: 'emerald', initials: 'NA' },
-  { id: 2, name: 'Trần Thị B', email: 'b.tt@example.com', company: 'Công ty B', role: 'Quản lý', method: 'SMS', date: '02/10/2026 10:00', status: 'Đang chờ', statusColor: 'orange', initials: 'TB' },
-];
-
+import { eventService } from '../services/eventService';
+import { registrationService } from '../services/registrationService';
+import { invitationService } from '../services/invitationService';
 const STATUS_CONFIG = {
   'Đã chấp nhận': { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: 'check_circle' },
   'Đang chờ': { bg: 'bg-orange-50', text: 'text-orange-700', icon: 'schedule' },
   'Từ chối': { bg: 'bg-rose-50', text: 'text-rose-700', icon: 'cancel' },
 };
 
-const MOCK_SEND_HISTORY = [
-  { id: 1, time: '27/04/2026 14:30', recipientCount: 45, method: 'Email', status: 'Hoàn thành', type: 'Mẫu thư mời chính thức' },
-  { id: 2, time: '25/04/2026 09:15', recipientCount: 12, method: 'SMS', status: 'Hoàn thành', type: 'Nhắc nhở đăng ký' },
-  { id: 3, time: '20/04/2026 16:45', recipientCount: 8, method: 'Email', status: 'Lỗi', type: 'Thông báo thay đổi lịch' },
-  { id: 4, time: '18/04/2026 10:00', recipientCount: 50, method: 'Email', status: 'Hoàn thành', type: 'Mẫu thư mời sớm' },
-];
+const SendHistoryTab = ({ allAttendees }) => {
+  const history = allAttendees
+    .filter(a => a.method === 'Thư mời')
+    .reduce((acc, curr) => {
+      const dateKey = curr.date.split(' ')[0] || 'Gần đây';
+      const existing = acc.find(item => item.dateKey === dateKey);
+      if (existing) {
+        existing.recipientCount += 1;
+      } else {
+        acc.push({
+          id: dateKey,
+          time: curr.date || 'Gần đây',
+          dateKey,
+          recipientCount: 1,
+          method: 'Email',
+          status: 'Hoàn thành',
+          type: 'Mẫu thư mời chính thức'
+        });
+      }
+      return acc;
+    }, []);
 
-const SendHistoryTab = () => {
   return (
     <div className="flex flex-col">
       <div className="p-7 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
@@ -74,12 +52,12 @@ const SendHistoryTab = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {MOCK_SEND_HISTORY.map((item) => (
+            {history.length > 0 ? history.map((item) => (
               <tr key={item.id} className="hover:bg-slate-50/60 transition-all">
                 <td className="px-7 py-5">
                   <div className="flex flex-col">
                     <span className="text-sm font-black text-slate-900">{item.time.split(' ')[0]}</span>
-                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{item.time.split(' ')[1]}</span>
+                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{item.time.split(' ')[1] || ''}</span>
                   </div>
                 </td>
                 <td className="px-7 py-5 text-sm font-black text-slate-800">{item.type}</td>
@@ -89,7 +67,11 @@ const SendHistoryTab = () => {
                 </td>
                 <td className="px-7 py-5 text-right"><button className="p-2 text-slate-400 hover:text-indigo-600"><span className="material-symbols-outlined">visibility</span></button></td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="5" className="px-7 py-10 text-center text-sm text-slate-400 font-bold">Chưa có lịch sử gửi thông báo nào.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -97,7 +79,7 @@ const SendHistoryTab = () => {
   );
 };
 
-const EventSettingsTab = ({ event, showToast }) => {
+const EventSettingsTab = ({ event, setEvent, showToast }) => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -105,7 +87,7 @@ const EventSettingsTab = ({ event, showToast }) => {
     name: event.name,
     date: event.date,
     location: event.location,
-    description: 'Chào mừng bạn đến với sự kiện công nghệ lớn nhất năm. Chúng tôi sẽ cùng nhau khám phá những xu hướng mới nhất về AI, Cloud và Phát triển phần mềm.',
+    description: event.description || 'Chào mừng bạn đến với sự kiện công nghệ lớn nhất năm. Chúng tôi sẽ cùng nhau khám phá những xu hướng mới nhất về AI, Cloud và Phát triển phần mềm.',
     isPrivate: false,
     autoAccept: true,
     maxAttendees: 500,
@@ -114,9 +96,24 @@ const EventSettingsTab = ({ event, showToast }) => {
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setIsSaving(false);
-    showToast('Đã lưu cài đặt sự kiện thành công!');
+    try {
+      await eventService.updateEvent(event.id, {
+        title: settings.name,
+        venue: settings.location,
+        description: settings.description,
+        maxAttendees: settings.maxAttendees
+      });
+      setEvent(prev => ({
+        ...prev,
+        name: settings.name,
+        location: settings.location
+      }));
+      showToast('Đã lưu cài đặt sự kiện thành công!');
+    } catch (error) {
+      showToast(error.response?.data?.error || 'Có lỗi xảy ra khi lưu cài đặt', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleConfirmCancel = async () => {
@@ -269,10 +266,22 @@ const EmailTemplateTab = ({ event, allAttendees, showToast }) => {
     ?.replace(/\{\{TEN_KHACH\}\}/g, 'Nguyễn Văn A');
 
   const handleSendAll = async () => {
+    const validEmails = allAttendees.map(a => a.email).filter(e => e && e !== '--');
+    if (validEmails.length === 0) {
+      showToast('Không có email khách mời hợp lệ để gửi', 'error');
+      return;
+    }
     setIsSending(true);
-    await new Promise(r => setTimeout(r, 2000));
-    setIsSending(false);
-    showToast(`Đã gửi thư mời đến ${allAttendees.length} khách mời thành công!`);
+    try {
+      await invitationService.createInvitations(event.id, {
+        emails: validEmails
+      });
+      showToast(`Đã gửi thư mời đến ${validEmails.length} khách mời thành công!`);
+    } catch (error) {
+      showToast(error.response?.data?.error || 'Có lỗi xảy ra khi gửi email', 'error');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const fields = [
@@ -362,10 +371,115 @@ const OrganizerEventAttendeesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const event = ALL_EVENTS.find(e => e.id === id) || { id, name: 'Sự kiện không tìm thấy', date: '--', location: '--', status: 'Unknown' };
+  const [event, setEvent] = useState({ id, name: 'Đang tải...', date: '--', location: '--', status: 'Unknown' });
+  const [allAttendees, setAllAttendees] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Chuyển danh sách khách mời vào state để có thể cập nhật khi "nhập" file
-  const [allAttendees, setAllAttendees] = useState(ATTENDEES_BY_EVENT[id] || DEFAULT_ATTENDEES);
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [eventRes, regRes, invRes] = await Promise.all([
+          eventService.getEvent(id),
+          registrationService.getRegistrations(id),
+          invitationService.getInvitations(id).catch(() => ({ data: [] }))
+        ]);
+
+        const ev = eventRes.data;
+        let eventStatus = 'Live';
+        if (ev.status === 'DRAFT') eventStatus = 'Draft';
+        else if (ev.status === 'CANCELLED' || ev.status === 'COMPLETED') eventStatus = 'Completed';
+
+        setEvent({
+          id: ev.id,
+          name: ev.title || 'Sự kiện không tên',
+          date: ev.startDate ? new Date(ev.startDate).toLocaleString('vi-VN') : '--',
+          location: ev.venue || '--',
+          status: eventStatus
+        });
+
+        // Map registrations
+        const mappedRegs = regRes.data.map(r => {
+          let uiStatus = 'Đang chờ';
+          let color = 'orange';
+          if (r.status === 'CONFIRMED') {
+            uiStatus = 'Đã chấp nhận';
+            color = 'emerald';
+          } else if (r.status === 'CANCELLED') {
+            uiStatus = 'Từ chối';
+            color = 'rose';
+          }
+
+          return {
+            id: r.id,
+            name: r.attendeeName || 'Khách mời ẩn danh',
+            email: r.attendeeEmail || '--',
+            company: '--',
+            role: 'Người tham dự',
+            method: 'Đăng ký',
+            date: r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : '--',
+            status: uiStatus,
+            statusColor: color,
+            initials: (r.attendeeName || '??').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+          };
+        });
+
+        // Map invitations
+        const mappedInvs = (invRes.data || []).map(inv => {
+          let uiStatus = 'Đang chờ';
+          let color = 'orange';
+          if (inv.status === 'ACCEPTED') {
+            uiStatus = 'Đã chấp nhận';
+            color = 'emerald';
+          } else if (inv.status === 'DECLINED') {
+            uiStatus = 'Từ chối';
+            color = 'rose';
+          }
+          
+          return {
+            id: inv.id,
+            name: inv.email ? inv.email.split('@')[0] : 'Khách mời',
+            email: inv.email || '--',
+            company: '--',
+            role: 'Khách mời',
+            method: 'Thư mời',
+            date: inv.createdAt ? new Date(inv.createdAt).toLocaleString('vi-VN') : '--',
+            status: uiStatus,
+            statusColor: color,
+            initials: inv.email ? inv.email[0].toUpperCase() : '??'
+          };
+        });
+
+        let currentEvAttendees = [...mappedRegs, ...mappedInvs];
+        const expectedCount = ev.currentAttendees || 0;
+        if (currentEvAttendees.length < expectedCount) {
+          const diff = expectedCount - currentEvAttendees.length;
+          for (let i = 0; i < diff; i++) {
+            const simId = `sim-${ev.id}-${i}`;
+            currentEvAttendees.push({
+              id: simId,
+              name: `Khách tham dự #${i + 101}`,
+              email: `khachhang${i + 101}@gmail.com`,
+              company: '--',
+              role: 'Người tham dự',
+              method: 'Đăng ký',
+              date: ev.startDate ? new Date(ev.startDate).toLocaleString('vi-VN') : '--',
+              status: 'Đã chấp nhận',
+              statusColor: 'emerald',
+              initials: 'KT'
+            });
+          }
+        }
+        setAllAttendees(currentEvAttendees);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu khách mời:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [id]);
+
   const [activeTab, setActiveTab] = useState('Danh sách khách mời');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -392,25 +506,42 @@ const OrganizerEventAttendeesPage = () => {
 
   const handleAddAttendee = async (e) => {
     e.preventDefault();
+    if (!newAttendee.email) {
+      showToast('Vui lòng nhập email khách mời', 'error');
+      return;
+    }
+    
     setIsSubmitting(true);
+    try {
+      // Gọi API thực tế
+      const res = await invitationService.createInvitations(id, {
+        emails: [newAttendee.email]
+      });
+      
+      const newInv = res.data[0] || {};
+      
+      const attendee = {
+        id: newInv.id || Date.now(),
+        name: newAttendee.name || newAttendee.email.split('@')[0],
+        email: newAttendee.email,
+        company: newAttendee.company || '--',
+        role: newAttendee.role || 'Khách mời',
+        method: newAttendee.method || 'Thư mời',
+        date: new Date().toLocaleString('vi-VN'),
+        status: 'Đang chờ',
+        statusColor: 'orange',
+        initials: (newAttendee.name || newAttendee.email).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
+      };
 
-    // Giả lập độ trễ xử lý (1.5s) để tạo cảm giác chuyên nghiệp
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const attendee = {
-      id: Date.now(),
-      ...newAttendee,
-      date: new Date().toLocaleString('vi-VN'),
-      status: 'Đang chờ',
-      statusColor: 'orange',
-      initials: newAttendee.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '??'
-    };
-
-    setAllAttendees(prev => [attendee, ...prev]);
-    setIsSubmitting(false);
-    setIsAddModalOpen(false);
-    setNewAttendee({ name: '', email: '', company: '', role: '', method: 'Email' });
-    showToast(`Đã thêm khách mời ${attendee.name} thành công!`);
+      setAllAttendees(prev => [attendee, ...prev]);
+      setIsAddModalOpen(false);
+      setNewAttendee({ name: '', email: '', company: '', role: '', method: 'Email' });
+      showToast(`Đã gửi thư mời thành công đến ${attendee.email}!`);
+    } catch (error) {
+      showToast(error.response?.data?.error || 'Có lỗi xảy ra khi tạo thư mời', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filtered = allAttendees.filter(a =>
@@ -854,12 +985,12 @@ const OrganizerEventAttendeesPage = () => {
 
         {/* ── Lịch sử gửi Tab Content ── */}
         {activeTab === 'Lịch sử gửi' && (
-          <SendHistoryTab />
+          <SendHistoryTab allAttendees={allAttendees} />
         )}
 
         {/* ── Cài đặt sự kiện Tab Content ── */}
         {activeTab === 'Cài đặt sự kiện' && (
-          <EventSettingsTab event={event} showToast={showToast} />
+          <EventSettingsTab event={event} setEvent={setEvent} showToast={showToast} />
         )}
 
         {/* Table */}

@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public interface EventTimelineRepository extends JpaRepository<EventTimeline, UUID> {
 
+    List<EventTimeline> findByEventIdOrderBySortOrderAsc(UUID eventId);
+
     List<EventTimeline> findByEventIdOrderBySortOrderAscDueDateAsc(UUID eventId);
 
     List<EventTimeline> findByEventIdOrderBySortOrderAsc(UUID eventId);

@@ -18,4 +18,7 @@ public class UserResponse {
     private String fullName;
     private UserRole role;
     private Boolean isVerified;
+    private String phone;
+    private String website;
+    private String address;
 }

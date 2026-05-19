@@ -1,6 +1,7 @@
 package com.eventhub.service;
 
 import com.eventhub.domain.entity.Event;
+import com.eventhub.domain.entity.TicketType;
 import com.eventhub.domain.entity.User;
 import com.eventhub.domain.enums.EventCategory;
 import com.eventhub.domain.enums.EventStatus;
@@ -42,6 +43,7 @@ public class EventService {
     private final EventScheduleRepository eventScheduleRepository;
     private final EventTimelineRepository eventTimelineRepository;
     private final EventMapper eventMapper;
+    private final com.eventhub.repository.InvitationRepository invitationRepository;
 
     public Page<EventSummaryResponse> getEvents(EventFilterRequest filter, Pageable pageable) {
         Page<Event> events = eventRepository.findAll(EventSpecification.filterPublicEvents(filter), pageable);
@@ -230,6 +232,22 @@ public class EventService {
                 ? organizer.getOrganizerProfile().getCompanyName()
                 : organizer.getEmail();
 
+        int ticketAttendees = event.getTicketTypes() != null
+                ? event.getTicketTypes().stream()
+                        .filter(tt -> tt.getSoldQuantity() != null)
+                        .mapToInt(TicketType::getSoldQuantity)
+                        .sum()
+                : 0;
+        int inviteAttendees = invitationRepository.countByEventIdAndStatus(event.getId(), com.eventhub.domain.enums.InviteStatus.ACCEPTED);
+        int currentAttendees = ticketAttendees + inviteAttendees;
+
+        java.math.BigDecimal revenue = event.getTicketTypes() != null
+                ? event.getTicketTypes().stream()
+                        .filter(tt -> tt.getSoldQuantity() != null && tt.getPrice() != null)
+                        .map(tt -> tt.getPrice().multiply(java.math.BigDecimal.valueOf(tt.getSoldQuantity())))
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                : java.math.BigDecimal.ZERO;
+
         EventResponse response = EventResponse.builder()
                 .id(event.getId())
                 .organizerId(organizer.getId())
@@ -252,10 +270,11 @@ public class EventService {
                 .endDate(event.getEndDate())
                 .registrationDeadline(event.getRegistrationDeadline())
                 .maxAttendees(event.getMaxAttendees())
-                .currentAttendees(event.getCurrentAttendees())
+                .currentAttendees(currentAttendees)
                 .isFeatured(event.getIsFeatured())
                 .tags(event.getTags())
                 .publishedAt(event.getPublishedAt())
+                .revenue(revenue)
                 .createdAt(event.getCreatedAt())
                 .updatedAt(event.getUpdatedAt())
                 .build();
@@ -279,6 +298,22 @@ public class EventService {
     }
 
     private EventSummaryResponse toEventSummaryResponse(Event event) {
+        java.math.BigDecimal revenue = event.getTicketTypes() != null
+                ? event.getTicketTypes().stream()
+                        .filter(tt -> tt.getSoldQuantity() != null && tt.getPrice() != null)
+                        .map(tt -> tt.getPrice().multiply(java.math.BigDecimal.valueOf(tt.getSoldQuantity())))
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add)
+                : java.math.BigDecimal.ZERO;
+
+        int ticketAttendees = event.getTicketTypes() != null
+                ? event.getTicketTypes().stream()
+                        .filter(tt -> tt.getSoldQuantity() != null)
+                        .mapToInt(TicketType::getSoldQuantity)
+                        .sum()
+                : 0;
+        int inviteAttendees = invitationRepository.countByEventIdAndStatus(event.getId(), com.eventhub.domain.enums.InviteStatus.ACCEPTED);
+        int currentAttendees = ticketAttendees + inviteAttendees;
+
         return EventSummaryResponse.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -292,9 +327,10 @@ public class EventService {
                 .city(event.getCity())
                 .startDate(event.getStartDate())
                 .endDate(event.getEndDate())
-                .currentAttendees(event.getCurrentAttendees())
+                .currentAttendees(currentAttendees)
                 .maxAttendees(event.getMaxAttendees())
                 .publishedAt(event.getPublishedAt())
+                .revenue(revenue)
                 .createdAt(event.getCreatedAt())
                 .build();
     }

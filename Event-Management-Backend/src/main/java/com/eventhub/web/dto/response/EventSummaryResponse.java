@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,5 +32,6 @@ public class EventSummaryResponse {
     private Integer currentAttendees;
     private Integer maxAttendees;
     private Instant publishedAt;
+    private BigDecimal revenue;
     private Instant createdAt;
 }

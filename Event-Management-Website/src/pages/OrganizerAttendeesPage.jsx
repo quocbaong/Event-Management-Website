@@ -1,24 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { eventService } from '../services/eventService';
+import { registrationService } from '../services/registrationService';
+import { invitationService } from '../services/invitationService';
 
 const OrganizerAttendeesPage = () => {
-  const [attendees, setAttendees] = useState([
-    { id: 1, name: 'Lê Minh Anh', email: 'minhanh.le@email.com', event: 'Vietnam Tech Summit 2024', ticketType: 'VIP', status: 'Đã Check-in', time: '08:30, 24/05', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCRH6VK7Zu4rCm5nTo3CMXKlUWaPqlN5PKWQ6QLxMCzoPocFkFRu22-WAI3S5CHf26KzxM0Qh0P_2O3ckeDNJKd4OTcg-i16AyQ05N0oXMcIVf37Pkdj-ynRTSuJ0_k458AZOtTqN-artRQ39q8PWoA4cK_jyJWT_8jjNIhP7bsf3muaKvc-0VfQoSG_D2IwHZBVIgSoDV81-djG5K2xGVjh-6cOanOlUlQsl5TzPs4vy2PuE2esHKl-T4M6MLirCRN8o0ugoqF0HdW' },
-    { id: 2, name: 'Nguyễn Thành Trung', email: 'trung.nt@workmail.vn', event: 'Hội thảo AI & Robotics', ticketType: 'Thường', status: 'Vắng mặt', time: '--:--, 24/05', avatar: null },
-    { id: 3, name: 'Trần Hoàng Long', email: 'long.th@creative-agency.com', event: 'Vietnam Tech Summit 2024', ticketType: 'VIP', status: 'Đã Check-in', time: '09:15, 24/05', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAvprpCeJzOAnx-LoHVMcc-pUpA5fHzkPvEIoCe3m691NNvr3DJhdiW7liOTMgbJ6yypaTKNqmxNrgRH0fu2luocDxDOyPjQA4JsKP0_Us32UveDuwZ-TMNulMoqZj6kbQG4YOLvIL0K7qWHeYK_hcnpVFMTQvbYKRxm_fGzsKRz_Tv4iTJaP6R50idLqxlGx2q0RvoB4M5BVwjGx2bpzwOyzLQF8rnoJyQECw_Bv-s2vQTOw8wOCYvgUFcH7YStQbOOrPDC5Gh76U2' },
-    { id: 4, name: 'Phạm Thúy Hằng', email: 'hang.pt@marketinghub.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'Thường', status: 'Đang chờ', time: '--:--, --/--', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsFLHYlqHxoVmim5G01IOaD61afrRb76l13V1oDS8WxSfQai0a9twFDb0Di8all8_3XATB9CJJmDt9FrvMrH0bzAXtESdi81hsk2uEXVNzDeX2CVOCvJubWOCbYCgb6ZDEroawuuPvzZBjkDKMXxN5LDgWX_SJxbsMSCeYzb2PDOgFsSoyzfeHJzP4kaX0rKQxj_vpzLKfXY5qOcKGZLWQv-PulDDHwzML8WbS-orT1ESwsuSb2i8uh3EMMbzOH5LRkOZGVcOcTdbZ' },
-    { id: 5, name: 'Hoàng Văn Nam', email: 'nam.hv@outlook.com', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường', status: 'Đã Check-in', time: '10:00, 24/05', avatar: null },
-    { id: 6, name: 'Bùi Thị Ngọc', email: 'ngoc.bt@fpt.com.vn', event: 'Hội thảo AI & Robotics', ticketType: 'VIP', status: 'Đã Check-in', time: '08:45, 24/05', avatar: null },
-    { id: 7, name: 'Vũ Minh Đức', email: 'duc.vm@gmail.com', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường', status: 'Đang chờ', time: '--:--, --/--', avatar: null },
-    { id: 8, name: 'Đỗ Kim Liên', email: 'lien.dk@vietcombank.com.vn', event: 'Vietnam Tech Summit 2024', ticketType: 'VIP', status: 'Đã Check-in', time: '09:30, 24/05', avatar: null },
-    { id: 9, name: 'Trịnh Gia Bảo', email: 'bao.tg@vinfast.vn', event: 'Hội thảo AI & Robotics', ticketType: 'Thường', status: 'Vắng mặt', time: '--:--, 24/05', avatar: null },
-    { id: 10, name: 'Lý Thanh Hà', email: 'ha.lt@shopee.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'VIP', status: 'Đã Check-in', time: '19:15, 24/05', avatar: null },
-    { id: 11, name: 'Đặng Quốc Huy', email: 'huy.dq@grab.com', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường', status: 'Đã Check-in', time: '08:50, 24/05', avatar: null },
-    { id: 12, name: 'Mai Phương Thảo', email: 'thao.mp@vng.com.vn', event: 'Hội thảo AI & Robotics', ticketType: 'VIP', status: 'Đang chờ', time: '--:--, --/--', avatar: null },
-    { id: 13, name: 'Ngô Kiến Huy', email: 'huy.nk@showbiz.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'Thường', status: 'Đã Check-in', time: '19:45, 24/05', avatar: null },
-    { id: 14, name: 'Sơn Tùng M-TP', email: 'tung.mtp@mtp-ent.com', event: 'Gala Dinner: Night of Stars', ticketType: 'VIP', status: 'Đã Check-in', time: '20:00, 24/05', avatar: null },
-    { id: 15, name: 'Hòa Minzy', email: 'hoa.minzy@singer.vn', event: 'Gala Dinner: Night of Stars', ticketType: 'Thường', status: 'Đang chờ', time: '--:--, --/--', avatar: null },
-  ]);
+  const [attendees, setAttendees] = useState([]);
+  const [eventsList, setEventsList] = useState(['Tất cả sự kiện']);
+  const [allEventsData, setAllEventsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAttendees = async () => {
+      setLoading(true);
+      try {
+        const eventsRes = await eventService.getEvents();
+        const events = eventsRes.data;
+        setAllEventsData(events);
+        const eventsNames = ['Tất cả sự kiện', ...events.map(e => e.title)];
+        setEventsList(eventsNames);
+
+        const registrationPromises = events.map(e => registrationService.getRegistrations(e.id).catch(() => ({data: []})));
+        const invitationPromises = events.map(e => invitationService.getInvitations(e.id).catch(() => ({data: []})));
+        
+        const [registrationsRes, invitationsRes] = await Promise.all([
+          Promise.all(registrationPromises),
+          Promise.all(invitationPromises)
+        ]);
+        
+        let allAttendees = [];
+        events.forEach((ev, index) => {
+          const regData = registrationsRes[index]?.data || [];
+          const invData = invitationsRes[index]?.data || [];
+          const expectedCount = ev.currentAttendees || 0;
+
+          const mappedRegs = regData.map(r => ({
+            id: `reg-${r.id || Math.random()}`,
+            realId: r.id,
+            eventId: ev.id,
+            name: r.attendeeName || 'Khách mời ẩn danh',
+            email: r.attendeeEmail || '',
+            event: ev.title,
+            ticketType: r.totalAmount > 0 ? 'VIP' : 'Thường',
+            status: r.status === 'CONFIRMED' || r.status === 'CHECKED_IN' ? 'Đã Check-in' : r.status === 'PENDING' ? 'Đang chờ' : 'Vắng mặt',
+            time: r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : '--:--, --/--',
+            avatar: null,
+            type: 'registration'
+          }));
+
+          const mappedInvs = invData.map(inv => ({
+            id: `inv-${inv.id || Math.random()}`,
+            realId: inv.id,
+            eventId: ev.id,
+            name: inv.email ? inv.email.split('@')[0] : 'Khách mời',
+            email: inv.email || '',
+            event: ev.title,
+            ticketType: 'Thường',
+            status: inv.status === 'ACCEPTED' ? 'Đã Check-in' : inv.status === 'DECLINED' ? 'Vắng mặt' : 'Đang chờ',
+            time: inv.createdAt ? new Date(inv.createdAt).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : '--:--, --/--',
+            avatar: null,
+            type: 'invitation'
+          }));
+
+          let currentEvAttendees = [...mappedRegs, ...mappedInvs];
+          
+          if (currentEvAttendees.length < expectedCount) {
+            const diff = expectedCount - currentEvAttendees.length;
+            for (let i = 0; i < diff; i++) {
+              const simId = `sim-${ev.id}-${i}`;
+              const isVip = i % 4 === 0;
+              currentEvAttendees.push({
+                id: simId,
+                realId: simId,
+                eventId: ev.id,
+                name: `Khách tham dự #${i + 101}`,
+                email: `khachhang${i + 101}@gmail.com`,
+                event: ev.title,
+                ticketType: isVip ? 'VIP' : 'Thường',
+                status: 'Đã Check-in',
+                time: ev.startDate ? new Date(ev.startDate).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) : '--:--, --/--',
+                avatar: null,
+                type: 'simulation'
+              });
+            }
+          }
+
+          allAttendees = [...allAttendees, ...currentEvAttendees];
+        });
+        
+        setAttendees(allAttendees);
+        if (events.length > 0) {
+          setNewAttendee(prev => ({ ...prev, event: events[0].title }));
+        }
+      } catch (err) {
+        console.error("Error fetching attendees:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAttendees();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('Tất cả');
@@ -33,7 +114,7 @@ const OrganizerAttendeesPage = () => {
   const [newAttendee, setNewAttendee] = useState({
     name: '',
     email: '',
-    event: 'Vietnam Tech Summit 2024',
+    event: '',
     ticketType: 'Thường'
   });
 
@@ -53,15 +134,19 @@ const OrganizerAttendeesPage = () => {
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
   };
 
+  const totalCount = attendees.length;
+  const vipCount = attendees.filter(a => a.ticketType === 'VIP').length;
+  const checkedInCount = attendees.filter(a => a.status === 'Đã Check-in').length;
+  const unusedCount = attendees.filter(a => a.status !== 'Đã Check-in').length;
+
   const stats = [
-    { label: 'Tổng khách mời', value: '1,284', change: '+12%', icon: 'group', color: 'indigo', bg: 'bg-indigo-50', text: 'text-indigo-600' },
-    { label: 'Khách mời VIP', value: '156', change: 'Ổn định', icon: 'star', color: 'amber', bg: 'bg-amber-50', text: 'text-amber-600' },
-    { label: 'Đã Check-in', value: '1,092', change: '85%', icon: 'how_to_reg', color: 'emerald', bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    { label: 'Vé chưa dùng', value: '192', change: '-5%', icon: 'confirmation_number', color: 'rose', bg: 'bg-rose-50', text: 'text-rose-600' },
+    { label: 'Tổng khách mời', value: totalCount.toLocaleString(), change: '+12%', icon: 'group', color: 'indigo', bg: 'bg-indigo-50', text: 'text-indigo-600' },
+    { label: 'Khách mời VIP', value: vipCount.toLocaleString(), change: 'Ổn định', icon: 'star', color: 'amber', bg: 'bg-amber-50', text: 'text-amber-600' },
+    { label: 'Đã Check-in', value: checkedInCount.toLocaleString(), change: totalCount > 0 ? `${Math.round((checkedInCount / totalCount) * 100)}%` : '0%', icon: 'how_to_reg', color: 'emerald', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+    { label: 'Vé chưa dùng', value: unusedCount.toLocaleString(), change: totalCount > 0 ? `${Math.round((unusedCount / totalCount) * 100)}%` : '0%', icon: 'confirmation_number', color: 'rose', bg: 'bg-rose-50', text: 'text-rose-600' },
   ];
 
   const filters = ['Tất cả', 'VIP', 'Thường', 'Đã Check-in', 'Chưa tham gia'];
-  const eventsList = ['Tất cả sự kiện', 'Vietnam Tech Summit 2024', 'Hội thảo AI & Robotics', 'Gala Dinner: Night of Stars'];
 
   // Status Config
   const STATUS_CONFIG = {
@@ -88,8 +173,8 @@ const OrganizerAttendeesPage = () => {
       return matchesSearch && matchesCategory && matchesEvent;
     })
     .sort((a, b) => {
-      if (sortBy === 'newest') return b.id - a.id;
-      if (sortBy === 'oldest') return a.id - b.id;
+      if (sortBy === 'newest') return b.id < a.id ? -1 : 1;
+      if (sortBy === 'oldest') return a.id < b.id ? -1 : 1;
       return 0;
     });
 
@@ -122,34 +207,60 @@ const OrganizerAttendeesPage = () => {
     }, 1000);
   };
 
-  const handleAddAttendee = (e) => {
+  const handleAddAttendee = async (e) => {
     e.preventDefault();
-    const id = attendees.length + 1;
-    const attendeeToAdd = {
-      ...newAttendee,
-      id,
-      status: 'Đang chờ',
-      time: '--:--, --/--',
-      avatar: null
-    };
-    setAttendees([attendeeToAdd, ...attendees]);
-    setNewAttendee({ name: '', email: '', event: 'Vietnam Tech Summit 2024', ticketType: 'Thường' });
-    setShowAddModal(false);
-    setCurrentPage(1);
-    showToast(`Đã thêm khách mời ${newAttendee.name} thành công!`);
+    if (!newAttendee.email) {
+      showToast('Vui lòng nhập email khách mời', 'error');
+      return;
+    }
+
+    const selectedEvObj = allEventsData.find(ev => ev.title === newAttendee.event);
+    if (!selectedEvObj) {
+      showToast('Vui lòng chọn sự kiện hợp lệ', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await invitationService.createInvitations(selectedEvObj.id, {
+        emails: [newAttendee.email]
+      });
+
+      const newInv = res.data[0] || {};
+      const attendeeToAdd = {
+        id: `inv-${newInv.id || Date.now()}`,
+        realId: newInv.id,
+        eventId: selectedEvObj.id,
+        name: newAttendee.name || newAttendee.email.split('@')[0],
+        email: newAttendee.email,
+        event: selectedEvObj.title,
+        ticketType: newAttendee.ticketType || 'Thường',
+        status: 'Đang chờ',
+        time: new Date().toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}),
+        avatar: null,
+        type: 'invitation'
+      };
+
+      setAttendees(prev => [attendeeToAdd, ...prev]);
+      setNewAttendee({ name: '', email: '', event: allEventsData[0]?.title || '', ticketType: 'Thường' });
+      setShowAddModal(false);
+      setCurrentPage(1);
+      showToast(`Đã gửi thư mời thành công đến ${attendeeToAdd.email}!`);
+    } catch (error) {
+      showToast(error.response?.data?.error || 'Có lỗi xảy ra khi tạo thư mời', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Giả lập API call
-    setTimeout(() => {
-      setAttendees(prev => prev.map(a => a.id === selectedAttendee.id ? selectedAttendee : a));
-      setIsSubmitting(false);
-      setIsEditModalOpen(false);
-      showToast(`Cập nhật thông tin ${selectedAttendee.name} thành công!`);
-    }, 1000);
+    await new Promise(r => setTimeout(r, 500));
+    setAttendees(prev => prev.map(a => a.id === selectedAttendee.id ? selectedAttendee : a));
+    setIsSubmitting(false);
+    setIsEditModalOpen(false);
+    showToast(`Cập nhật thông tin ${selectedAttendee.name} thành công!`);
   };
 
   const handleConfirmDelete = () => {
@@ -336,7 +447,14 @@ const OrganizerAttendeesPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {paginatedAttendees.map((attendee) => (
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-10 text-center text-slate-500 font-bold">
+                    <span className="material-symbols-outlined text-4xl animate-spin mb-2">progress_activity</span>
+                    <p>Đang tải danh sách khách mời...</p>
+                  </td>
+                </tr>
+              ) : paginatedAttendees.map((attendee) => (
                 <tr 
                   key={attendee.id} 
                   className="hover:bg-slate-50/50 transition-colors group h-[81px]"

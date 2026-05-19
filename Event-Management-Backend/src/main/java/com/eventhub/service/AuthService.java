@@ -38,7 +38,8 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
-    private final EmailService emailService;
+    private final com.eventhub.infrastructure.email.EmailService emailService;
+    private final com.eventhub.infrastructure.email.EmailTemplateService emailTemplateService;
     private final JwtConfig jwtProperties;
     private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
 
@@ -82,10 +83,13 @@ public class AuthService {
         String otp = generateOtp();
         saveOtpToRedis(request.getEmail(), otp);
 
-        emailService.sendEmail(
-                request.getEmail(),
-                "Xác thực tài khoản EventHub",
-                "Mã OTP của bạn là: " + otp + ". Mã có hiệu lực trong " + OTP_EXPIRY_MINUTES + " phút.");
+        String html = emailTemplateService.renderOtpEmail(
+                "Xác thực tài khoản",
+                "Cảm ơn bạn đã đăng ký tài khoản trên Prestige Planner. Vui lòng sử dụng mã OTP dưới đây để hoàn tất thủ tục xác thực.",
+                otp,
+                OTP_EXPIRY_MINUTES
+        );
+        emailService.sendHtmlMessage(request.getEmail(), "Xác thực tài khoản Prestige Planner", html);
     }
 
     public void verifyOtp(String email, String otp) {
@@ -115,10 +119,13 @@ public class AuthService {
         String otp = generateOtp();
         saveOtpToRedis(email, otp);
 
-        emailService.sendEmail(
-                email,
-                "Gửi lại mã xác thực EventHub",
-                "Mã OTP mới của bạn là: " + otp);
+        String html = emailTemplateService.renderOtpEmail(
+                "Gửi lại mã xác thực",
+                "Chúng tôi đã nhận được yêu cầu gửi lại mã xác thực của bạn. Vui lòng sử dụng mã OTP dưới đây để tiếp tục.",
+                otp,
+                OTP_EXPIRY_MINUTES
+        );
+        emailService.sendHtmlMessage(email, "Gửi lại mã xác thực Prestige Planner", html);
     }
 
     private String generateOtp() {
@@ -199,10 +206,13 @@ public class AuthService {
                 otp,
                 java.time.Duration.ofMinutes(OTP_EXPIRY_MINUTES));
 
-        emailService.sendEmail(
-                user.getEmail(),
-                "Yêu cầu khôi phục mật khẩu EventHub",
-                "Mã OTP khôi phục mật khẩu của bạn là: " + otp + ". Mã có hiệu lực trong " + OTP_EXPIRY_MINUTES + " phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.");
+        String html = emailTemplateService.renderOtpEmail(
+                "Khôi phục mật khẩu",
+                "Chúng tôi đã nhận được yêu cầu khôi phục mật khẩu của bạn. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email. Ngược lại, hãy sử dụng mã OTP dưới đây để đặt lại mật khẩu.",
+                otp,
+                OTP_EXPIRY_MINUTES
+        );
+        emailService.sendHtmlMessage(user.getEmail(), "Yêu cầu khôi phục mật khẩu Prestige Planner", html);
     }
 
     public void verifyResetOtp(String email, String otp) {

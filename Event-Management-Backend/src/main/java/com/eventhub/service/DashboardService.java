@@ -50,13 +50,15 @@ public class DashboardService {
         List<UUID> eventIds = events.stream().map(Event::getId).toList();
         List<Registration> allRegistrations = registrationRepository.findByEventIdIn(eventIds);
 
+        Instant now = Instant.now();
+
         BigDecimal totalRevenue = allRegistrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatus.CONFIRMED)
+                .filter(r -> r.getStatus() == RegistrationStatus.CONFIRMED && r.getCreatedAt() != null && r.getCreatedAt().isBefore(now))
                 .map(Registration::getFinalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Set<UUID> uniqueAttendees = allRegistrations.stream()
-                .filter(r -> r.getStatus() == RegistrationStatus.CONFIRMED)
+                .filter(r -> r.getStatus() == RegistrationStatus.CONFIRMED && r.getCreatedAt() != null && r.getCreatedAt().isBefore(now))
                 .map(r -> r.getAttendee().getId())
                 .collect(Collectors.toSet());
 

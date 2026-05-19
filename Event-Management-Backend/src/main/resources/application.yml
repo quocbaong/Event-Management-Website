@@ -30,6 +30,8 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
+    clean-disabled: false
+    clean-on-validation-error: true
 
   data:
     redis:
@@ -87,8 +89,8 @@ springdoc:
     operations-sorter: alpha
   default-produces-media-type: application/json
   info:
-    title: EventHub API
-    description: Event Management Website Backend API
+    title: Prestige Planner API
+    description: Prestige Planner Event Management Website Backend API
     version: 1.0.0
 
 server:

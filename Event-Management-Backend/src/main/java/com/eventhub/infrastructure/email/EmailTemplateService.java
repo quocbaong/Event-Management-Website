@@ -40,4 +40,20 @@ public class EmailTemplateService {
         context.setVariable("status", request.getStatus().name());
         return templateEngine.process("email/withdrawal-result", context);
     }
+
+    public String renderOtpEmail(String title, String message, String otp, long expiryMinutes) {
+        Context context = new Context();
+        context.setVariable("title", title);
+        context.setVariable("message", message);
+        context.setVariable("otp", otp);
+        context.setVariable("expiryMinutes", expiryMinutes);
+        return templateEngine.process("email/otp-verification", context);
+    }
+
+    public String renderInvitation(String eventTitle, String inviteLink) {
+        Context context = new Context();
+        context.setVariable("eventTitle", eventTitle);
+        context.setVariable("inviteLink", inviteLink);
+        return templateEngine.process("email/invitation", context);
+    }
 }
