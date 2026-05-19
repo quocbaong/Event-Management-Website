@@ -55,6 +55,11 @@ public class RegistrationService {
     private final ApplicationEventPublisher eventPublisher;
     private final QrCodeService qrCodeService;
 
+    @Caching(evict = {
+        @CacheEvict(value = "eventDetail", allEntries = true),
+        @CacheEvict(value = "featuredEvents", allEntries = true),
+        @CacheEvict(value = "upcomingEvents", allEntries = true)
+    })
     public RegistrationDetailResponse register(User attendee, UUID eventId, RegisterEventRequest request) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
@@ -109,11 +114,13 @@ public class RegistrationService {
         }
 
         BigDecimal finalAmount = totalAmount;
+        boolean isFree = finalAmount.compareTo(BigDecimal.ZERO) == 0;
 
         Registration registration = Registration.builder()
                 .event(event)
                 .attendee(attendee)
-                .status(RegistrationStatus.PENDING)
+                .status(isFree ? RegistrationStatus.CONFIRMED : RegistrationStatus.PENDING)
+                .confirmedAt(isFree ? Instant.now() : null)
                 .totalAmount(totalAmount)
                 .discountAmount(BigDecimal.ZERO)
                 .finalAmount(finalAmount)
@@ -128,6 +135,30 @@ public class RegistrationService {
         }
         ticketRepository.saveAll(tickets);
         registration.setTickets(tickets);
+
+        if (isFree) {
+            for (Ticket ticket : tickets) {
+                TicketType ticketType = ticket.getTicketType();
+                ticketType.setSoldQuantity(ticketType.getSoldQuantity() + 1);
+                ticketTypeRepository.save(ticketType);
+
+                String qrToken = "QR-" + ticket.getId().toString().substring(0, 8) + "-" + UUID.randomUUID().toString().substring(0, 8);
+                String qrContent = "ticket://event/" + event.getId() + "/ticket/" + ticket.getTicketCode();
+                String imageUrl = qrCodeService.generateQrImage(qrContent);
+                QrCode qrCode = QrCode.builder()
+                        .ticket(ticket)
+                        .token(qrToken)
+                        .imageUrl(imageUrl)
+                        .build();
+                qrCodeRepository.save(qrCode);
+                ticket.setQrCode(qrCode);
+            }
+
+            eventPublisher.publishEvent(new RegistrationConfirmedEvent(
+                    registration, tickets, attendee));
+
+            return toDetailResponse(registration, tickets);
+        }
 
         Transaction transaction = Transaction.builder()
                 .user(attendee)
