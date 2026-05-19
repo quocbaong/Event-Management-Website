@@ -107,4 +107,12 @@ public class OrganizerController {
         User currentUser = getCurrentUser(userDetails);
         return ResponseEntity.ok(eventService.publishEvent(currentUser, id, request));
     }
+
+    @PatchMapping("/{id}/submit-approval")
+    public ResponseEntity<EventResponse> submitApproval(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID id) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(eventService.submitApproval(currentUser, id));
+    }
 }

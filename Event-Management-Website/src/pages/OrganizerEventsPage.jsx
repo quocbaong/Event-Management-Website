@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { eventService } from '../services/eventService';
+import { ticketTypeService } from '../services/ticketTypeService';
 
 const STATUS_MAP = {
   DRAFT: { label: 'Draft', color: 'slate', pulse: false },
@@ -50,6 +51,8 @@ const mapEventFromApi = (event) => {
     rawStatus: event.status,
     statusColor: statusInfo.color,
     statusPulse: statusInfo.pulse,
+    isApproved: event.isApproved,
+    isPendingApproval: event.isPendingApproval,
     attendance,
     currentAttendees: event.currentAttendees || 0,
     maxAttendees: event.maxAttendees,
@@ -111,6 +114,14 @@ const OrganizerEventsPage = () => {
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, event: null });
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [loadingAi, setLoadingAi] = useState(false);
+  const [ticketTypes, setTicketTypes] = useState([]);
+  const [setupTicketsLoading, setSetupTicketsLoading] = useState(false);
+  const [newTicket, setNewTicket] = useState({
+    name: '',
+    price: '',
+    totalQuantity: '',
+    maxPerOrder: 5,
+  });
 
   const [createForm, setCreateForm] = useState({
     title: '', description: '', shortDesc: '', venue: '', address: '', city: '',
@@ -239,12 +250,82 @@ const OrganizerEventsPage = () => {
   };
 
   const handlePublish = async (event) => {
+    setSetupTicketsLoading(true);
+    setModalConfig({ isOpen: true, type: 'setup_tickets', event });
     try {
-      const res = await eventService.publishEvent(event.id, {});
-      setEvents(prev => prev.map(ev => ev.id === event.id ? mapEventFromApi(res.data) : ev));
-      showNotification(`Đã xuất bản sự kiện: ${event.name}`, 'success');
+      const res = await ticketTypeService.getTicketTypes(event.id);
+      setTicketTypes(res.data || []);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Không thể xuất bản sự kiện';
+      showNotification('Không thể lấy danh sách loại vé', 'error');
+    } finally {
+      setSetupTicketsLoading(false);
+    }
+  };
+
+  const handleAddTicketType = async (e) => {
+    e.preventDefault();
+    if (!newTicket.name.trim()) {
+      showNotification('Vui lòng nhập tên loại vé', 'error');
+      return;
+    }
+    if (!newTicket.totalQuantity || parseInt(newTicket.totalQuantity) <= 0) {
+      showNotification('Số lượng vé phải lớn hơn 0', 'error');
+      return;
+    }
+
+    try {
+      const payload = {
+        name: newTicket.name,
+        price: newTicket.price ? parseFloat(newTicket.price) : 0,
+        totalQuantity: parseInt(newTicket.totalQuantity),
+        maxPerOrder: parseInt(newTicket.maxPerOrder || 5),
+      };
+      
+      const res = await ticketTypeService.createTicketType(modalConfig.event.id, payload);
+      setTicketTypes(prev => [...prev, res.data]);
+      setNewTicket({ name: '', price: '', totalQuantity: '', maxPerOrder: 5 });
+      showNotification('Đã thêm loại vé thành công', 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể tạo loại vé';
+      showNotification(msg, 'error');
+    }
+  };
+
+  const handleDeleteTicketType = async (ticketId) => {
+    try {
+      await ticketTypeService.deleteTicketType(modalConfig.event.id, ticketId);
+      setTicketTypes(prev => prev.filter(tt => tt.id !== ticketId));
+      showNotification('Đã xóa loại vé thành công', 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể xóa loại vé';
+      showNotification(msg, 'error');
+    }
+  };
+
+  const handleConfirmPublish = async () => {
+    if (ticketTypes.length === 0) {
+      showNotification('Vui lòng thêm ít nhất một loại vé để mở bán', 'error');
+      return;
+    }
+
+    try {
+      const res = await eventService.publishEvent(modalConfig.event.id, {});
+      setEvents(prev => prev.map(ev => ev.id === modalConfig.event.id ? mapEventFromApi(res.data) : ev));
+      showNotification(`Đã xuất bản sự kiện: ${modalConfig.event.name}`, 'success');
+      closeModal();
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể mở bán vé';
+      showNotification(msg, 'error');
+    }
+  };
+
+  const handleSubmitApproval = async (event) => {
+    try {
+      const res = await eventService.submitApproval(event.id);
+      setEvents(prev => prev.map(ev => ev.id === event.id ? mapEventFromApi(res.data) : ev));
+      showNotification(`Đã gửi yêu cầu phê duyệt cho sự kiện: ${event.name}`, 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Không thể gửi yêu cầu phê duyệt';
       showNotification(msg, 'error');
     }
   };
@@ -369,24 +450,48 @@ const OrganizerEventsPage = () => {
   };
 
   const renderStatusBadge = (event) => {
-    const colors = {
-      slate: 'bg-slate-50 text-slate-600 border border-slate-100',
-      emerald: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
-      amber: 'bg-amber-50 text-amber-700 border border-amber-200',
-      indigo: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
-      rose: 'bg-rose-50 text-rose-700 border border-rose-100',
-    };
-    const dots = {
-      slate: 'bg-slate-400',
-      emerald: 'bg-emerald-500 animate-pulse',
-      amber: 'bg-amber-500',
-      indigo: 'bg-indigo-500',
-      rose: 'bg-rose-500',
-    };
+    let bgClass = 'bg-slate-50 text-slate-600 border border-slate-100';
+    let dotClass = 'bg-slate-400';
+    let label = event.status;
+
+    if (event.rawStatus === 'DRAFT') {
+      if (event.isPendingApproval) {
+        bgClass = 'bg-orange-50 text-orange-700 border border-orange-100';
+        dotClass = 'bg-orange-500 animate-pulse';
+        label = 'Chờ duyệt';
+      } else if (event.isApproved) {
+        bgClass = 'bg-sky-50 text-sky-700 border border-sky-100';
+        dotClass = 'bg-sky-500';
+        label = 'Đã duyệt (Chờ mở bán)';
+      } else {
+        bgClass = 'bg-slate-50 text-slate-500 border border-slate-100';
+        dotClass = 'bg-slate-400';
+        label = 'Nháp';
+      }
+    } else {
+      const colors = {
+        slate: 'bg-slate-50 text-slate-600 border border-slate-100',
+        emerald: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+        amber: 'bg-amber-50 text-amber-700 border border-amber-200',
+        indigo: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
+        rose: 'bg-rose-50 text-rose-700 border border-rose-100',
+      };
+      const dots = {
+        slate: 'bg-slate-400',
+        emerald: 'bg-emerald-500 animate-pulse',
+        amber: 'bg-amber-500',
+        indigo: 'bg-indigo-500',
+        rose: 'bg-rose-500',
+      };
+      bgClass = colors[event.statusColor] || colors.slate;
+      dotClass = dots[event.statusColor] || dots.slate;
+      label = event.status === 'Cancelled' ? 'Đã hủy' : event.status === 'Completed' ? 'Hoàn thành' : event.status;
+    }
+
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${colors[event.statusColor] || colors.slate}`}>
-        <span className={`w-1.5 h-1.5 rounded-full ${dots[event.statusColor] || dots.slate}`}></span>
-        {event.status === 'Cancelled' ? 'Đã hủy' : event.status === 'Completed' ? 'Hoàn thành' : event.status}
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${bgClass}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`}></span>
+        {label}
       </span>
     );
   };
@@ -431,7 +536,7 @@ const OrganizerEventsPage = () => {
               className={`relative w-full ${
                 modalConfig.type === 'analytics'
                   ? 'max-w-7xl h-[92vh] flex flex-col'
-                  : modalConfig.type === 'create' || modalConfig.type === 'edit'
+                  : modalConfig.type === 'create' || modalConfig.type === 'edit' || modalConfig.type === 'setup_tickets'
                   ? 'max-w-3xl max-h-[90vh] flex flex-col'
                   : 'max-w-xl flex flex-col'
               } bg-white rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-300`}
@@ -444,6 +549,7 @@ const OrganizerEventsPage = () => {
                     {modalConfig.type === 'edit' && 'Chỉnh sửa Sự kiện'}
                     {modalConfig.type === 'delete' && 'Xác nhận xóa'}
                     {modalConfig.type === 'analytics' && 'Phân tích Sự kiện'}
+                    {modalConfig.type === 'setup_tickets' && 'Cấu hình vé & Mở bán'}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium mt-1">
                     {modalConfig.event ? (
@@ -650,6 +756,145 @@ const OrganizerEventsPage = () => {
                       <button type="submit" className="px-10 py-3 rounded-2xl bg-primary text-white font-black shadow-lg shadow-indigo-200 hover:shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all">Lưu thay đổi</button>
                     </div>
                   </form>
+                )}
+
+                {/* SETUP TICKETS Modal */}
+                {modalConfig.type === 'setup_tickets' && (
+                  <div className="space-y-6">
+                    <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100/80 flex items-center gap-4">
+                      <div className="h-16 w-24 rounded-2xl overflow-hidden shrink-0 border border-slate-200 shadow-sm">
+                        <img alt={modalConfig.event?.name} className="w-full h-full object-cover" src={modalConfig.event?.image} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-800 text-base">{modalConfig.event?.name}</h4>
+                        <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1 font-medium">
+                          <span className="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
+                          {modalConfig.event?.location}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Ticket List */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 ml-1">
+                        <span className="material-symbols-outlined text-base text-primary">local_activity</span>
+                        Hạng vé hiện tại ({ticketTypes.length})
+                      </h4>
+
+                      {setupTicketsLoading ? (
+                        <div className="py-12 flex flex-col justify-center items-center text-slate-400 gap-2">
+                          <span className="material-symbols-outlined text-3xl animate-spin">progress_activity</span>
+                          <span className="text-xs font-bold">Đang tải cấu hình vé...</span>
+                        </div>
+                      ) : ticketTypes.length === 0 ? (
+                        <div className="py-10 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200/80 text-slate-400 text-xs font-semibold">
+                          Chưa có loại vé nào. Vui lòng thêm ít nhất một hạng vé ở form bên dưới.
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                          {ticketTypes.map((tt) => (
+                            <div key={tt.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all">
+                              <div>
+                                <p className="font-bold text-slate-800 text-sm">{tt.name}</p>
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px] text-slate-500 font-bold">
+                                  <span className="flex items-center gap-0.5 text-primary">
+                                    <span className="material-symbols-outlined text-[14px]">payments</span>
+                                    {tt.price === 0 ? 'Miễn phí' : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tt.price)}
+                                  </span>
+                                  <span className="text-slate-300">•</span>
+                                  <span className="flex items-center gap-0.5 text-emerald-600">
+                                    <span className="material-symbols-outlined text-[14px]">inventory_2</span>
+                                    Số lượng: {tt.totalQuantity}
+                                  </span>
+                                  <span className="text-slate-300">•</span>
+                                  <span className="flex items-center gap-0.5 text-amber-600">
+                                    <span className="material-symbols-outlined text-[14px]">lock_clock</span>
+                                    Tối đa/đơn: {tt.maxPerOrder}
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleDeleteTicketType(tt.id)}
+                                className="w-8 h-8 flex items-center justify-center text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-90"
+                                title="Xóa hạng vé"
+                              >
+                                <span className="material-symbols-outlined text-lg">delete</span>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Add New Ticket Type Form */}
+                    <form onSubmit={handleAddTicketType} className="border-t border-slate-100 pt-5 space-y-4">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Thêm hạng vé mới</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5 col-span-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tên hạng vé *</label>
+                          <input
+                            required
+                            placeholder="Ví dụ: Vé Phổ Thông, Vé VIP..."
+                            value={newTicket.name}
+                            onChange={e => setNewTicket(p => ({ ...p, name: e.target.value }))}
+                            className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs font-bold text-slate-700"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Giá vé (VND - Để trống nếu Miễn phí)</label>
+                          <input
+                            type="number"
+                            placeholder="0 (Miễn phí)"
+                            value={newTicket.price}
+                            onChange={e => setNewTicket(p => ({ ...p, price: e.target.value }))}
+                            className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs font-bold text-slate-700"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tổng số lượng vé *</label>
+                          <input
+                            required
+                            type="number"
+                            placeholder="Ví dụ: 100, 500..."
+                            value={newTicket.totalQuantity}
+                            onChange={e => setNewTicket(p => ({ ...p, totalQuantity: e.target.value }))}
+                            className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs font-bold text-slate-700"
+                          />
+                        </div>
+                        <div className="space-y-1.5 col-span-2">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Tối đa mua mỗi đơn hàng</label>
+                          <input
+                            type="number"
+                            placeholder="Mặc định: 5 vé"
+                            value={newTicket.maxPerOrder}
+                            onChange={e => setNewTicket(p => ({ ...p, maxPerOrder: e.target.value }))}
+                            className="w-full px-5 py-3 rounded-2xl border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-xs font-bold text-slate-700"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="submit"
+                          className="flex items-center gap-1.5 px-6 py-3 rounded-2xl bg-indigo-50 text-primary hover:bg-primary hover:text-white font-black text-xs transition-all active:scale-95 shadow-sm"
+                        >
+                          <span className="material-symbols-outlined text-base">add</span>
+                          Thêm hạng vé
+                        </button>
+                      </div>
+                    </form>
+
+                    <div className="flex justify-end gap-3 pt-5 border-t border-slate-100">
+                      <button type="button" onClick={closeModal} className="px-6 py-3 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all text-xs">Hủy</button>
+                      <button
+                        type="button"
+                        onClick={handleConfirmPublish}
+                        disabled={ticketTypes.length === 0}
+                        className="px-8 py-3 rounded-2xl bg-emerald-600 text-white font-black shadow-lg shadow-emerald-200 hover:shadow-xl hover:translate-y-[-2px] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition-all text-xs"
+                      >
+                        Xác nhận & Mở bán vé
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 {/* DELETE Modal */}
@@ -1101,13 +1346,31 @@ const OrganizerEventsPage = () => {
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
-                        {event.rawStatus === 'DRAFT' && (
+                        {event.rawStatus === 'DRAFT' && event.isApproved && (
                           <button
                             onClick={() => handlePublish(event)}
                             className="w-9 h-9 flex items-center justify-center bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
-                            title="Xuất bản"
+                            title="Mở bán vé (Xuất bản)"
                           >
                             <span className="material-symbols-outlined text-[18px]">publish</span>
+                          </button>
+                        )}
+                        {event.rawStatus === 'DRAFT' && !event.isApproved && !event.isPendingApproval && (
+                          <button
+                            onClick={() => handleSubmitApproval(event)}
+                            className="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                            title="Gửi yêu cầu duyệt"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">rule</span>
+                          </button>
+                        )}
+                        {event.rawStatus === 'DRAFT' && event.isPendingApproval && (
+                          <button
+                            disabled
+                            className="w-9 h-9 flex items-center justify-center bg-orange-50 text-orange-400 rounded-xl cursor-not-allowed"
+                            title="Đang chờ duyệt"
+                          >
+                            <span className="material-symbols-outlined text-[18px] animate-pulse">hourglass_empty</span>
                           </button>
                         )}
                         <button

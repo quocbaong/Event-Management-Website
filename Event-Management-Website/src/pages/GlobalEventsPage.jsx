@@ -93,6 +93,7 @@ const GlobalEventsPage = () => {
 
   // Selection states for bulk actions
   const [selectedIds, setSelectedIds] = useState([]);
+  const [processingIds, setProcessingIds] = useState([]);
 
   const fetchEvents = async () => {
     try {
@@ -153,24 +154,28 @@ const GlobalEventsPage = () => {
   };
 
   const handleApproveEvent = async (dbId, name) => {
-    if (window.confirm(`Bạn có chắc chắn muốn phê duyệt sự kiện "${name}"?`)) {
-      try {
-        await axios.post(`/admin/events/${dbId}/approve`);
-        fetchEvents();
-      } catch (error) {
-        console.error('Lỗi khi phê duyệt sự kiện', error);
-      }
+    if (processingIds.includes(dbId)) return;
+    setProcessingIds(prev => [...prev, dbId]);
+    try {
+      await axios.post(`/admin/events/${dbId}/approve`);
+      await fetchEvents();
+    } catch (error) {
+      console.error('Lỗi khi phê duyệt sự kiện', error);
+    } finally {
+      setProcessingIds(prev => prev.filter(id => id !== dbId));
     }
   };
 
   const handleSuspendEvent = async (dbId, name) => {
-    if (window.confirm(`Bạn có chắc chắn muốn đình chỉ sự kiện "${name}"?`)) {
-      try {
-        await axios.post(`/admin/events/${dbId}/suspend`);
-        fetchEvents();
-      } catch (error) {
-        console.error('Lỗi khi đình chỉ sự kiện', error);
-      }
+    if (processingIds.includes(dbId)) return;
+    setProcessingIds(prev => [...prev, dbId]);
+    try {
+      await axios.post(`/admin/events/${dbId}/suspend`);
+      await fetchEvents();
+    } catch (error) {
+      console.error('Lỗi khi đình chỉ sự kiện', error);
+    } finally {
+      setProcessingIds(prev => prev.filter(id => id !== dbId));
     }
   };
 
@@ -456,8 +461,9 @@ const GlobalEventsPage = () => {
                       <div className="flex justify-end gap-2">
                         {row.status.text === 'Chờ phê duyệt' && (
                           <button 
+                            disabled={processingIds.includes(row.dbId)}
                             onClick={() => handleApproveEvent(row.dbId, row.name)}
-                            className="p-2.5 rounded-xl hover:bg-green-50 text-green-700 transition-all"
+                            className="p-2.5 rounded-xl hover:bg-green-50 text-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Phê duyệt sự kiện"
                           >
                             <CheckCircle2 className="w-4 h-4" />
@@ -465,8 +471,9 @@ const GlobalEventsPage = () => {
                         )}
                         {row.status.text !== 'Bị đình chỉ' && (
                           <button 
+                            disabled={processingIds.includes(row.dbId)}
                             onClick={() => handleSuspendEvent(row.dbId, row.name)}
-                            className="p-2.5 rounded-xl hover:bg-red-50 text-red-500 transition-all"
+                            className="p-2.5 rounded-xl hover:bg-red-50 text-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Đình chỉ sự kiện"
                           >
                             <Ban className="w-4 h-4" />
