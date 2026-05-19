@@ -92,4 +92,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     List<Registration> findAllAnalyticsByOrganizer(@Param("organizerId") UUID organizerId);
 
     List<Registration> findByAttendeeIdOrderByCreatedAtDesc(UUID attendeeId);
+
+    boolean existsByEventIdAndAttendeeId(UUID eventId, UUID attendeeId);
 }

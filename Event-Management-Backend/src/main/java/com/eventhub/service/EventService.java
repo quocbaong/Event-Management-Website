@@ -44,6 +44,7 @@ public class EventService {
     private final EventTimelineRepository eventTimelineRepository;
     private final EventMapper eventMapper;
     private final com.eventhub.repository.InvitationRepository invitationRepository;
+    private final com.eventhub.repository.TicketTypeRepository ticketTypeRepository;
 
     public Page<EventSummaryResponse> getEvents(EventFilterRequest filter, Pageable pageable) {
         Page<Event> events = eventRepository.findAll(EventSpecification.filterPublicEvents(filter), pageable);
@@ -169,12 +170,29 @@ public class EventService {
         eventRepository.delete(event);
     }
 
+    public EventResponse submitApproval(User organizer, UUID eventId) {
+        Event event = eventRepository.findByIdAndOrganizerId(eventId, organizer.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
+
+        if (event.getIsApproved()) {
+            throw new InvalidOperationException("Event is already approved");
+        }
+
+        event.setIsPendingApproval(true);
+        event = eventRepository.save(event);
+        return toEventResponse(event);
+    }
+
     public EventResponse publishEvent(User organizer, UUID eventId, PublishEventRequest request) {
         Event event = eventRepository.findByIdAndOrganizerId(eventId, organizer.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
 
         if (event.getStatus() == EventStatus.PUBLISHED) {
             throw new InvalidOperationException("Event is already published");
+        }
+
+        if (!Boolean.TRUE.equals(event.getIsApproved())) {
+            throw new InvalidOperationException("Sự kiện chưa được Admin phê duyệt. Không thể mở bán vé.");
         }
 
         validatePublishable(event);
@@ -187,11 +205,20 @@ public class EventService {
 
     private void validatePublishable(Event event) {
         if (event.getVenue() == null || event.getVenue().isBlank()) {
-            throw new InvalidOperationException("Cannot publish event without a venue");
+            event.setVenue("Online / Trực tiếp");
         }
 
         if (event.getTicketTypes() == null || event.getTicketTypes().isEmpty()) {
-            throw new InvalidOperationException("Cannot publish event without at least one ticket type");
+            TicketType defaultTicket = new TicketType();
+            defaultTicket.setEvent(event);
+            defaultTicket.setName("Vé Phổ Thông");
+            defaultTicket.setPrice(java.math.BigDecimal.ZERO);
+            defaultTicket.setTotalQuantity(100);
+            defaultTicket.setSoldQuantity(0);
+            defaultTicket.setMaxPerOrder(5);
+            defaultTicket.setIsActive(true);
+            ticketTypeRepository.save(defaultTicket);
+            event.setTicketTypes(List.of(defaultTicket));
         }
 
         if (event.getStartDate() == null || event.getEndDate() == null) {
@@ -200,12 +227,9 @@ public class EventService {
         if (!event.getStartDate().isBefore(event.getEndDate())) {
             throw new InvalidOperationException("Start date must be before end date");
         }
-        if (event.getStartDate().isBefore(Instant.now())) {
-            throw new InvalidOperationException("Start date must be in the future");
-        }
 
         if (event.getBannerUrl() == null || event.getBannerUrl().isBlank()) {
-            throw new InvalidOperationException("Cannot publish event without a banner image");
+            event.setBannerUrl("https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=1200");
         }
     }
 
@@ -259,6 +283,8 @@ public class EventService {
                 .shortDesc(event.getShortDesc())
                 .category(event.getCategory())
                 .status(event.getStatus())
+                .isApproved(event.getIsApproved())
+                .isPendingApproval(event.getIsPendingApproval())
                 .bannerUrl(event.getBannerUrl())
                 .thumbnailUrl(event.getThumbnailUrl())
                 .venue(event.getVenue())
@@ -321,6 +347,8 @@ public class EventService {
                 .shortDesc(event.getShortDesc())
                 .category(event.getCategory())
                 .status(event.getStatus())
+                .isApproved(event.getIsApproved())
+                .isPendingApproval(event.getIsPendingApproval())
                 .bannerUrl(event.getBannerUrl())
                 .thumbnailUrl(event.getThumbnailUrl())
                 .venue(event.getVenue())

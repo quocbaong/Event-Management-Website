@@ -56,7 +56,8 @@ const EventDetailPage = () => {
   const [error, setError] = useState(null);
 
   // Registration selection state
-  const [selectedQuantities, setSelectedQuantities] = useState({});
+  const [selectedTicketTypeId, setSelectedTicketTypeId] = useState('');
+  const [ticketQuantity, setTicketQuantity] = useState(1);
   const [notes, setNotes] = useState('');
   const [couponCode, setCouponCode] = useState('');
   
@@ -73,6 +74,10 @@ const EventDetailPage = () => {
         const eventData = eventRes.data;
         setEvent(eventData);
 
+        if (eventData.ticketTypes && eventData.ticketTypes.length > 0) {
+          setSelectedTicketTypeId(eventData.ticketTypes[0].id);
+        }
+
         // Fetch schedules
         const scheduleRes = await eventService.getPublicEventSchedules(eventData.id);
         setSchedules(scheduleRes.data || []);
@@ -84,14 +89,27 @@ const EventDetailPage = () => {
       }
     };
     fetchEventData();
+
+    // Polling interval to fetch ticket availability in real-time
+    const interval = setInterval(async () => {
+      try {
+        const eventRes = await eventService.getPublicEventDetail(slug);
+        setEvent(eventRes.data);
+      } catch (err) {
+        console.error('Failed to silently refresh event tickets:', err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [slug]);
 
-  const handleQuantityChange = (ticketTypeId, amount, maxQuantity) => {
-    setSelectedQuantities(prev => {
-      const current = prev[ticketTypeId] || 0;
-      const next = Math.max(0, Math.min(maxQuantity, current + amount));
-      return { ...prev, [ticketTypeId]: next };
-    });
+  const refreshEventData = async () => {
+    try {
+      const eventRes = await eventService.getPublicEventDetail(slug);
+      setEvent(eventRes.data);
+    } catch (err) {
+      console.error('Failed to refresh event data:', err);
+    }
   };
 
   const getMinPrice = () => {
@@ -102,11 +120,10 @@ const EventDetailPage = () => {
   };
 
   const getTotalAmount = () => {
-    if (!event || !event.ticketTypes) return 0;
-    return event.ticketTypes.reduce((total, tt) => {
-      const qty = selectedQuantities[tt.id] || 0;
-      return total + (qty * tt.price);
-    }, 0);
+    if (!event || !event.ticketTypes || !selectedTicketTypeId) return 0;
+    const selectedTicket = event.ticketTypes.find(tt => tt.id === selectedTicketTypeId);
+    if (!selectedTicket) return 0;
+    return selectedTicket.price * ticketQuantity;
   };
 
   const handleRegister = async () => {
@@ -115,12 +132,8 @@ const EventDetailPage = () => {
       return;
     }
 
-    const selectedTickets = Object.entries(selectedQuantities)
-      .filter(([_, qty]) => qty > 0)
-      .map(([id, qty]) => ({ ticketTypeId: id, quantity: qty }));
-
-    if (selectedTickets.length === 0) {
-      setRegError('Vui lòng chọn ít nhất 1 vé.');
+    if (!selectedTicketTypeId || ticketQuantity <= 0) {
+      setRegError('Vui lòng chọn loại vé và số lượng.');
       return;
     }
 
@@ -128,7 +141,12 @@ const EventDetailPage = () => {
       setFlowState('registering');
       setRegError('');
       const payload = {
-        tickets: selectedTickets,
+        tickets: [
+          {
+            ticketTypeId: selectedTicketTypeId,
+            quantity: ticketQuantity
+          }
+        ],
         couponCode: couponCode || undefined,
         notes: notes || undefined
       };
@@ -139,12 +157,13 @@ const EventDetailPage = () => {
       // If registration status is already confirmed or amount is 0, we can complete
       if (regDetail.status === 'CONFIRMED' || regDetail.finalAmount === 0) {
         setFlowState('success');
+        refreshEventData();
       } else {
         setFlowState('payment_pending');
       }
     } catch (err) {
       console.error('Registration failed:', err);
-      setRegError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng ký vé.');
+      setRegError(err.response?.data?.error || err.response?.data?.message || 'Có lỗi xảy ra khi đăng ký vé.');
       setFlowState('selection');
     }
   };
@@ -156,9 +175,10 @@ const EventDetailPage = () => {
       const response = await registrationService.confirmRegistration(event.id, activeRegistration.id);
       setActiveRegistration(response.data);
       setFlowState('success');
+      refreshEventData();
     } catch (err) {
       console.error('Payment confirmation failed:', err);
-      setRegError(err.response?.data?.message || 'Không thể xác nhận thanh toán.');
+      setRegError(err.response?.data?.error || err.response?.data?.message || 'Không thể xác nhận thanh toán.');
       setFlowState('payment_pending');
     }
   };
@@ -351,43 +371,63 @@ const EventDetailPage = () => {
                         
                         <div className="space-y-4 mb-6">
                           {event.ticketTypes && event.ticketTypes.length > 0 ? (
-                            event.ticketTypes.map((tt) => {
-                              const selectedQty = selectedQuantities[tt.id] || 0;
-                              const available = tt.totalQuantity - (tt.soldQuantity || 0);
+                            (() => {
+                              const selectedTicket = event.ticketTypes.find(tt => tt.id === selectedTicketTypeId);
+                              const selectedAvailable = selectedTicket ? (selectedTicket.totalQuantity - (selectedTicket.soldQuantity || 0)) : 0;
+
                               return (
-                                <div key={tt.id} className="p-5 rounded-3xl bg-slate-50 border border-slate-100 flex flex-col gap-3">
-                                  <div className="flex justify-between items-start gap-4">
-                                    <div>
-                                      <h4 className="font-bold text-slate-900 text-base">{tt.name}</h4>
-                                      <p className="text-slate-400 text-xs mt-0.5">{tt.description || 'Hạng vé tham dự'}</p>
-                                    </div>
-                                    <span className="text-indigo-600 font-extrabold text-base">{formatPrice(tt.price)}</span>
-                                  </div>
-                                  
-                                  <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-200/50">
-                                    <span className="text-xs font-medium text-slate-400">
-                                      {available <= 10 ? `Chỉ còn ${available} vé` : `Còn trống: ${available} vé`}
-                                    </span>
-                                    
-                                    <div className="flex items-center gap-3">
-                                      <button 
-                                        onClick={() => handleQuantityChange(tt.id, -1, available)}
-                                        className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                <>
+                                  {/* Select Ticket Type */}
+                                  <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-400 uppercase tracking-wider">Chọn loại vé</label>
+                                    <div className="relative">
+                                      <select
+                                        value={selectedTicketTypeId}
+                                        onChange={(e) => {
+                                          setSelectedTicketTypeId(e.target.value);
+                                          setTicketQuantity(1);
+                                        }}
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-3xl py-4 px-5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none cursor-pointer"
                                       >
-                                        -
-                                      </button>
-                                      <span className="font-black text-slate-800 text-sm w-4 text-center">{selectedQty}</span>
-                                      <button 
-                                        onClick={() => handleQuantityChange(tt.id, 1, available)}
-                                        className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
-                                      >
-                                        +
-                                      </button>
+                                        {event.ticketTypes.map(tt => (
+                                          <option key={tt.id} value={tt.id}>
+                                            {tt.name} — {formatPrice(tt.price)}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      <span className="material-symbols-outlined absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        keyboard_arrow_down
+                                      </span>
                                     </div>
                                   </div>
-                                </div>
+
+                                  {/* Ticket Quantity & Details */}
+                                  {selectedTicket && (
+                                    <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                      <span className="text-xs font-semibold text-slate-500">
+                                        {selectedAvailable <= 10 ? `Chỉ còn ${selectedAvailable} vé` : `Còn trống: ${selectedAvailable} vé`}
+                                      </span>
+                                      
+                                      <div className="flex items-center gap-3">
+                                        <button 
+                                          onClick={() => setTicketQuantity(prev => Math.max(1, prev - 1))}
+                                          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                        >
+                                          -
+                                        </button>
+                                        <span className="font-black text-slate-800 text-sm w-4 text-center">{ticketQuantity}</span>
+                                        <button 
+                                          onClick={() => setTicketQuantity(prev => Math.min(selectedAvailable, prev + 1))}
+                                          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
                               );
-                            })
+                            })()
                           ) : (
                             <p className="text-slate-400 text-sm">Hết vé hoặc không có loại vé nào khả dụng.</p>
                           )}

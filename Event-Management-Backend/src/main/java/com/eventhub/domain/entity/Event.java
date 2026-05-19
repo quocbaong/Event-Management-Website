@@ -69,6 +69,15 @@ public class Event extends BaseEntity {
     @Builder.Default
     private EventStatus status = EventStatus.DRAFT;
 
+    @Column(name = "is_approved", nullable = false)
+    @Builder.Default
+    private Boolean isApproved = false;
+
+    @Column(name = "is_pending_approval", nullable = false)
+    @Builder.Default
+    private Boolean isPendingApproval = false;
+
+
     @Column(name = "banner_url", length = 1000)
     private String bannerUrl;
 

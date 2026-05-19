@@ -28,6 +28,8 @@ import com.eventhub.web.dto.response.PaymentResponse;
 import com.eventhub.web.dto.response.RegistrationDetailResponse;
 import com.eventhub.web.dto.response.RegistrationResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,10 @@ public class RegistrationService {
 
         if (event.getStatus() != com.eventhub.domain.enums.EventStatus.PUBLISHED) {
             throw new InvalidOperationException("Event is not published");
+        }
+
+        if (registrationRepository.existsByEventIdAndAttendeeId(eventId, attendee.getId())) {
+            throw new InvalidOperationException("Bạn đã đăng ký tham gia sự kiện này rồi.");
         }
 
         List<Ticket> tickets = new ArrayList<>();
@@ -147,6 +153,11 @@ public class RegistrationService {
         return detail;
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "eventDetail", allEntries = true),
+        @CacheEvict(value = "featuredEvents", allEntries = true),
+        @CacheEvict(value = "upcomingEvents", allEntries = true)
+    })
     public RegistrationDetailResponse confirmRegistration(UUID eventId, UUID registrationId) {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Registration not found with id: " + registrationId));

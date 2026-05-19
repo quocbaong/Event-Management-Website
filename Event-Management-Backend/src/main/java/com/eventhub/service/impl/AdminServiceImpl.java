@@ -181,7 +181,9 @@ public class AdminServiceImpl implements AdminService {
         }
 
         StringBuilder sql = new StringBuilder(
-            "SELECT e.id, e.title, e.thumbnail_url, u.email, op.company_name, op.is_verified, op.total_revenue, op.logo_url, e.status, e.current_attendees, e.max_attendees, e.start_date " +
+            "SELECT e.id, e.title, e.thumbnail_url, u.email, op.company_name, op.is_verified, op.total_revenue, op.logo_url, e.status, " +
+            "(COALESCE((SELECT SUM(tt.sold_quantity) FROM ticket_types tt WHERE tt.event_id = e.id), 0) + COALESCE((SELECT COUNT(*) FROM invitations inv WHERE inv.event_id = e.id AND inv.status = 'ACCEPTED'), 0)) AS current_attendees, " +
+            "e.max_attendees, e.start_date, e.is_approved, e.is_pending_approval " +
             "FROM events e " +
             "JOIN users u ON e.organizer_id = u.id " +
             "LEFT JOIN organizer_profiles op ON u.id = op.user_id " +
@@ -218,7 +220,7 @@ public class AdminServiceImpl implements AdminService {
             if (status.equals("Đang diễn ra")) {
                 conditions.add("(e.status = 'PUBLISHED' OR e.status = 'ONGOING')");
             } else if (status.equals("Chờ phê duyệt")) {
-                conditions.add("e.status = 'DRAFT'");
+                conditions.add("e.is_pending_approval = true");
             } else if (status.equals("Bị đình chỉ")) {
                 conditions.add("e.status = 'CANCELLED'");
             }
@@ -276,14 +278,23 @@ public class AdminServiceImpl implements AdminService {
                 }
             }
 
-            String statusText = "Chờ phê duyệt";
-            String statusColor = "bg-orange-100 text-orange-700 dot-orange";
-            if (evtStatus.equals("PUBLISHED") || evtStatus.equals("ONGOING") || evtStatus.equals("ON_SALE") || evtStatus.equals("SOLD_OUT") || evtStatus.equals("COMPLETED")) {
+            Boolean isApproved = r[12] != null ? (Boolean) r[12] : false;
+            Boolean isPendingApproval = r[13] != null ? (Boolean) r[13] : false;
+
+            String statusText = "Draft";
+            String statusColor = "bg-gray-100 text-gray-700 dot-gray";
+            if (Boolean.TRUE.equals(isPendingApproval)) {
+                statusText = "Chờ phê duyệt";
+                statusColor = "bg-orange-100 text-orange-700 dot-orange";
+            } else if (evtStatus.equals("PUBLISHED") || evtStatus.equals("ONGOING") || evtStatus.equals("ON_SALE") || evtStatus.equals("SOLD_OUT") || evtStatus.equals("COMPLETED")) {
                 statusText = "Đang diễn ra";
                 statusColor = "bg-green-100 text-green-700 dot-green";
             } else if (evtStatus.equals("CANCELLED")) {
                 statusText = "Bị đình chỉ";
                 statusColor = "bg-red-100 text-red-700 dot-red";
+            } else if (Boolean.TRUE.equals(isApproved)) {
+                statusText = "Đã duyệt (Chờ mở bán)";
+                statusColor = "bg-blue-100 text-blue-700 dot-blue";
             }
 
             int percent = maxAtt > 0 ? (int) Math.round((currentAtt * 100.0) / maxAtt) : 0;
@@ -331,15 +342,38 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void approveEvent(UUID id) {
-        entityManager.createNativeQuery("UPDATE events SET status = 'PUBLISHED' WHERE id = :id")
+        entityManager.createNativeQuery("UPDATE events SET is_approved = true, is_pending_approval = false WHERE id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
+
+        try {
+            Object[] eventInfo = (Object[]) entityManager.createNativeQuery(
+                    "SELECT title, organizer_id FROM events WHERE id = :id")
+                    .setParameter("id", id)
+                    .getSingleResult();
+            String title = (String) eventInfo[0];
+            UUID organizerId = (UUID) eventInfo[1];
+
+            com.eventhub.domain.entity.User organizer = entityManager.find(com.eventhub.domain.entity.User.class, organizerId);
+            if (organizer != null) {
+                com.eventhub.domain.entity.Notification notif = com.eventhub.domain.entity.Notification.builder()
+                        .user(organizer)
+                        .type(com.eventhub.domain.enums.NotificationType.EVENT_UPDATE)
+                        .title("Sự kiện đã được phê duyệt!")
+                        .body("Sự kiện '" + title + "' của bạn đã được phê duyệt thành công. Bạn có thể mở bán vé ngay bây giờ.")
+                        .isRead(false)
+                        .build();
+                entityManager.persist(notif);
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     @Override
     @Transactional
     public void suspendEvent(UUID id) {
-        entityManager.createNativeQuery("UPDATE events SET status = 'CANCELLED' WHERE id = :id")
+        entityManager.createNativeQuery("UPDATE events SET status = 'CANCELLED', is_approved = false, is_pending_approval = false WHERE id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
     }
@@ -348,9 +382,34 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void bulkApprove(List<UUID> ids) {
         if (ids != null && !ids.isEmpty()) {
-            entityManager.createNativeQuery("UPDATE events SET status = 'PUBLISHED' WHERE id IN (:ids)")
+            entityManager.createNativeQuery("UPDATE events SET is_approved = true, is_pending_approval = false WHERE id IN (:ids)")
                     .setParameter("ids", ids)
                     .executeUpdate();
+
+            for (UUID id : ids) {
+                try {
+                    Object[] eventInfo = (Object[]) entityManager.createNativeQuery(
+                            "SELECT title, organizer_id FROM events WHERE id = :id")
+                            .setParameter("id", id)
+                            .getSingleResult();
+                    String title = (String) eventInfo[0];
+                    UUID organizerId = (UUID) eventInfo[1];
+
+                    com.eventhub.domain.entity.User organizer = entityManager.find(com.eventhub.domain.entity.User.class, organizerId);
+                    if (organizer != null) {
+                        com.eventhub.domain.entity.Notification notif = com.eventhub.domain.entity.Notification.builder()
+                                .user(organizer)
+                                .type(com.eventhub.domain.enums.NotificationType.EVENT_UPDATE)
+                                .title("Sự kiện đã được phê duyệt!")
+                                .body("Sự kiện '" + title + "' của bạn đã được phê duyệt thành công. Bạn có thể mở bán vé ngay bây giờ.")
+                                .isRead(false)
+                                .build();
+                        entityManager.persist(notif);
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
         }
     }
 

@@ -28,6 +28,8 @@ public class EventResponse {
     private String shortDesc;
     private EventCategory category;
     private EventStatus status;
+    private Boolean isApproved;
+    private Boolean isPendingApproval;
     private String bannerUrl;
     private String thumbnailUrl;
     private String venue;
