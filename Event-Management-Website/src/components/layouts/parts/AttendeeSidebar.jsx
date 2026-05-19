@@ -8,7 +8,8 @@ import {
   QrCode,
   Star,
   Heart,
-  LogOut
+  LogOut,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '../../../stores/AuthContext';
 
@@ -47,7 +48,10 @@ const AttendeeSidebar = () => {
   return (
     <aside className="w-[var(--sidebar-width)] h-screen bg-white border-r border-slate-100 flex flex-col pt-4 pb-6">
       {/* Brand Section */}
-      <div className="px-6 mb-8">
+      <div 
+        onClick={() => navigate('/attendee/dashboard')}
+        className="px-6 mb-8 cursor-pointer hover:opacity-85 transition-opacity"
+      >
         <img src={logo} alt="Nexus Events" className="h-14 w-auto object-contain" />
       </div>
 
@@ -92,7 +96,13 @@ const AttendeeSidebar = () => {
       </nav>
 
       {/* Logout Section */}
-      <div className="px-4 pt-4 border-t border-slate-100">
+      <div className="px-4 pt-4 border-t border-slate-100 space-y-1">
+        <SidebarItem
+          icon={HelpCircle}
+          label="Hỗ trợ"
+          active={isActive('/attendee/help')}
+          onClick={() => navigate('/attendee/help')}
+        />
         <SidebarItem
           icon={LogOut}
           label="Đăng xuất"

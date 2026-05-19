@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '../lib/axios';
 import { 
   Bell, 
   MapPin, 
@@ -16,17 +17,28 @@ import {
 const NotificationPage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedNotif, setSelectedNotif] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const filters = [
-    { id: 'all', label: 'Tất cả' },
-    { id: 'unread', label: 'Chưa đọc (3)' },
-    { id: 'calendar', label: 'Cập nhật lịch' },
-    { id: 'confirmation', label: 'Xác nhận' }
-  ];
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/notifications');
+      setNotifications(response.data || []);
+    } catch (error) {
+      console.error('Lỗi khi tải thông báo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const notifications = [
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const mockNotifications = [
     {
-      id: 1,
+      id: 'mock-1',
       type: 'location',
       title: 'Thay đổi địa điểm: Hội thảo AI 2024',
       description: 'Sự kiện đã được chuyển sang Grand Ballroom, Khách sạn Park Hyatt thay vì địa điểm cũ tại Trung tâm Hội nghị Quốc gia. Vui lòng cập nhật lộ trình của bạn.',
@@ -37,7 +49,7 @@ const NotificationPage = () => {
       unread: true,
     },
     {
-      id: 2,
+      id: 'mock-2',
       type: 'reminder',
       title: 'Nhắc nhở lịch trình: Lễ ra mắt sản phẩm X',
       description: 'Chương trình sẽ bắt đầu trong vòng 2 giờ tới. Đừng quên mang theo mã QR để check-in nhanh chóng tại quầy đón tiếp.',
@@ -47,7 +59,7 @@ const NotificationPage = () => {
       unread: true,
     },
     {
-      id: 3,
+      id: 'mock-3',
       type: 'approval',
       title: 'Xác nhận đăng ký: Đêm nhạc Indigo Nexus',
       description: 'Yêu cầu đăng ký của bạn đã được phê duyệt thành công. Vé điện tử đã được gửi tới email cá nhân của bạn.',
@@ -57,7 +69,7 @@ const NotificationPage = () => {
       unread: false,
     },
     {
-      id: 4,
+      id: 'mock-4',
       type: 'update',
       title: 'Cập nhật phiên thảo luận',
       description: 'Phiên thảo luận "Tương lai của thiết kế" sẽ bắt đầu muộn hơn 15 phút so với dự kiến ban đầu. Rất xin lỗi vì sự bất tiện này.',
@@ -66,6 +78,41 @@ const NotificationPage = () => {
       unread: false,
     }
   ];
+
+  const getNotificationsList = () => {
+    if (notifications && notifications.length > 0) {
+      return notifications;
+    }
+    return mockNotifications;
+  };
+
+  const unreadCount = getNotificationsList().filter(n => n.unread).length;
+
+  const filters = [
+    { id: 'all', label: 'Tất cả' },
+    { id: 'unread', label: `Chưa đọc (${unreadCount})` },
+    { id: 'calendar', label: 'Cập nhật lịch' },
+    { id: 'confirmation', label: 'Xác nhận' }
+  ];
+
+  const filteredNotifications = getNotificationsList().filter(notif => {
+    if (activeFilter === 'unread') return notif.unread;
+    if (activeFilter === 'calendar') return notif.type === 'location' || notif.type === 'reminder' || notif.type === 'update';
+    if (activeFilter === 'confirmation') return notif.type === 'approval';
+    return true;
+  });
+
+  const handleSelectNotification = async (notif) => {
+    setSelectedNotif(notif);
+    if (notif.unread && !String(notif.id).startsWith('mock-')) {
+      try {
+        await axios.post(`/notifications/${notif.id}/read`);
+        setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, unread: false, isNew: false } : n));
+      } catch (error) {
+        console.error('Lỗi khi đánh dấu đã đọc:', error);
+      }
+    }
+  };
 
   const getIcon = (type) => {
     switch(type) {
@@ -116,10 +163,10 @@ const NotificationPage = () => {
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto no-scrollbar bg-slate-50/50">
         <div className="max-w-[1000px] mx-auto p-10 space-y-4">
-          {notifications.map((notif) => (
+          {filteredNotifications.map((notif) => (
             <div 
               key={notif.id}
-              onClick={() => setSelectedNotif(notif)}
+              onClick={() => handleSelectNotification(notif)}
               className={`relative group bg-white rounded-[32px] p-8 border-2 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex items-start gap-6 cursor-pointer ${
                 notif.unread ? 'border-indigo-600/30' : 'border-white'
               }`}
@@ -186,7 +233,7 @@ const NotificationPage = () => {
               Tải thêm thông báo
             </button>
             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-              Hiển thị 4 trên tổng số 24 thông báo
+              Hiển thị {filteredNotifications.length} trên tổng số {notifications.length} thông báo
             </p>
           </div>
         </div>

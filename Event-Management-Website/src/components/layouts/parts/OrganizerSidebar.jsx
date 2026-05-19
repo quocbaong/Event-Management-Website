@@ -23,7 +23,6 @@ const OrganizerSidebar = () => {
   ];
 
   const bottomItems = [
-    { icon: "settings", label: "Cài đặt", path: "/organizer/settings" },
     { icon: "help", label: "Hỗ trợ", path: "/organizer/help" },
   ];
 
@@ -34,7 +33,7 @@ const OrganizerSidebar = () => {
       <div className="mb-10 px-2 flex justify-center">
         <div 
           className="cursor-pointer group flex flex-col items-center text-center"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/organizer/dashboard')}
         >
           <img 
             src={logo} 

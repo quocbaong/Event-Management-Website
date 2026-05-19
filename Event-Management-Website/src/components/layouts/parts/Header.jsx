@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { Search, Bell, Mail, ChevronRight, Settings, User as UserIcon } from 'lucide-react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Search, Bell, Mail, ChevronRight, Settings, User as UserIcon, LogOut, Check } from 'lucide-react';
 import UserProfileModal from '../../modals/UserProfileModal';
 import NotificationDropdown from '../../common/NotificationDropdown';
+import { useAuth } from '../../../stores/AuthContext';
 
 const Header = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'A';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  };
 
   const getBreadcrumbs = () => {
     switch (location.pathname) {
@@ -70,8 +87,6 @@ const Header = () => {
           {getBreadcrumbs()}
         </div>
 
-        {/* Center Nav removed for synchronization */}
-
         {/* Right Actions */}
         <div className="flex items-center gap-4">
           {/* Search Bar - hidden for broadcast and settings */}
@@ -93,12 +108,18 @@ const Header = () => {
               className={`relative p-2 rounded-xl transition-all ${isNotifOpen ? 'bg-primary/10 text-primary' : 'hover:bg-gray-50 text-slate-600'}`}
             >
               <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
             </button>
 
             <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
 
-            <Link to="/admin/settings" className="p-2 rounded-xl hover:bg-gray-50 text-slate-600 transition-all">
+            <Link 
+              to="/admin/settings" 
+              className={`p-2 rounded-xl transition-all ${
+                location.pathname === '/admin/settings' ? 'bg-primary/10 text-primary' : 'hover:bg-gray-50 text-slate-600'
+              }`}
+              title="Cấu hình hệ thống"
+            >
               <Settings className="w-5 h-5" />
             </Link>
           </div>
@@ -106,17 +127,83 @@ const Header = () => {
           <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
 
           {/* User Profile */}
-          <div
-            className="flex items-center gap-2 cursor-pointer group"
-            onClick={() => setIsProfileModalOpen(true)}
-          >
-            {location.pathname !== '/admin/settings' && <span className="text-sm font-medium text-slate-600">Hệ thống</span>}
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${location.pathname === '/admin/settings'
-                ? 'bg-primary text-white border border-primary/20'
-                : 'bg-slate-100 text-slate-500 border border-slate-200 group-hover:border-primary'
-              }`}>
-              {location.pathname === '/admin/settings' ? 'AD' : <UserIcon className="w-4 h-4" />}
+          <div className="relative">
+            <div
+              className="flex items-center gap-3 cursor-pointer group select-none"
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+            >
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors">
+                  {user?.fullName || 'Quản trị viên'}
+                </p>
+                <p className="text-xs text-slate-500 font-medium">
+                  {user?.role === 'ADMIN' ? 'Hệ thống Quản trị' : 'Quản trị viên'}
+                </p>
+              </div>
+              
+              {/* Custom Avatar with premium initials layout */}
+              <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-gradient-to-tr from-primary to-indigo-600 text-white ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all overflow-hidden shadow-sm">
+                {getInitials(user?.fullName)}
+              </div>
             </div>
+
+            {/* Floating Dropdown Menu */}
+            {isProfileMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setIsProfileMenuOpen(false)} />
+                <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-40 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center font-black text-base bg-gradient-to-tr from-primary to-indigo-600 text-white shadow-md">
+                      {getInitials(user?.fullName)}
+                    </div>
+                    <div className="overflow-hidden">
+                      <h4 className="text-sm font-bold text-slate-955 truncate">
+                        {user?.fullName || 'Quản trị viên'}
+                      </h4>
+                      <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                      {user?.isVerified && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-emerald-600 mt-1 bg-emerald-50 px-2 py-0.5 rounded-full">
+                          <Check className="w-3 h-3 text-emerald-600" /> Đã xác thực
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="px-2 py-2 border-b border-slate-100">
+                    <button 
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        setIsProfileModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-colors"
+                    >
+                      <UserIcon className="text-slate-400 w-4.5 h-4.5" />
+                      <span>Hồ sơ cá nhân</span>
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        navigate('/admin/settings');
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-colors"
+                    >
+                      <Settings className="text-slate-400 w-4.5 h-4.5" />
+                      <span>Cấu hình hệ thống</span>
+                    </button>
+                  </div>
+
+                  <div className="px-2 pt-2">
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-rose-50 text-rose-600 text-sm font-bold rounded-xl transition-colors"
+                    >
+                      <LogOut className="text-rose-500 w-4.5 h-4.5" />
+                      <span>Đăng xuất</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -125,22 +212,9 @@ const Header = () => {
       <UserProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        user={{
-          name: 'Nguyễn Văn An',
-          id: '#EA-10293',
-          role: 'Ban tổ chức',
-          email: 'an.nguyen@email.com',
-          phone: '+84 90 123 4567',
-          address: 'Quận 7, TP. Hồ Chí Minh, Việt Nam',
-          events: 12,
-          rating: 4.8,
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-          status: 'Đã định danh (eKYC)'
-        }}
       />
     </>
   );
 };
 
 export default Header;
-

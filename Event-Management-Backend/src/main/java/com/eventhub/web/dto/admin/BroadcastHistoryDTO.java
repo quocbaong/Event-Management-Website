@@ -17,4 +17,6 @@ public class BroadcastHistoryDTO {
     private long reach;
     private long clicks;
     private String bounce;
+    private String body;
 }
+
