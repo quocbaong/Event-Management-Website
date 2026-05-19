@@ -11,6 +11,4 @@ public interface EventTimelineRepository extends JpaRepository<EventTimeline, UU
     List<EventTimeline> findByEventIdOrderBySortOrderAsc(UUID eventId);
 
     List<EventTimeline> findByEventIdOrderBySortOrderAscDueDateAsc(UUID eventId);
-
-    List<EventTimeline> findByEventIdOrderBySortOrderAsc(UUID eventId);
 }
