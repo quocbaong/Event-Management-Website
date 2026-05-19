@@ -71,7 +71,18 @@ public class AdminServiceImpl implements AdminService {
             String catName = stat[0].toString();
             Long count = ((Number) stat[1]).longValue();
             Integer percent = totalEvents > 0 ? (int) Math.round((count * 100.0) / totalEvents) : 0;
-            eventCategories.add(new EventCategoryDTO(catName, percent));
+            
+            String displayName = catName;
+            if ("TECH".equals(catName) || "BUSINESS".equals(catName) || "EDUCATION".equals(catName)) {
+                displayName = "Hội thảo";
+            } else if ("MUSIC".equals(catName)) {
+                displayName = "Âm nhạc";
+            } else if ("SPORTS".equals(catName)) {
+                displayName = "Thể thao";
+            } else {
+                displayName = "Khác";
+            }
+            eventCategories.add(new EventCategoryDTO(displayName, percent));
         }
 
         return DashboardResponse.builder()
@@ -158,15 +169,15 @@ public class AdminServiceImpl implements AdminService {
         }
         
         if (totalForCategories > 0) {
-            categories.add(new EventCategoryDTO("HỘI THẢO", (int) Math.round((hoithao * 100.0) / totalForCategories)));
-            categories.add(new EventCategoryDTO("ÂM NHẠC", (int) Math.round((amnhac * 100.0) / totalForCategories)));
-            categories.add(new EventCategoryDTO("THỂ THAO", (int) Math.round((thethao * 100.0) / totalForCategories)));
-            categories.add(new EventCategoryDTO("KHÁC", (int) Math.round((khac * 100.0) / totalForCategories)));
+            categories.add(new EventCategoryDTO("Hội thảo", (int) Math.round((hoithao * 100.0) / totalForCategories)));
+            categories.add(new EventCategoryDTO("Âm nhạc", (int) Math.round((amnhac * 100.0) / totalForCategories)));
+            categories.add(new EventCategoryDTO("Thể thao", (int) Math.round((thethao * 100.0) / totalForCategories)));
+            categories.add(new EventCategoryDTO("Khác", (int) Math.round((khac * 100.0) / totalForCategories)));
         } else {
-            categories.add(new EventCategoryDTO("HỘI THẢO", 0));
-            categories.add(new EventCategoryDTO("ÂM NHẠC", 0));
-            categories.add(new EventCategoryDTO("THỂ THAO", 0));
-            categories.add(new EventCategoryDTO("KHÁC", 0));
+            categories.add(new EventCategoryDTO("Hội thảo", 0));
+            categories.add(new EventCategoryDTO("Âm nhạc", 0));
+            categories.add(new EventCategoryDTO("Thể thao", 0));
+            categories.add(new EventCategoryDTO("Khác", 0));
         }
 
         StringBuilder sql = new StringBuilder(
@@ -183,10 +194,10 @@ public class AdminServiceImpl implements AdminService {
         }
         if (category != null && !category.trim().isEmpty() && !category.equals("Tất cả hạng mục")) {
             String dbCat = null;
-            if (category.equals("HỘI THẢO")) dbCat = "TECH";
-            else if (category.equals("ÂM NHẠC")) dbCat = "MUSIC";
-            else if (category.equals("THỂ THAO")) dbCat = "SPORTS";
-            else if (category.equals("KHÁC")) dbCat = "OTHER";
+            if (category.equalsIgnoreCase("HỘI THẢO") || category.equalsIgnoreCase("Hội thảo")) dbCat = "TECH";
+            else if (category.equalsIgnoreCase("ÂM NHẠC") || category.equalsIgnoreCase("Âm nhạc")) dbCat = "MUSIC";
+            else if (category.equalsIgnoreCase("THỂ THAO") || category.equalsIgnoreCase("Thể thao")) dbCat = "SPORTS";
+            else if (category.equalsIgnoreCase("KHÁC") || category.equalsIgnoreCase("Khác")) dbCat = "OTHER";
             
             if (dbCat != null) {
                 conditions.add("e.category = '" + dbCat + "'");
