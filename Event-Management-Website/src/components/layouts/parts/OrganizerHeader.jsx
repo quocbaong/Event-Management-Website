@@ -131,7 +131,9 @@ const OrganizerHeader = ({ onToggleSidebar }) => {
               >
                 <span className="material-symbols-outlined">notifications</span>
                 {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 border border-white animate-pulse">
+                    {unreadCount}
+                  </span>
                 )}
               </button>
               

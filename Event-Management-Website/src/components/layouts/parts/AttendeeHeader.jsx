@@ -1,18 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { Search, Bell, User as UserIcon, Settings, LogOut, Check } from 'lucide-react';
 import NotificationDropdown from '../../common/NotificationDropdown';
 import { useAuth } from '../../../stores/AuthContext';
 import UserProfileModal from '../../modals/UserProfileModal';
+import axios from '../../../lib/axios';
 
 const AttendeeHeader = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get('/notifications');
+      setNotifications(response.data || []);
+    } catch (error) {
+      console.error('Lỗi khi tải thông báo:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   const navLinks = [
     { label: 'Sự kiện của tôi', path: '/attendee/events' },
@@ -69,10 +88,14 @@ const AttendeeHeader = () => {
           <div className="relative">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className={`p-2 rounded-xl transition-all ${isNotifOpen ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:bg-slate-50'}`}
+              className={`p-2 rounded-xl transition-all relative ${isNotifOpen ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:bg-slate-50'}`}
             >
               <Bell className="w-6 h-6" />
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 border border-white animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
             </button>
             <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
           </div>
