@@ -132,10 +132,10 @@ const AttendeeTicketsPage = () => {
   const catInfo = categoryMap[activeReg.eventCategory] || categoryMap.OTHER;
 
   return (
-    <div className="p-8 lg:p-12 space-y-12 animate-in fade-in duration-500 bg-[#fbfcff] min-h-screen">
+    <div className="p-6 lg:p-8 space-y-8 animate-in fade-in duration-500 bg-[#fbfcff] min-h-screen">
       
       {/* 1. Futuristic / Novelty Wallet Card Header */}
-      <div className="relative p-8 rounded-[36px] bg-white border border-slate-100/80 shadow-[0_15px_40px_rgba(92,70,229,0.03)] overflow-hidden">
+      <div className="relative p-6 lg:p-7 rounded-[32px] bg-white border border-slate-100/80 shadow-[0_15px_40px_rgba(92,70,229,0.03)] overflow-hidden">
         {/* Background gradient blur blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-transparent rounded-full blur-3xl -z-10" />
         <div className="absolute -left-12 -top-12 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl -z-10" />
@@ -184,7 +184,7 @@ const AttendeeTicketsPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
         
         {/* Left Column: Orders list with Search */}
         <div className="xl:col-span-4 space-y-6">
