@@ -132,7 +132,7 @@ const AttendeeTicketsPage = () => {
   const catInfo = categoryMap[activeReg.eventCategory] || categoryMap.OTHER;
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 animate-in fade-in duration-500 bg-[#fbfcff] min-h-screen">
+    <div className="pt-4 lg:pt-5 pb-8 px-6 lg:px-8 space-y-6 lg:space-y-8 animate-in fade-in duration-500 bg-[#fbfcff] min-h-screen">
       
       {/* 1. Futuristic / Novelty Wallet Card Header */}
       <div className="relative p-6 lg:p-7 rounded-[32px] bg-white border border-slate-100/80 shadow-[0_15px_40px_rgba(92,70,229,0.03)] overflow-hidden">
