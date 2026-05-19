@@ -374,6 +374,10 @@ const DiscoverEvents = ({ searchQuery = "" }) => {
 const EventsPage = () => {
   const [activeSearchQuery, setActiveSearchQuery] = useState('');
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#fafafc] font-sans selection:bg-[#5c46e5]/20 flex flex-col">
       <LandingNavbar />
