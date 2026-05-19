@@ -134,36 +134,53 @@ const AttendeeTicketsPage = () => {
   return (
     <div className="p-8 lg:p-12 space-y-12 animate-in fade-in duration-500 bg-[#fbfcff] min-h-screen">
       
-      {/* 1. Elegant Minimalist Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-8 border-b border-slate-100/80">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" />
-            <span>Vé của tôi</span>
-          </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-            Quản lý Vé
-          </h1>
-          <p className="text-xs font-semibold text-slate-400 max-w-[500px]">
-            Xem danh sách vé điện tử và thông tin check-in sự kiện của bạn.
-          </p>
-        </div>
+      {/* 1. Futuristic / Novelty Wallet Card Header */}
+      <div className="relative p-8 rounded-[36px] bg-white border border-slate-100/80 shadow-[0_15px_40px_rgba(92,70,229,0.03)] overflow-hidden">
+        {/* Background gradient blur blobs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-transparent rounded-full blur-3xl -z-10" />
+        <div className="absolute -left-12 -top-12 w-48 h-48 bg-pink-500/5 rounded-full blur-3xl -z-10" />
         
-        <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
-          <button 
-            onClick={() => window.print()}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 px-5 py-3 rounded-xl font-bold text-xs transition-all active:scale-95"
-          >
-            <Printer className="w-4 h-4 text-slate-450" />
-            <span>In / Tải xuống</span>
-          </button>
-          <button 
-            onClick={() => navigate('/attendee/explore')}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 bg-[#5c46e5] hover:bg-[#4d38da] text-white px-6 py-3 rounded-xl font-black text-xs transition-all active:scale-95 shadow-lg shadow-indigo-100/50"
-          >
-            <span>Mua thêm vé</span>
-            <ChevronRight className="w-4.5 h-4.5" />
-          </button>
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10">
+          {/* Left: Branding, Stats & Title */}
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-[10px] font-black text-indigo-600 bg-indigo-50/70 border border-indigo-100/30 px-3.5 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-sm">
+                NEXUS WALLET
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-600 bg-emerald-50/70 border border-emerald-100/30 px-3.5 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {registrations.length} Vé hoạt động
+              </span>
+            </div>
+            
+            <div className="space-y-1.5">
+              <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-none">
+                Vé của tôi
+              </h1>
+              <p className="text-xs font-semibold text-slate-450 leading-relaxed max-w-[520px]">
+                Nơi quản lý vé thông minh của bạn. Hãy chọn một sự kiện bất kỳ để xem nhanh thông tin chi tiết và xuất trình mã QR Check-in.
+              </p>
+            </div>
+          </div>
+          
+          {/* Right: Premium integrated buttons */}
+          <div className="flex items-center gap-3 w-full xl:w-auto shrink-0">
+            <button 
+              onClick={() => window.print()}
+              className="flex-1 xl:flex-none flex items-center justify-center gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-650 px-6 py-4 rounded-2xl font-black text-xs transition-all active:scale-95"
+            >
+              <Printer className="w-4.5 h-4.5 text-slate-400" />
+              <span>In hóa đơn</span>
+            </button>
+            
+            <button 
+              onClick={() => navigate('/attendee/explore')}
+              className="flex-1 xl:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-7 py-4 rounded-2xl font-black text-xs transition-all active:scale-95 shadow-lg shadow-indigo-500/10"
+            >
+              <span>Khám phá thêm</span>
+              <ChevronRight className="w-4.5 h-4.5" />
+            </button>
+          </div>
         </div>
       </div>
 
