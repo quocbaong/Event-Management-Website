@@ -462,32 +462,50 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void sendBroadcast(com.eventhub.web.dto.admin.BroadcastRequest request) {
-        String notifType = "Bảo trì hệ thống".equalsIgnoreCase(request.getType()) ? "SYSTEM" : "BROADCAST";
+        com.eventhub.domain.enums.NotificationType notifType = 
+            "Bảo trì hệ thống".equalsIgnoreCase(request.getType()) 
+            ? com.eventhub.domain.enums.NotificationType.SYSTEM 
+            : com.eventhub.domain.enums.NotificationType.BROADCAST;
         
-        String roleFilter = "";
+        com.eventhub.domain.enums.UserRole targetRole = null;
         String target = request.getTarget();
         if (target != null) {
             target = target.trim();
             if ("Chỉ ban tổ chức".equalsIgnoreCase(target) || 
                 "Ban tổ chức".equalsIgnoreCase(target) || 
                 "Nhà tổ chức".equalsIgnoreCase(target) || 
+                "Chỉ nhà tổ chức".equalsIgnoreCase(target) ||
                 "Chỉ nhà tổ chức".equalsIgnoreCase(target)) {
-                roleFilter = " WHERE role = 'ORGANIZER'";
+                targetRole = com.eventhub.domain.enums.UserRole.ORGANIZER;
             } else if ("Người dùng mới".equalsIgnoreCase(target) || 
                        "Người tham gia".equalsIgnoreCase(target) || 
+                       "Chỉ người tham gia".equalsIgnoreCase(target) ||
                        "Chỉ người tham gia".equalsIgnoreCase(target)) {
-                roleFilter = " WHERE role = 'ATTENDEE'";
+                targetRole = com.eventhub.domain.enums.UserRole.ATTENDEE;
             }
         }
 
-        entityManager.createNativeQuery(
-                "INSERT INTO notifications (user_id, type, title, body, is_read) " +
-                "SELECT id, CAST(:type AS public.notification_type), :title, :body, false " +
-                "FROM users" + roleFilter)
-                .setParameter("type", notifType)
-                .setParameter("title", request.getTitle())
-                .setParameter("body", request.getBody())
-                .executeUpdate();
+        String jpql = "SELECT u FROM User u";
+        if (targetRole != null) {
+            jpql += " WHERE u.role = :role";
+        }
+        
+        var query = entityManager.createQuery(jpql, com.eventhub.domain.entity.User.class);
+        if (targetRole != null) {
+            query.setParameter("role", targetRole);
+        }
+        
+        java.util.List<com.eventhub.domain.entity.User> users = query.getResultList();
+        for (com.eventhub.domain.entity.User u : users) {
+            com.eventhub.domain.entity.Notification notif = com.eventhub.domain.entity.Notification.builder()
+                .user(u)
+                .type(notifType)
+                .title(request.getTitle())
+                .body(request.getBody())
+                .isRead(false)
+                .build();
+            entityManager.persist(notif);
+        }
     }
 
     @Override
