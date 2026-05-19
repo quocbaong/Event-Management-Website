@@ -21,6 +21,7 @@ import AttendeeEventsPage from '../pages/AttendeeEventsPage';
 import AttendeeExplorePage from '../pages/AttendeeExplorePage';
 import AttendeeQRPage from '../pages/AttendeeQRPage';
 import AttendeeReviewPage from '../pages/AttendeeReviewPage';
+import AttendeeFavoritesPage from '../pages/AttendeeFavoritesPage';
 import OrganizerLayout from '../components/layouts/OrganizerLayout';
 import OrganizerDashboardPage from '../pages/OrganizerDashboardPage';
 import OrganizerEventsPage from '../pages/OrganizerEventsPage';
@@ -101,6 +102,7 @@ const AppRouter = () => {
           <Route path="explore" element={<AttendeeExplorePage />} />
           <Route path="qr" element={<AttendeeQRPage />} />
           <Route path="reviews" element={<AttendeeReviewPage />} />
+          <Route path="favorites" element={<AttendeeFavoritesPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="help" element={<SupportPage />} />
           <Route path="notifications" element={<NotificationPage />} />

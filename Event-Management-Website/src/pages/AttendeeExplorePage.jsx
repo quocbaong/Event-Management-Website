@@ -6,7 +6,8 @@ import {
   ChevronRight, 
   Search,
   Layout,
-  Filter
+  Filter,
+  Heart
 } from 'lucide-react';
 import { eventService } from '../services/eventService';
 
@@ -43,6 +44,44 @@ const AttendeeExplorePage = () => {
   const [events, setEvents] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [favorites, setFavorites] = useState([]);
+
+  // Load favorites from localStorage
+  useEffect(() => {
+    const loadFavorites = () => {
+      const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+      setFavorites(favs);
+    };
+    loadFavorites();
+    window.addEventListener('storage', loadFavorites);
+    return () => window.removeEventListener('storage', loadFavorites);
+  }, []);
+
+  const toggleFavorite = (event, e) => {
+    e.stopPropagation(); // Stop navigation
+    const isFav = favorites.some(f => f.id === event.id);
+    let updated;
+    if (isFav) {
+      updated = favorites.filter(f => f.id !== event.id);
+    } else {
+      updated = [...favorites, {
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
+        shortDesc: event.shortDesc || event.description,
+        description: event.description,
+        startDate: event.startDate,
+        venue: event.venue,
+        city: event.city,
+        category: event.category,
+        bannerUrl: event.bannerUrl,
+        thumbnailUrl: event.thumbnailUrl
+      }];
+    }
+    setFavorites(updated);
+    localStorage.setItem('favorites', JSON.stringify(updated));
+    window.dispatchEvent(new Event('storage'));
+  };
   
   // Filters state
   const [search, setSearch] = useState('');
@@ -196,6 +235,15 @@ const AttendeeExplorePage = () => {
                onClick={() => navigate(`/attendee/events/${featuredEvents[0].slug}`)}
                className="lg:col-span-2 group relative rounded-[40px] overflow-hidden cursor-pointer h-[480px] shadow-sm hover:shadow-xl transition-all duration-500"
              >
+                {/* Favorite Heart Button */}
+                <button
+                  onClick={(e) => toggleFavorite(featuredEvents[0], e)}
+                  className="absolute top-6 right-6 z-10 w-12 h-12 bg-white/95 backdrop-blur-sm rounded-2xl flex items-center justify-center text-rose-500 border border-slate-200/60 shadow-md active:scale-90 hover:bg-rose-50 transition-all"
+                  title={favorites.some(f => f.id === featuredEvents[0].id) ? "Bỏ yêu thích" : "Yêu thích"}
+                >
+                  <Heart className={`w-5 h-5 ${favorites.some(f => f.id === featuredEvents[0].id) ? 'fill-current' : 'text-slate-400'}`} />
+                </button>
+
                {featuredEvents[0].bannerUrl ? (
                  <img src={featuredEvents[0].bannerUrl} alt={featuredEvents[0].title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                ) : (
@@ -223,6 +271,15 @@ const AttendeeExplorePage = () => {
                    onClick={() => navigate(`/attendee/events/${c.slug}`)}
                    className="flex-1 group relative rounded-[32px] overflow-hidden cursor-pointer h-[224px] shadow-sm hover:shadow-xl transition-all duration-500"
                  >
+                    {/* Favorite Heart Button */}
+                    <button
+                      onClick={(e) => toggleFavorite(c, e)}
+                      className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/95 backdrop-blur-sm rounded-xl flex items-center justify-center text-rose-500 border border-slate-200/60 shadow-sm active:scale-90 hover:bg-rose-50 transition-all"
+                      title={favorites.some(f => f.id === c.id) ? "Bỏ yêu thích" : "Yêu thích"}
+                    >
+                      <Heart className={`w-4 h-4 ${favorites.some(f => f.id === c.id) ? 'fill-current' : 'text-slate-400'}`} />
+                    </button>
+
                    {c.bannerUrl ? (
                      <img src={c.bannerUrl} alt={c.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                    ) : (
@@ -290,7 +347,15 @@ const AttendeeExplorePage = () => {
                  onClick={() => navigate(`/attendee/events/${event.slug}`)}
                  className="bg-white rounded-[40px] overflow-hidden shadow-sm border border-slate-50 hover:shadow-xl transition-all group cursor-pointer flex flex-col h-full"
                >
-                 <div className="relative h-[240px] overflow-hidden bg-slate-100">
+                 <div className="relative h-[240px] overflow-hidden bg-slate-100 relative">
+                    {/* Favorite Heart Button */}
+                    <button
+                      onClick={(e) => toggleFavorite(event, e)}
+                      className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/95 backdrop-blur-sm rounded-xl flex items-center justify-center text-rose-500 border border-slate-200/60 shadow-sm active:scale-90 hover:bg-rose-50 transition-all"
+                      title={favorites.some(f => f.id === event.id) ? "Bỏ yêu thích" : "Yêu thích"}
+                    >
+                      <Heart className={`w-4 h-4 ${favorites.some(f => f.id === event.id) ? 'fill-current' : 'text-slate-400'}`} />
+                    </button>
                    {event.bannerUrl ? (
                      <img src={event.bannerUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                    ) : (
