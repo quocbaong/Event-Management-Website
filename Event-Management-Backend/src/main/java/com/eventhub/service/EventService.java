@@ -58,7 +58,7 @@ public class EventService {
 
     @Cacheable(value = "featuredEvents", key = "'featured'")
     public List<EventSummaryResponse> getFeaturedEvents() {
-        Pageable limit = PageRequest.of(0, 10);
+        Pageable limit = PageRequest.of(0, 2);
         return eventRepository.findByIsFeaturedTrueAndStatusOrderByCreatedAtDesc(EventStatus.PUBLISHED, limit)
                 .stream()
                 .map(event -> {
