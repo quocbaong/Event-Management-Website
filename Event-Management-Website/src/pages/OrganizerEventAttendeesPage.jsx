@@ -432,6 +432,33 @@ const EmailTemplateTab = ({ event, allAttendees, showToast }) => {
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
+const getPaginationRange = (currentPage, totalPages) => {
+  const delta = 1;
+  const range = [];
+  const rangeWithDots = [];
+  let l;
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+      range.push(i);
+    }
+  }
+
+  for (let i of range) {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (i - l > 2) {
+        rangeWithDots.push('...');
+      }
+    }
+    rangeWithDots.push(i);
+    l = i;
+  }
+
+  return rangeWithDots;
+};
+
 const OrganizerEventAttendeesPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -1233,17 +1260,23 @@ const OrganizerEventAttendeesPage = () => {
                 >
                   <span className="material-symbols-outlined text-base">chevron_left</span>
                 </button>
-                {[...Array(totalPages)].map((_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`w-9 h-9 flex items-center justify-center rounded-xl font-black text-sm transition-all ${currentPage === i + 1
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                      : 'text-slate-400 hover:bg-slate-100'
-                      }`}
-                  >
-                    {i + 1}
-                  </button>
+                {getPaginationRange(currentPage, totalPages).map((p, i) => (
+                  p === '...' ? (
+                    <span key={`dots-${i}`} className="w-9 h-9 flex items-center justify-center text-slate-400 font-bold text-sm">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={p}
+                      onClick={() => setCurrentPage(p)}
+                      className={`w-9 h-9 flex items-center justify-center rounded-xl font-black text-sm transition-all ${currentPage === p
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                        : 'text-slate-400 hover:bg-slate-100'
+                        }`}
+                    >
+                      {p}
+                    </button>
+                  )
                 ))}
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
