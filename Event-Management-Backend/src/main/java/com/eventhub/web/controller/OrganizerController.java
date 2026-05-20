@@ -115,4 +115,12 @@ public class OrganizerController {
         User currentUser = getCurrentUser(userDetails);
         return ResponseEntity.ok(eventService.submitApproval(currentUser, id));
     }
+
+    @PatchMapping("/{id}/toggle-sales")
+    public ResponseEntity<EventResponse> toggleEventSales(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID id) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(eventService.toggleEventSales(currentUser, id));
+    }
 }

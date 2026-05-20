@@ -57,13 +57,20 @@ public class ReviewService {
     }
 
     private ReviewResponse mapToResponse(Review review) {
+        String userName = review.getUser().getEmail();
+        if (review.getUser().getAttendeeProfile() != null && review.getUser().getAttendeeProfile().getDisplayName() != null) {
+            userName = review.getUser().getAttendeeProfile().getDisplayName();
+        } else if (review.getUser().getOrganizerProfile() != null && review.getUser().getOrganizerProfile().getCompanyName() != null) {
+            userName = review.getUser().getOrganizerProfile().getCompanyName();
+        }
+
         return ReviewResponse.builder()
                 .id(review.getId())
                 .eventId(review.getEvent().getId())
                 .eventTitle(review.getEvent().getTitle())
                 .eventBannerUrl(review.getEvent().getBannerUrl())
                 .userId(review.getUser().getId())
-                .userName(review.getUser().getFirstName() + " " + review.getUser().getLastName())
+                .userName(userName)
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())

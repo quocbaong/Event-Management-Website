@@ -77,6 +77,10 @@ public class Event extends BaseEntity {
     @Builder.Default
     private Boolean isPendingApproval = false;
 
+    @Column(name = "is_sales_active", nullable = false)
+    @Builder.Default
+    private Boolean isSalesActive = true;
+
 
     @Column(name = "banner_url", length = 1000)
     private String bannerUrl;

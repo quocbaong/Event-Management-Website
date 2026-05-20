@@ -30,6 +30,7 @@ public class EventResponse {
     private EventStatus status;
     private Boolean isApproved;
     private Boolean isPendingApproval;
+    private Boolean isSalesActive;
     private String bannerUrl;
     private String thumbnailUrl;
     private String venue;

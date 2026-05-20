@@ -23,6 +23,7 @@ import com.eventhub.repository.specification.EventSpecification;
 import com.eventhub.web.mapper.EventMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -144,6 +145,7 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "eventDetail", key = "#result.slug")
     public EventResponse updateEvent(User organizer, UUID eventId, UpdateEventRequest request) {
         Event event = eventRepository.findByIdAndOrganizerId(eventId, organizer.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
@@ -197,6 +199,7 @@ public class EventService {
         return toEventResponse(event);
     }
 
+    @CacheEvict(value = "eventDetail", key = "#result.slug")
     public EventResponse publishEvent(User organizer, UUID eventId, PublishEventRequest request) {
         Event event = eventRepository.findByIdAndOrganizerId(eventId, organizer.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
@@ -213,6 +216,21 @@ public class EventService {
 
         event.setStatus(EventStatus.PUBLISHED);
         event.setPublishedAt(Instant.now());
+        event = eventRepository.save(event);
+        return toEventResponse(event);
+    }
+
+    @CacheEvict(value = "eventDetail", key = "#result.slug")
+    @org.springframework.transaction.annotation.Transactional
+    public EventResponse toggleEventSales(User organizer, java.util.UUID eventId) {
+        Event event = eventRepository.findByIdAndOrganizerId(eventId, organizer.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
+
+        if (event.getStatus() != EventStatus.PUBLISHED) {
+            throw new InvalidOperationException("Chỉ có thể tạm ngưng/mở bán vé cho sự kiện đã xuất bản (Live).");
+        }
+
+        event.setIsSalesActive(!event.getIsSalesActive());
         event = eventRepository.save(event);
         return toEventResponse(event);
     }
@@ -306,6 +324,7 @@ public class EventService {
                 .status(event.getStatus())
                 .isApproved(event.getIsApproved())
                 .isPendingApproval(event.getIsPendingApproval())
+                .isSalesActive(event.getIsSalesActive())
                 .bannerUrl(event.getBannerUrl())
                 .thumbnailUrl(event.getThumbnailUrl())
                 .venue(event.getVenue())
@@ -364,6 +383,7 @@ public class EventService {
                 .status(event.getStatus())
                 .isApproved(event.getIsApproved())
                 .isPendingApproval(event.getIsPendingApproval())
+                .isSalesActive(event.getIsSalesActive())
                 .bannerUrl(event.getBannerUrl())
                 .thumbnailUrl(event.getThumbnailUrl())
                 .venue(event.getVenue())

@@ -53,6 +53,7 @@ const mapEventFromApi = (event) => {
     statusPulse: statusInfo.pulse,
     isApproved: event.isApproved,
     isPendingApproval: event.isPendingApproval,
+    isSalesActive: event.isSalesActive,
     attendance,
     currentAttendees: event.currentAttendees || 0,
     maxAttendees: event.maxAttendees,
@@ -483,9 +484,15 @@ const OrganizerEventsPage = () => {
         indigo: 'bg-indigo-500',
         rose: 'bg-rose-500',
       };
-      bgClass = colors[event.statusColor] || colors.slate;
-      dotClass = dots[event.statusColor] || dots.slate;
-      label = event.status === 'Cancelled' ? 'Đã hủy' : event.status === 'Completed' ? 'Hoàn thành' : event.status;
+      if (event.rawStatus === 'PUBLISHED' && event.isSalesActive === false) {
+        bgClass = 'bg-amber-50 text-amber-700 border border-amber-200';
+        dotClass = 'bg-amber-500';
+        label = 'Tạm ngưng';
+      } else {
+        bgClass = colors[event.statusColor] || colors.slate;
+        dotClass = dots[event.statusColor] || dots.slate;
+        label = event.status === 'Cancelled' ? 'Đã hủy' : event.status === 'Completed' ? 'Hoàn thành' : event.status;
+      }
     }
 
     return (

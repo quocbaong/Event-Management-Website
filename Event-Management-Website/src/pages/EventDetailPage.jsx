@@ -423,7 +423,8 @@ const EventDetailPage = () => {
                                           setSelectedTicketTypeId(e.target.value);
                                           setTicketQuantity(1);
                                         }}
-                                        className="w-full bg-slate-50 border border-slate-100 rounded-3xl py-4 px-5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none cursor-pointer"
+                                        disabled={event.isSalesActive === false}
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-3xl py-4 px-5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                                       >
                                         {event.ticketTypes.map(tt => (
                                           <option key={tt.id} value={tt.id}>
@@ -447,14 +448,16 @@ const EventDetailPage = () => {
                                       <div className="flex items-center gap-3">
                                         <button 
                                           onClick={() => setTicketQuantity(prev => Math.max(1, prev - 1))}
-                                          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                          disabled={event.isSalesActive === false}
+                                          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                           -
                                         </button>
                                         <span className="font-black text-slate-800 text-sm w-4 text-center">{ticketQuantity}</span>
                                         <button 
                                           onClick={() => setTicketQuantity(prev => Math.min(selectedAvailable, prev + 1))}
-                                          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90"
+                                          disabled={event.isSalesActive === false}
+                                          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-600 hover:bg-slate-100 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                           +
                                         </button>
@@ -477,7 +480,8 @@ const EventDetailPage = () => {
                               value={couponCode}
                               onChange={(e) => setCouponCode(e.target.value)}
                               placeholder="Mã giảm giá (nếu có)"
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500/20"
+                              disabled={event.isSalesActive === false}
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-75"
                             />
                           </div>
                         )}
@@ -490,7 +494,15 @@ const EventDetailPage = () => {
                         </div>
 
                         <div className="flex gap-3">
-                          {user ? (
+                          {event.isSalesActive === false ? (
+                            <button
+                              disabled
+                              className="flex-1 bg-amber-50 text-amber-700 border border-amber-200 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-not-allowed"
+                            >
+                              <span className="material-symbols-outlined text-lg">pause_circle</span>
+                              Tạm ngưng bán vé
+                            </button>
+                          ) : user ? (
                             <button
                               onClick={handleRegister}
                               disabled={getTotalAmount() === 0}
