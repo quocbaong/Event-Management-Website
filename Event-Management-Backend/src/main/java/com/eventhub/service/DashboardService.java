@@ -449,10 +449,18 @@ public class DashboardService {
 
         List<Event> filtered = events.stream()
                 .filter(e -> e.getStartDate() != null && !e.getStartDate().isBefore(from) && e.getStartDate().isBefore(to))
+                .limit(5)
                 .toList();
 
-        if (filtered.isEmpty()) {
-            filtered = events.stream().limit(5).toList();
+        if (filtered.size() < 5 && !events.isEmpty()) {
+            List<UUID> filteredIds = filtered.stream().map(Event::getId).toList();
+            List<Event> extra = events.stream()
+                    .filter(e -> !filteredIds.contains(e.getId()))
+                    .limit(5 - filtered.size())
+                    .toList();
+            List<Event> combined = new ArrayList<>(filtered);
+            combined.addAll(extra);
+            filtered = combined;
         }
 
         if (filtered.isEmpty()) {

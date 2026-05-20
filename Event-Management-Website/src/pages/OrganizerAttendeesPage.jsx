@@ -4,6 +4,33 @@ import { eventService } from '../services/eventService';
 import { registrationService } from '../services/registrationService';
 import { invitationService } from '../services/invitationService';
 
+const getPaginationRange = (currentPage, totalPages) => {
+  const delta = 1;
+  const range = [];
+  const rangeWithDots = [];
+  let l;
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+      range.push(i);
+    }
+  }
+
+  for (let i of range) {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (i - l > 2) {
+        rangeWithDots.push('...');
+      }
+    }
+    rangeWithDots.push(i);
+    l = i;
+  }
+
+  return rangeWithDots;
+};
+
 const OrganizerAttendeesPage = () => {
   const [attendees, setAttendees] = useState([]);
   const [eventsList, setEventsList] = useState(['Tất cả sự kiện']);
@@ -587,17 +614,23 @@ const OrganizerAttendeesPage = () => {
               <span className="material-symbols-outlined text-sm">chevron_left</span>
             </button>
             
-            {[...Array(realTotalPages)].map((_, i) => (
-              <button 
-                key={i + 1}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-8 h-8 rounded-lg text-sm font-bold flex items-center justify-center transition-all
-                  ${currentPage === i + 1 
-                    ? 'bg-primary text-white shadow-md shadow-primary/20' 
-                    : 'hover:bg-slate-100 text-slate-600 font-medium'}`}
-              >
-                {i + 1}
-              </button>
+            {getPaginationRange(currentPage, realTotalPages).map((p, i) => (
+              p === '...' ? (
+                <span key={`dots-${i}`} className="w-8 h-8 text-sm font-bold flex items-center justify-center text-slate-400">
+                  ...
+                </span>
+              ) : (
+                <button 
+                  key={p}
+                  onClick={() => setCurrentPage(p)}
+                  className={`w-8 h-8 rounded-lg text-sm font-bold flex items-center justify-center transition-all
+                    ${currentPage === p 
+                      ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                      : 'hover:bg-slate-100 text-slate-600 font-medium'}`}
+                >
+                  {p}
+                </button>
+              )
             ))}
             
             <button 
