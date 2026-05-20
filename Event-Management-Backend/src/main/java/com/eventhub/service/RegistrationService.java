@@ -68,6 +68,10 @@ public class RegistrationService {
             throw new InvalidOperationException("Event is not published");
         }
 
+        if (Boolean.FALSE.equals(event.getIsSalesActive())) {
+            throw new InvalidOperationException("Vé sự kiện hiện đang tạm ngưng mở bán.");
+        }
+
         if (registrationRepository.existsByEventIdAndAttendeeId(eventId, attendee.getId())) {
             throw new InvalidOperationException("Bạn đã đăng ký tham gia sự kiện này rồi.");
         }

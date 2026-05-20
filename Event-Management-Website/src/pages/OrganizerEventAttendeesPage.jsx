@@ -87,12 +87,25 @@ const EventSettingsTab = ({ event, setEvent, showToast }) => {
     name: event.name,
     date: event.date,
     location: event.location,
-    description: event.description || 'Chào mừng bạn đến với sự kiện công nghệ lớn nhất năm. Chúng tôi sẽ cùng nhau khám phá những xu hướng mới nhất về AI, Cloud và Phát triển phần mềm.',
+    description: event.description || '',
     isPrivate: false,
     autoAccept: true,
-    maxAttendees: 500,
+    maxAttendees: event.maxAttendees || 500,
     allowWaitlist: true,
   });
+
+  useEffect(() => {
+    if (event && event.name !== 'Đang tải...') {
+      setSettings(prev => ({
+        ...prev,
+        name: event.name,
+        date: event.date,
+        location: event.location,
+        description: event.description || '',
+        maxAttendees: event.maxAttendees || 500,
+      }));
+    }
+  }, [event]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -106,7 +119,9 @@ const EventSettingsTab = ({ event, setEvent, showToast }) => {
       setEvent(prev => ({
         ...prev,
         name: settings.name,
-        location: settings.location
+        location: settings.location,
+        description: settings.description,
+        maxAttendees: settings.maxAttendees
       }));
       showToast('Đã lưu cài đặt sự kiện thành công!');
     } catch (error) {
@@ -117,11 +132,23 @@ const EventSettingsTab = ({ event, setEvent, showToast }) => {
   };
 
   const handleConfirmCancel = async () => {
-    // Lưu ID vào localStorage để trang danh sách cập nhật trạng thái
-    localStorage.setItem('pausedEventId', event.id);
-    showToast(`Sự kiện "${event.name}" đã được chuyển sang trạng thái tạm ngưng.`);
-    setIsDeleteModalOpen(false);
-    navigate('/organizer/events');
+    try {
+      const res = await eventService.toggleSales(event.id);
+      const updatedEvent = res.data;
+      setEvent(prev => ({
+        ...prev,
+        isSalesActive: updatedEvent.isSalesActive
+      }));
+      showToast(
+        updatedEvent.isSalesActive
+          ? `Đã mở bán lại vé cho sự kiện "${event.name}".`
+          : `Sự kiện "${event.name}" đã được tạm ngưng bán vé.`
+      );
+    } catch (error) {
+      showToast(error.response?.data?.message || 'Có lỗi xảy ra khi thực hiện hành động này.', 'error');
+    } finally {
+      setIsDeleteModalOpen(false);
+    }
   };
 
   return (
@@ -205,13 +232,35 @@ const EventSettingsTab = ({ event, setEvent, showToast }) => {
       </section>
 
       {/* ── Section: Danger Zone ── */}
-      <section className="pt-8 mt-4 border-t border-slate-100">
-        <div className="p-8 bg-amber-50/50 rounded-[3rem] border-2 border-dashed border-amber-200 space-y-4">
-          <div className="flex items-center gap-3"><span className="material-symbols-outlined text-amber-600">pause_circle</span><h3 className="text-base font-black text-amber-900 uppercase tracking-widest">Tạm ngưng sự kiện</h3></div>
-          <p className="text-sm text-amber-700 font-bold">Hành động này sẽ chuyển trạng thái sự kiện sang "Tạm ngưng". Khách mời sẽ không thể đăng ký mới cho đến khi bạn kích hoạt lại.</p>
-          <button onClick={() => setIsDeleteModalOpen(true)} className="px-6 py-3 bg-amber-600 text-white text-sm font-black rounded-2xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-100">Tạm ngưng sự kiện này</button>
-        </div>
-      </section>
+      {event.statusRaw === 'PUBLISHED' && (
+        <section className="pt-8 mt-4 border-t border-slate-100">
+          <div className={`p-8 rounded-[3rem] border-2 border-dashed space-y-4 ${event.isSalesActive ? 'bg-amber-50/50 border-amber-200' : 'bg-emerald-50/50 border-emerald-200'}`}>
+            <div className="flex items-center gap-3">
+              <span className={`material-symbols-outlined ${event.isSalesActive ? 'text-amber-600' : 'text-emerald-600'}`}>
+                {event.isSalesActive ? 'pause_circle' : 'play_circle'}
+              </span>
+              <h3 className={`text-base font-black uppercase tracking-widest ${event.isSalesActive ? 'text-amber-900' : 'text-emerald-900'}`}>
+                {event.isSalesActive ? 'Tạm ngưng bán vé' : 'Mở bán vé lại'}
+              </h3>
+            </div>
+            <p className={`text-sm font-bold ${event.isSalesActive ? 'text-amber-700' : 'text-emerald-700'}`}>
+              {event.isSalesActive
+                ? 'Hành động này sẽ tạm dừng việc bán vé cho sự kiện. Khách mời sẽ không thể đăng ký mới cho đến khi bạn kích hoạt lại.'
+                : 'Hành động này sẽ mở bán vé lại cho sự kiện. Khách mời sẽ có thể tiếp tục đăng ký tham gia.'}
+            </p>
+            <button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className={`px-6 py-3 text-white text-sm font-black rounded-2xl transition-all shadow-lg ${
+                event.isSalesActive
+                  ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-100'
+                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100'
+              }`}
+            >
+              {event.isSalesActive ? 'Tạm ngưng bán vé sự kiện này' : 'Mở bán vé lại ngay'}
+            </button>
+          </div>
+        </section>
+      )}
 
       <div className="flex justify-end pt-4">
         <button onClick={handleSave} disabled={isSaving} className="px-10 py-4 bg-slate-900 text-white text-sm font-black rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 disabled:opacity-70 flex items-center gap-3">
@@ -226,12 +275,31 @@ const EventSettingsTab = ({ event, setEvent, showToast }) => {
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDeleteModalOpen(false)} className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md bg-white rounded-[3rem] p-8 shadow-2xl z-10 text-center">
-              <div className="w-20 h-20 bg-amber-50 text-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-6"><span className="material-symbols-outlined text-4xl">pause_circle</span></div>
-              <h2 className="text-2xl font-black text-slate-900 mb-3">Tạm ngưng sự kiện?</h2>
-              <p className="text-sm text-slate-500 font-bold mb-8 leading-relaxed">Bạn có chắc chắn muốn chuyển <span className="text-amber-600">"{event.name}"</span> sang trạng thái tạm ngưng? Bạn có thể kích hoạt lại sự kiện bất cứ lúc nào từ trang quản lý.</p>
+              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 ${event.isSalesActive ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                <span className="material-symbols-outlined text-4xl">
+                  {event.isSalesActive ? 'pause_circle' : 'play_circle'}
+                </span>
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-3">
+                {event.isSalesActive ? 'Tạm ngưng bán vé?' : 'Mở bán vé lại?'}
+              </h2>
+              <p className="text-sm text-slate-500 font-bold mb-8 leading-relaxed">
+                {event.isSalesActive
+                  ? `Bạn có chắc chắn muốn chuyển sự kiện "${event.name}" sang trạng thái tạm ngưng bán vé? Bạn có thể mở bán lại bất kỳ lúc nào.`
+                  : `Bạn có chắc chắn muốn mở bán vé lại cho sự kiện "${event.name}"? Khách mời sẽ có thể tiếp tục đăng ký tham gia.`}
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <button onClick={() => setIsDeleteModalOpen(false)} className="py-4 bg-slate-100 text-slate-600 font-black text-sm rounded-2xl hover:bg-slate-200 transition-all">Quay lại</button>
-                <button onClick={handleConfirmCancel} className="py-4 bg-amber-600 text-white font-black text-sm rounded-2xl hover:bg-amber-700 transition-all shadow-lg shadow-amber-100">Xác nhận tạm ngưng</button>
+                <button
+                  onClick={handleConfirmCancel}
+                  className={`py-4 text-white font-black text-sm rounded-2xl transition-all shadow-lg ${
+                    event.isSalesActive
+                      ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-100'
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100'
+                  }`}
+                >
+                  {event.isSalesActive ? 'Xác nhận tạm ngưng' : 'Xác nhận mở bán'}
+                </button>
               </div>
             </motion.div>
           </div>
@@ -395,7 +463,11 @@ const OrganizerEventAttendeesPage = () => {
           name: ev.title || 'Sự kiện không tên',
           date: ev.startDate ? new Date(ev.startDate).toLocaleString('vi-VN') : '--',
           location: ev.venue || '--',
-          status: eventStatus
+          status: eventStatus,
+          statusRaw: ev.status,
+          isSalesActive: ev.isSalesActive,
+          description: ev.description || '',
+          maxAttendees: ev.maxAttendees || 500
         });
 
         // Map registrations

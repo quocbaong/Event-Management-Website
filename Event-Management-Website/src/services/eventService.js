@@ -13,6 +13,7 @@ export const eventService = {
 
   publishEvent: (id, data) => api.patch(`/organizer/events/${id}/publish`, data),
   submitApproval: (id) => api.patch(`/organizer/events/${id}/submit-approval`),
+  toggleSales: (id) => api.patch(`/organizer/events/${id}/toggle-sales`),
 
   getTimelines: (eventId) => api.get(`/organizer/events/${eventId}/timelines`),
 
